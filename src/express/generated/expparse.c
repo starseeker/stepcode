@@ -56,14 +56,14 @@ int local_var_count; /**< used to keep LOCAL variables in order
 
 Express yyexpresult;    /* hook to everything built by parser */
 
-Symbol *interface_schema;    /* schema of interest in use/ref clauses */
-void (*interface_func)();    /* func to attach rename clauses */
+Symbol * interface_schema;   /* schema of interest in use/ref clauses */
+void ( *interface_func )();  /* func to attach rename clauses */
 
 /* record schemas found in a single parse here, allowing them to be */
 /* differentiated from other schemas parsed earlier */
 Linked_List PARSEnew_schemas;
 
-void SCANskip_to_end_schema(perplex_t scanner);
+void SCANskip_to_end_schema( perplex_t scanner );
 
 int yylineno;
 
@@ -72,9 +72,9 @@ bool yyeof = false;
 #define MAX_SCOPE_DEPTH    20    /* max number of scopes that can be nested */
 
 static struct scope {
-    struct Scope_ *this_;
+    struct Scope_ * this_;
     char type;    /* one of OBJ_XXX */
-    struct scope *pscope;    /* pointer back to most recent scope */
+    struct scope * pscope;   /* pointer back to most recent scope */
     /* that has a printable name - for better */
     /* error messages */
 } scopes[MAX_SCOPE_DEPTH], *scope;
@@ -112,8 +112,7 @@ static struct scope {
 
 #define ERROR(code)    ERRORreport(code, yylineno)
 
-void parserInitState()
-{
+void parserInitState() {
     scope = scopes;
     /* no need to define scope->this */
     scope->this_ = yyexpresult;
@@ -188,7 +187,7 @@ typedef union {
     struct subsuper_decl yy242;
     struct type_flags yy252;
     struct upper_lower yy253;
-    Symbol *yy275;
+    Symbol * yy275;
     Type yy297;
     Case_Item yy321;
     Statement yy332;
@@ -1007,7 +1006,7 @@ struct yyParser {
     ParseARG_SDECL                /* A place to hold %extra_argument */
 #if YYSTACKDEPTH<=0
     int yystksz;                  /* Current side of the stack */
-    yyStackEntry *yystack;        /* The parser's stack */
+    yyStackEntry * yystack;       /* The parser's stack */
 #else
     yyStackEntry yystack[YYSTACKDEPTH];  /* The parser's stack */
 #endif
@@ -1016,8 +1015,8 @@ typedef struct yyParser yyParser;
 
 #ifndef NDEBUG
 #include <stdio.h>
-static FILE *yyTraceFILE = 0;
-static char *yyTracePrompt = 0;
+static FILE * yyTraceFILE = 0;
+static char * yyTracePrompt = 0;
 #endif /* NDEBUG */
 
 #ifndef NDEBUG
@@ -1038,13 +1037,12 @@ static char *yyTracePrompt = 0;
 ** Outputs:
 ** None.
 */
-void ParseTrace(FILE *TraceFILE, char *zTracePrompt)
-{
+void ParseTrace( FILE * TraceFILE, char * zTracePrompt ) {
     yyTraceFILE = TraceFILE;
     yyTracePrompt = zTracePrompt;
-    if(yyTraceFILE == 0) {
+    if( yyTraceFILE == 0 ) {
         yyTracePrompt = 0;
-    } else if(yyTracePrompt == 0) {
+    } else if( yyTracePrompt == 0 ) {
         yyTraceFILE = 0;
     }
 }
@@ -1053,7 +1051,7 @@ void ParseTrace(FILE *TraceFILE, char *zTracePrompt)
 #ifndef NDEBUG
 /* For tracing shifts, the names of all terminals and nonterminals
 ** are required.  The following table supplies these names */
-static const char *const yyTokenName[] = {
+static const char * const yyTokenName[] = {
     "$",             "TOK_EQUAL",     "TOK_GREATER_EQUAL",  "TOK_GREATER_THAN",
     "TOK_IN",        "TOK_INST_EQUAL",  "TOK_INST_NOT_EQUAL",  "TOK_LESS_EQUAL",
     "TOK_LESS_THAN",  "TOK_LIKE",      "TOK_NOT_EQUAL",  "TOK_MINUS",
@@ -1130,7 +1128,7 @@ static const char *const yyTokenName[] = {
 #ifndef NDEBUG
 /* For tracing reduce actions, the names of all rules are required.
 */
-static const char *const yyRuleName[] = {
+static const char * const yyRuleName[] = {
     /*   0 */ "action_body ::= action_body_item_rep statement_rep",
     /*   1 */ "action_body_item ::= declaration",
     /*   2 */ "action_body_item ::= constant_decl",
@@ -1471,20 +1469,19 @@ static const char *const yyRuleName[] = {
 /*
 ** Try to increase the size of the parser stack.
 */
-static void yyGrowStack(yyParser *p)
-{
+static void yyGrowStack( yyParser * p ) {
     int newSize;
-    yyStackEntry *pNew;
+    yyStackEntry * pNew;
 
     newSize = p->yystksz * 2 + 256;
-    pNew = realloc(p->yystack, newSize * sizeof(pNew[0]));
-    if(pNew) {
+    pNew = realloc( p->yystack, newSize * sizeof( pNew[0] ) );
+    if( pNew ) {
         p->yystack = pNew;
         p->yystksz = newSize;
 #ifndef NDEBUG
-        if(yyTraceFILE) {
-            fprintf(yyTraceFILE, "%sStack grows to %d entries!\n",
-                    yyTracePrompt, p->yystksz);
+        if( yyTraceFILE ) {
+            fprintf( yyTraceFILE, "%sStack grows to %d entries!\n",
+                     yyTracePrompt, p->yystksz );
         }
 #endif
     }
@@ -1503,11 +1500,10 @@ static void yyGrowStack(yyParser *p)
 ** A pointer to a parser.  This pointer is used in subsequent calls
 ** to Parse and ParseFree.
 */
-void *ParseAlloc(void *(*mallocProc)(size_t))
-{
-    yyParser *pParser;
-    pParser = (yyParser *)(*mallocProc)((size_t)sizeof(yyParser));
-    if(pParser) {
+void * ParseAlloc( void * ( *mallocProc )( size_t ) ) {
+    yyParser * pParser;
+    pParser = ( yyParser * )( *mallocProc )( ( size_t )sizeof( yyParser ) );
+    if( pParser ) {
         pParser->yyidx = -1;
 #ifdef YYTRACKMAXSTACKDEPTH
         pParser->yyidxMax = 0;
@@ -1515,7 +1511,7 @@ void *ParseAlloc(void *(*mallocProc)(size_t))
 #if YYSTACKDEPTH<=0
         pParser->yystack = NULL;
         pParser->yystksz = 0;
-        yyGrowStack(pParser);
+        yyGrowStack( pParser );
 #endif
     }
     return pParser;
@@ -1527,13 +1523,12 @@ void *ParseAlloc(void *(*mallocProc)(size_t))
 ** the value.
 */
 static void yy_destructor(
-    yyParser *yypParser,    /* The parser */
+    yyParser * yypParser,   /* The parser */
     YYCODETYPE yymajor,     /* Type code for object to destroy */
-    YYMINORTYPE *yypminor   /* The object to be destroyed */
-)
-{
+    YYMINORTYPE * yypminor  /* The object to be destroyed */
+) {
     ParseARG_FETCH;
-    switch(yymajor) {
+    switch( yymajor ) {
         /* Here is inserted the actions which take place when a
         ** terminal or non-terminal is destroyed.  This can happen
         ** when the symbol is popped from the stack during a
@@ -1547,8 +1542,8 @@ static void yy_destructor(
         case 122: { /* statement_list */
 #line 124 "expparse.y"
 
-            if(parseData.scanner == NULL) {
-                (yypminor->yy0).string = (char *)NULL;
+            if( parseData.scanner == NULL ) {
+                ( yypminor->yy0 ).string = ( char * )NULL;
             }
 
 #line 1549 "expparse.c"
@@ -1567,26 +1562,25 @@ static void yy_destructor(
 **
 ** Return the major token number for the symbol popped.
 */
-static int yy_pop_parser_stack(yyParser *pParser)
-{
+static int yy_pop_parser_stack( yyParser * pParser ) {
     YYCODETYPE yymajor;
-    yyStackEntry *yytos;
+    yyStackEntry * yytos;
 
-    if(pParser->yyidx < 0) {
+    if( pParser->yyidx < 0 ) {
         return 0;
     }
 
     yytos = &pParser->yystack[pParser->yyidx];
 
 #ifndef NDEBUG
-    if(yyTraceFILE && pParser->yyidx >= 0) {
-        fprintf(yyTraceFILE, "%sPopping %s\n",
-                yyTracePrompt,
-                yyTokenName[yytos->major]);
+    if( yyTraceFILE && pParser->yyidx >= 0 ) {
+        fprintf( yyTraceFILE, "%sPopping %s\n",
+                 yyTracePrompt,
+                 yyTokenName[yytos->major] );
     }
 #endif
     yymajor = yytos->major;
-    yy_destructor(pParser, yymajor, &yytos->minor);
+    yy_destructor( pParser, yymajor, &yytos->minor );
     pParser->yyidx--;
     return yymajor;
 }
@@ -1604,30 +1598,28 @@ static int yy_pop_parser_stack(yyParser *pParser)
 ** </ul>
 */
 void ParseFree(
-    void *p,                    /* The parser to be deleted */
-    void (*freeProc)(void *)    /* Function used to reclaim memory */
-)
-{
-    yyParser *pParser = (yyParser *)p;
-    if(pParser == 0) {
+    void * p,                   /* The parser to be deleted */
+    void ( *freeProc )( void * ) /* Function used to reclaim memory */
+) {
+    yyParser * pParser = ( yyParser * )p;
+    if( pParser == 0 ) {
         return;
     }
-    while(pParser->yyidx >= 0) {
-        yy_pop_parser_stack(pParser);
+    while( pParser->yyidx >= 0 ) {
+        yy_pop_parser_stack( pParser );
     }
 #if YYSTACKDEPTH<=0
-    free(pParser->yystack);
+    free( pParser->yystack );
 #endif
-    (*freeProc)((void *)pParser);
+    ( *freeProc )( ( void * )pParser );
 }
 
 /*
 ** Return the peak depth of the stack for a parser.
 */
 #ifdef YYTRACKMAXSTACKDEPTH
-int ParseStackPeak(void *p)
-{
-    yyParser *pParser = (yyParser *)p;
+int ParseStackPeak( void * p ) {
+    yyParser * pParser = ( yyParser * )p;
     return pParser->yyidxMax;
 }
 #endif
@@ -1641,32 +1633,31 @@ int ParseStackPeak(void *p)
 ** return YY_NO_ACTION.
 */
 static int yy_find_shift_action(
-    yyParser *pParser,        /* The parser */
+    yyParser * pParser,       /* The parser */
     YYCODETYPE iLookAhead     /* The look-ahead token */
-)
-{
+) {
     int i;
     int stateno = pParser->yystack[pParser->yyidx].stateno;
 
-    if(stateno > YY_SHIFT_COUNT
-            || (i = yy_shift_ofst[stateno]) == YY_SHIFT_USE_DFLT) {
+    if( stateno > YY_SHIFT_COUNT
+            || ( i = yy_shift_ofst[stateno] ) == YY_SHIFT_USE_DFLT ) {
         return yy_default[stateno];
     }
-    assert(iLookAhead != YYNOCODE);
+    assert( iLookAhead != YYNOCODE );
     i += iLookAhead;
-    if(i < 0 || i >= YY_ACTTAB_COUNT || yy_lookahead[i] != iLookAhead) {
-        if(iLookAhead > 0) {
+    if( i < 0 || i >= YY_ACTTAB_COUNT || yy_lookahead[i] != iLookAhead ) {
+        if( iLookAhead > 0 ) {
 #ifdef YYFALLBACK
             YYCODETYPE iFallback;            /* Fallback token */
-            if(iLookAhead < sizeof(yyFallback) / sizeof(yyFallback[0])
-                    && (iFallback = yyFallback[iLookAhead]) != 0) {
+            if( iLookAhead < sizeof( yyFallback ) / sizeof( yyFallback[0] )
+                    && ( iFallback = yyFallback[iLookAhead] ) != 0 ) {
 #ifndef NDEBUG
-                if(yyTraceFILE) {
-                    fprintf(yyTraceFILE, "%sFALLBACK %s => %s\n",
-                            yyTracePrompt, yyTokenName[iLookAhead], yyTokenName[iFallback]);
+                if( yyTraceFILE ) {
+                    fprintf( yyTraceFILE, "%sFALLBACK %s => %s\n",
+                             yyTracePrompt, yyTokenName[iLookAhead], yyTokenName[iFallback] );
                 }
 #endif
-                return yy_find_shift_action(pParser, iFallback);
+                return yy_find_shift_action( pParser, iFallback );
             }
 #endif
 #ifdef YYWILDCARD
@@ -1682,9 +1673,9 @@ static int yy_find_shift_action(
                     yy_lookahead[j] == YYWILDCARD
                 ) {
 #ifndef NDEBUG
-                    if(yyTraceFILE) {
-                        fprintf(yyTraceFILE, "%sWILDCARD %s => %s\n",
-                                yyTracePrompt, yyTokenName[iLookAhead], yyTokenName[YYWILDCARD]);
+                    if( yyTraceFILE ) {
+                        fprintf( yyTraceFILE, "%sWILDCARD %s => %s\n",
+                                 yyTracePrompt, yyTokenName[iLookAhead], yyTokenName[YYWILDCARD] );
                     }
 #endif /* NDEBUG */
                     return yy_action[j];
@@ -1709,27 +1700,26 @@ static int yy_find_shift_action(
 static int yy_find_reduce_action(
     int stateno,              /* Current state number */
     YYCODETYPE iLookAhead     /* The look-ahead token */
-)
-{
+) {
     int i;
 #ifdef YYERRORSYMBOL
-    if(stateno > YY_REDUCE_COUNT) {
+    if( stateno > YY_REDUCE_COUNT ) {
         return yy_default[stateno];
     }
 #else
-    assert(stateno <= YY_REDUCE_COUNT);
+    assert( stateno <= YY_REDUCE_COUNT );
 #endif
     i = yy_reduce_ofst[stateno];
-    assert(i != YY_REDUCE_USE_DFLT);
-    assert(iLookAhead != YYNOCODE);
+    assert( i != YY_REDUCE_USE_DFLT );
+    assert( iLookAhead != YYNOCODE );
     i += iLookAhead;
 #ifdef YYERRORSYMBOL
-    if(i < 0 || i >= YY_ACTTAB_COUNT || yy_lookahead[i] != iLookAhead) {
+    if( i < 0 || i >= YY_ACTTAB_COUNT || yy_lookahead[i] != iLookAhead ) {
         return yy_default[stateno];
     }
 #else
-    assert(i >= 0 && i < YY_ACTTAB_COUNT);
-    assert(yy_lookahead[i] == iLookAhead);
+    assert( i >= 0 && i < YY_ACTTAB_COUNT );
+    assert( yy_lookahead[i] == iLookAhead );
 #endif
     return yy_action[i];
 }
@@ -1737,24 +1727,23 @@ static int yy_find_reduce_action(
 /*
 ** The following routine is called if the stack overflows.
 */
-static void yyStackOverflow(yyParser *yypParser, YYMINORTYPE *yypMinor)
-{
+static void yyStackOverflow( yyParser * yypParser, YYMINORTYPE * yypMinor ) {
     ParseARG_FETCH;
     yypParser->yyidx--;
 #ifndef NDEBUG
-    if(yyTraceFILE) {
-        fprintf(yyTraceFILE, "%sStack Overflow!\n", yyTracePrompt);
+    if( yyTraceFILE ) {
+        fprintf( yyTraceFILE, "%sStack Overflow!\n", yyTracePrompt );
     }
 #endif
-    while(yypParser->yyidx >= 0) {
-        yy_pop_parser_stack(yypParser);
+    while( yypParser->yyidx >= 0 ) {
+        yy_pop_parser_stack( yypParser );
     }
     /* Here code is inserted which will execute if the parser
     ** stack every overflows */
 #line 2440 "expparse.y"
 
-    fprintf(stderr, "Express parser experienced stack overflow.\n");
-    fprintf(stderr, "Last token had value %x\n", yypMinor->yy0.val);
+    fprintf( stderr, "Express parser experienced stack overflow.\n" );
+    fprintf( stderr, "Last token had value %x\n", yypMinor->yy0.val );
 #line 1738 "expparse.c"
     ParseARG_STORE; /* Suppress warning about unused %extra_argument var */
 }
@@ -1763,46 +1752,45 @@ static void yyStackOverflow(yyParser *yypParser, YYMINORTYPE *yypMinor)
 ** Perform a shift action.
 */
 static void yy_shift(
-    yyParser *yypParser,          /* The parser to be shifted */
+    yyParser * yypParser,         /* The parser to be shifted */
     int yyNewState,               /* The new state to shift in */
     int yyMajor,                  /* The major token to shift in */
-    YYMINORTYPE *yypMinor         /* Pointer to the minor token to shift in */
-)
-{
-    yyStackEntry *yytos;
+    YYMINORTYPE * yypMinor        /* Pointer to the minor token to shift in */
+) {
+    yyStackEntry * yytos;
     yypParser->yyidx++;
 #ifdef YYTRACKMAXSTACKDEPTH
-    if(yypParser->yyidx > yypParser->yyidxMax) {
+    if( yypParser->yyidx > yypParser->yyidxMax ) {
         yypParser->yyidxMax = yypParser->yyidx;
     }
 #endif
 #if YYSTACKDEPTH>0
-    if(yypParser->yyidx >= YYSTACKDEPTH) {
-        yyStackOverflow(yypParser, yypMinor);
+    if( yypParser->yyidx >= YYSTACKDEPTH ) {
+        yyStackOverflow( yypParser, yypMinor );
         return;
     }
 #else
-    if(yypParser->yyidx >= yypParser->yystksz) {
-        yyGrowStack(yypParser);
-        if(yypParser->yyidx >= yypParser->yystksz) {
-            yyStackOverflow(yypParser, yypMinor);
+    if( yypParser->yyidx >= yypParser->yystksz ) {
+        yyGrowStack( yypParser );
+        if( yypParser->yyidx >= yypParser->yystksz ) {
+            yyStackOverflow( yypParser, yypMinor );
             return;
         }
     }
 #endif
     yytos = &yypParser->yystack[yypParser->yyidx];
-    yytos->stateno = (YYACTIONTYPE)yyNewState;
-    yytos->major = (YYCODETYPE)yyMajor;
+    yytos->stateno = ( YYACTIONTYPE )yyNewState;
+    yytos->major = ( YYCODETYPE )yyMajor;
     yytos->minor = *yypMinor;
 #ifndef NDEBUG
-    if(yyTraceFILE && yypParser->yyidx > 0) {
+    if( yyTraceFILE && yypParser->yyidx > 0 ) {
         int i;
-        fprintf(yyTraceFILE, "%sShift %d\n", yyTracePrompt, yyNewState);
-        fprintf(yyTraceFILE, "%sStack:", yyTracePrompt);
-        for(i = 1; i <= yypParser->yyidx; i++) {
-            fprintf(yyTraceFILE, " %s", yyTokenName[yypParser->yystack[i].major]);
+        fprintf( yyTraceFILE, "%sShift %d\n", yyTracePrompt, yyNewState );
+        fprintf( yyTraceFILE, "%sStack:", yyTracePrompt );
+        for( i = 1; i <= yypParser->yyidx; i++ ) {
+            fprintf( yyTraceFILE, " %s", yyTokenName[yypParser->yystack[i].major] );
         }
-        fprintf(yyTraceFILE, "\n");
+        fprintf( yyTraceFILE, "\n" );
     }
 #endif
 }
@@ -2148,32 +2136,31 @@ static const struct {
     { 148, 2 },
 };
 
-static void yy_accept(yyParser *); /* Forward Declaration */
+static void yy_accept( yyParser * ); /* Forward Declaration */
 
 /*
 ** Perform a reduce action and the shift that must immediately
 ** follow the reduce.
 */
 static void yy_reduce(
-    yyParser *yypParser,         /* The parser */
+    yyParser * yypParser,        /* The parser */
     int yyruleno                 /* Number of the rule by which to reduce */
-)
-{
+) {
     int yygoto;                     /* The next state */
     int yyact;                      /* The next action */
     YYMINORTYPE yygotominor;        /* The LHS of the rule reduced */
-    yyStackEntry *yymsp;            /* The top of the parser's stack */
+    yyStackEntry * yymsp;           /* The top of the parser's stack */
     int yysize;                     /* Amount to pop the stack */
     ParseARG_FETCH;
 
     yymsp = &yypParser->yystack[yypParser->yyidx];
 
-    if(yyruleno >= 0) {
+    if( yyruleno >= 0 ) {
 #ifndef NDEBUG
-        if(yyruleno < (int)(sizeof(yyRuleName) / sizeof(yyRuleName[0]))) {
-            if(yyTraceFILE) {
-                fprintf(yyTraceFILE, "%sReduce [%s].\n", yyTracePrompt,
-                        yyRuleName[yyruleno]);
+        if( yyruleno < ( int )( sizeof( yyRuleName ) / sizeof( yyRuleName[0] ) ) ) {
+            if( yyTraceFILE ) {
+                fprintf( yyTraceFILE, "%sReduce [%s].\n", yyTracePrompt,
+                         yyRuleName[yyruleno] );
             }
         }
 #endif /* NDEBUG */
@@ -2201,7 +2188,7 @@ static void yy_reduce(
     yygotominor = yyzerominor;
 
 
-    switch(yyruleno) {
+    switch( yyruleno ) {
         /* Beginning here are the reduction cases.  A typical example
         ** follows:
         **   case 0:
@@ -2212,17 +2199,17 @@ static void yy_reduce(
         */
         case 0: /* action_body ::= action_body_item_rep statement_rep */
         case 70: /* derive_decl ::= TOK_DERIVE derived_attribute_rep */
-            yytestcase(yyruleno == 70);
+            yytestcase( yyruleno == 70 );
         case 180: /* inverse_clause ::= TOK_INVERSE inverse_attr_list */
-            yytestcase(yyruleno == 180);
+            yytestcase( yyruleno == 180 );
         case 269: /* statement_rep ::= semicolon statement_rep */
-            yytestcase(yyruleno == 269);
+            yytestcase( yyruleno == 269 );
         case 320: /* unique_clause ::= TOK_UNIQUE labelled_attrib_list_list */
-            yytestcase(yyruleno == 320);
+            yytestcase( yyruleno == 320 );
         case 327: /* where_rule ::= TOK_WHERE where_clause_list */
-            yytestcase(yyruleno == 327);
+            yytestcase( yyruleno == 327 );
         case 329: /* where_rule_OPT ::= where_rule */
-            yytestcase(yyruleno == 329);
+            yytestcase( yyruleno == 329 );
 #line 297 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[0].minor.yy371;
@@ -2231,37 +2218,37 @@ static void yy_reduce(
             break;
         case 1: /* action_body_item ::= declaration */
         case 2: /* action_body_item ::= constant_decl */
-            yytestcase(yyruleno == 2);
+            yytestcase( yyruleno == 2 );
         case 3: /* action_body_item ::= local_decl */
-            yytestcase(yyruleno == 3);
+            yytestcase( yyruleno == 3 );
         case 43: /* block_member ::= declaration */
-            yytestcase(yyruleno == 43);
+            yytestcase( yyruleno == 43 );
         case 44: /* block_member ::= include_directive */
-            yytestcase(yyruleno == 44);
+            yytestcase( yyruleno == 44 );
         case 45: /* block_member ::= rule_decl */
-            yytestcase(yyruleno == 45);
+            yytestcase( yyruleno == 45 );
         case 65: /* declaration ::= entity_decl */
-            yytestcase(yyruleno == 65);
+            yytestcase( yyruleno == 65 );
         case 66: /* declaration ::= function_decl */
-            yytestcase(yyruleno == 66);
+            yytestcase( yyruleno == 66 );
         case 67: /* declaration ::= procedure_decl */
-            yytestcase(yyruleno == 67);
+            yytestcase( yyruleno == 67 );
         case 68: /* declaration ::= type_decl */
-            yytestcase(yyruleno == 68);
+            yytestcase( yyruleno == 68 );
         case 87: /* schema_decl_list ::= schema_decl */
-            yytestcase(yyruleno == 87);
+            yytestcase( yyruleno == 87 );
         case 157: /* rename_list ::= rename */
-            yytestcase(yyruleno == 157);
+            yytestcase( yyruleno == 157 );
         case 166: /* interface_specification ::= use_clause */
-            yytestcase(yyruleno == 166);
+            yytestcase( yyruleno == 166 );
         case 167: /* interface_specification ::= reference_clause */
-            yytestcase(yyruleno == 167);
+            yytestcase( yyruleno == 167 );
         case 203: /* oneof_op ::= TOK_ONEOF */
-            yytestcase(yyruleno == 203);
+            yytestcase( yyruleno == 203 );
         case 251: /* schema_decl ::= include_directive */
-            yytestcase(yyruleno == 251);
+            yytestcase( yyruleno == 251 );
         case 291: /* type_item_body ::= enumeration_type */
-            yytestcase(yyruleno == 291);
+            yytestcase( yyruleno == 291 );
 #line 303 "expparse.y"
             {
                 yygotominor.yy0 = yymsp[0].minor.yy0;
@@ -2270,17 +2257,17 @@ static void yy_reduce(
             break;
         case 5: /* action_body_item_rep ::= action_body_item action_body_item_rep */
         case 42: /* block_list ::= block_list block_member */
-            yytestcase(yyruleno == 42);
+            yytestcase( yyruleno == 42 );
         case 63: /* constant_body_list ::= constant_body constant_body_list */
-            yytestcase(yyruleno == 63);
+            yytestcase( yyruleno == 63 );
         case 88: /* schema_decl_list ::= schema_decl_list schema_decl */
-            yytestcase(yyruleno == 88);
+            yytestcase( yyruleno == 88 );
         case 169: /* interface_specification_list ::= interface_specification_list interface_specification */
-            yytestcase(yyruleno == 169);
+            yytestcase( yyruleno == 169 );
         case 195: /* local_body ::= local_variable local_body */
-            yytestcase(yyruleno == 195);
+            yytestcase( yyruleno == 195 );
         case 248: /* schema_body ::= interface_specification_list block_list */
-            yytestcase(yyruleno == 248);
+            yytestcase( yyruleno == 248 );
 #line 320 "expparse.y"
             {
                 yygotominor.yy0 = yymsp[-1].minor.yy0;
@@ -2289,9 +2276,9 @@ static void yy_reduce(
             break;
         case 6: /* actual_parameters ::= TOK_LEFT_PAREN expression_list TOK_RIGHT_PAREN */
         case 202: /* nested_id_list ::= TOK_LEFT_PAREN id_list TOK_RIGHT_PAREN */
-            yytestcase(yyruleno == 202);
+            yytestcase( yyruleno == 202 );
         case 275: /* subtype_decl ::= TOK_SUBTYPE TOK_OF TOK_LEFT_PAREN defined_type_list TOK_RIGHT_PAREN */
-            yytestcase(yyruleno == 275);
+            yytestcase( yyruleno == 275 );
 #line 337 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
@@ -2300,7 +2287,7 @@ static void yy_reduce(
             break;
         case 7: /* actual_parameters ::= TOK_LEFT_PAREN TOK_RIGHT_PAREN */
         case 319: /* unique_clause ::= */
-            yytestcase(yyruleno == 319);
+            yytestcase( yyruleno == 319 );
 #line 341 "expparse.y"
             {
                 yygotominor.yy371 = 0;
@@ -2310,7 +2297,7 @@ static void yy_reduce(
         case 8: /* aggregate_initializer ::= TOK_LEFT_BRACKET TOK_RIGHT_BRACKET */
 #line 347 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate(Type_Aggregate);
+                yygotominor.yy401 = EXPcreate( Type_Aggregate );
                 yygotominor.yy401->u.list = LISTcreate();
             }
 #line 2262 "expparse.c"
@@ -2318,48 +2305,48 @@ static void yy_reduce(
         case 9: /* aggregate_initializer ::= TOK_LEFT_BRACKET aggregate_init_body TOK_RIGHT_BRACKET */
 #line 353 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate(Type_Aggregate);
+                yygotominor.yy401 = EXPcreate( Type_Aggregate );
                 yygotominor.yy401->u.list = yymsp[-1].minor.yy371;
             }
 #line 2270 "expparse.c"
             break;
         case 10: /* aggregate_init_element ::= expression */
         case 25: /* assignable ::= identifier */
-            yytestcase(yyruleno == 25);
+            yytestcase( yyruleno == 25 );
         case 47: /* by_expression ::= TOK_BY expression */
-            yytestcase(yyruleno == 47);
+            yytestcase( yyruleno == 47 );
         case 89: /* expression ::= simple_expression */
-            yytestcase(yyruleno == 89);
+            yytestcase( yyruleno == 89 );
         case 104: /* simple_expression ::= unary_expression */
-            yytestcase(yyruleno == 104);
+            yytestcase( yyruleno == 104 );
         case 154: /* initializer ::= TOK_ASSIGNMENT expression */
-            yytestcase(yyruleno == 154);
+            yytestcase( yyruleno == 154 );
         case 190: /* literal ::= constant */
-            yytestcase(yyruleno == 190);
+            yytestcase( yyruleno == 190 );
         case 191: /* local_initializer ::= TOK_ASSIGNMENT expression */
-            yytestcase(yyruleno == 191);
+            yytestcase( yyruleno == 191 );
         case 298: /* general_ref ::= assignable */
-            yytestcase(yyruleno == 298);
+            yytestcase( yyruleno == 298 );
         case 299: /* unary_expression ::= aggregate_initializer */
-            yytestcase(yyruleno == 299);
+            yytestcase( yyruleno == 299 );
         case 301: /* unary_expression ::= literal */
-            yytestcase(yyruleno == 301);
+            yytestcase( yyruleno == 301 );
         case 302: /* unary_expression ::= function_call */
-            yytestcase(yyruleno == 302);
+            yytestcase( yyruleno == 302 );
         case 303: /* unary_expression ::= identifier */
-            yytestcase(yyruleno == 303);
+            yytestcase( yyruleno == 303 );
         case 305: /* unary_expression ::= interval */
-            yytestcase(yyruleno == 305);
+            yytestcase( yyruleno == 305 );
         case 306: /* unary_expression ::= query_expression */
-            yytestcase(yyruleno == 306);
+            yytestcase( yyruleno == 306 );
         case 308: /* unary_expression ::= TOK_PLUS unary_expression */
-            yytestcase(yyruleno == 308);
+            yytestcase( yyruleno == 308 );
         case 312: /* qualified_attr ::= attribute_decl */
-            yytestcase(yyruleno == 312);
+            yytestcase( yyruleno == 312 );
         case 322: /* until_control ::= TOK_UNTIL expression */
-            yytestcase(yyruleno == 322);
+            yytestcase( yyruleno == 322 );
         case 331: /* while_control ::= TOK_WHILE expression */
-            yytestcase(yyruleno == 331);
+            yytestcase( yyruleno == 331 );
 #line 359 "expparse.y"
             {
                 yygotominor.yy401 = yymsp[0].minor.yy401;
@@ -2368,15 +2355,15 @@ static void yy_reduce(
             break;
         case 11: /* aggregate_init_body ::= aggregate_init_element */
         case 113: /* expression_list ::= expression */
-            yytestcase(yyruleno == 113);
+            yytestcase( yyruleno == 113 );
         case 282: /* supertype_expression_list ::= supertype_expression */
-            yytestcase(yyruleno == 282);
+            yytestcase( yyruleno == 282 );
         case 313: /* qualified_attr_list ::= qualified_attr */
-            yytestcase(yyruleno == 313);
+            yytestcase( yyruleno == 313 );
 #line 364 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy401 );
             }
 #line 2306 "expparse.c"
             break;
@@ -2384,9 +2371,9 @@ static void yy_reduce(
 #line 369 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[-2].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[-2].minor.yy401 );
 
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy401 );
 
                 yymsp[0].minor.yy401->type = Type_Repeat;
             }
@@ -2397,7 +2384,7 @@ static void yy_reduce(
             {
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
 
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy401 );
 
             }
 #line 2328 "expparse.c"
@@ -2407,8 +2394,8 @@ static void yy_reduce(
             {
                 yygotominor.yy371 = yymsp[-4].minor.yy371;
 
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[-2].minor.yy401);
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[-2].minor.yy401 );
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy401 );
 
                 yymsp[0].minor.yy401->type = Type_Repeat;
             }
@@ -2417,15 +2404,15 @@ static void yy_reduce(
         case 15: /* aggregate_type ::= TOK_AGGREGATE TOK_OF parameter_type */
 #line 397 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(aggregate_);
+                yygotominor.yy477 = TYPEBODYcreate( aggregate_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
 
-                if(tag_count < 0) {
+                if( tag_count < 0 ) {
                     Symbol sym;
                     sym.line = yylineno;
                     sym.filename = current_filename;
-                    ERRORreport_with_symbol(UNLABELLED_PARAM_TYPE, &sym,
-                                            CURRENT_SCOPE_NAME);
+                    ERRORreport_with_symbol( UNLABELLED_PARAM_TYPE, &sym,
+                                             CURRENT_SCOPE_NAME );
                 }
             }
 #line 2356 "expparse.c"
@@ -2433,11 +2420,11 @@ static void yy_reduce(
         case 16: /* aggregate_type ::= TOK_AGGREGATE TOK_COLON TOK_IDENTIFIER TOK_OF parameter_type */
 #line 411 "expparse.y"
             {
-                Type t = TYPEcreate_user_defined_tag(yymsp[0].minor.yy297, CURRENT_SCOPE, yymsp[-2].minor.yy0.symbol);
+                Type t = TYPEcreate_user_defined_tag( yymsp[0].minor.yy297, CURRENT_SCOPE, yymsp[-2].minor.yy0.symbol );
 
-                if(t) {
-                    SCOPEadd_super(t);
-                    yygotominor.yy477 = TYPEBODYcreate(aggregate_);
+                if( t ) {
+                    SCOPEadd_super( t );
+                    yygotominor.yy477 = TYPEBODYcreate( aggregate_ );
                     yygotominor.yy477->tag = t;
                     yygotominor.yy477->base = yymsp[0].minor.yy297;
                 }
@@ -2446,11 +2433,11 @@ static void yy_reduce(
             break;
         case 17: /* aggregation_type ::= array_type */
         case 18: /* aggregation_type ::= bag_type */
-            yytestcase(yyruleno == 18);
+            yytestcase( yyruleno == 18 );
         case 19: /* aggregation_type ::= list_type */
-            yytestcase(yyruleno == 19);
+            yytestcase( yyruleno == 19 );
         case 20: /* aggregation_type ::= set_type */
-            yytestcase(yyruleno == 20);
+            yytestcase( yyruleno == 20 );
 #line 423 "expparse.y"
             {
                 yygotominor.yy477 = yymsp[0].minor.yy477;
@@ -2460,14 +2447,14 @@ static void yy_reduce(
         case 21: /* alias_statement ::= TOK_ALIAS TOK_IDENTIFIER TOK_FOR general_ref semicolon alias_push_scope statement_rep TOK_END_ALIAS semicolon */
 #line 442 "expparse.y"
             {
-                Expression e = EXPcreate_from_symbol(Type_Attribute, yymsp[-7].minor.yy0.symbol);
-                Variable v = VARcreate(e, Type_Unknown);
+                Expression e = EXPcreate_from_symbol( Type_Attribute, yymsp[-7].minor.yy0.symbol );
+                Variable v = VARcreate( e, Type_Unknown );
 
                 v->initializer = yymsp[-5].minor.yy401;
 
-                DICTdefine(CURRENT_SCOPE->symbol_table, yymsp[-7].minor.yy0.symbol->name, (Generic)v,
-                           yymsp[-7].minor.yy0.symbol, OBJ_VARIABLE);
-                yygotominor.yy332 = ALIAScreate(CURRENT_SCOPE, v, yymsp[-2].minor.yy371);
+                DICTdefine( CURRENT_SCOPE->symbol_table, yymsp[-7].minor.yy0.symbol->name, ( Generic )v,
+                            yymsp[-7].minor.yy0.symbol, OBJ_VARIABLE );
+                yygotominor.yy332 = ALIAScreate( CURRENT_SCOPE, v, yymsp[-2].minor.yy371 );
 
                 POP_SCOPE();
             }
@@ -2476,15 +2463,15 @@ static void yy_reduce(
         case 22: /* alias_push_scope ::= */
 #line 456 "expparse.y"
             {
-                struct Scope_ *s = SCOPEcreate_tiny(OBJ_ALIAS);
-                PUSH_SCOPE(s, (Symbol *)0, OBJ_ALIAS);
+                struct Scope_ *s = SCOPEcreate_tiny( OBJ_ALIAS );
+                PUSH_SCOPE( s, ( Symbol * )0, OBJ_ALIAS );
             }
 #line 2404 "expparse.c"
             break;
         case 23: /* array_type ::= TOK_ARRAY bound_spec TOK_OF optional_or_unique attribute_type */
 #line 463 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(array_);
+                yygotominor.yy477 = TYPEBODYcreate( array_ );
 
                 yygotominor.yy477->flags.optional = yymsp[-1].minor.yy252.optional;
                 yygotominor.yy477->flags.unique = yymsp[-1].minor.yy252.unique;
@@ -2496,7 +2483,7 @@ static void yy_reduce(
             break;
         case 24: /* assignable ::= assignable qualifier */
         case 300: /* unary_expression ::= unary_expression qualifier */
-            yytestcase(yyruleno == 300);
+            yytestcase( yyruleno == 300 );
 #line 475 "expparse.y"
             {
                 yymsp[0].minor.yy46.first->e.op1 = yymsp[-1].minor.yy401;
@@ -2507,29 +2494,29 @@ static void yy_reduce(
         case 26: /* assignment_statement ::= assignable TOK_ASSIGNMENT expression semicolon */
 #line 486 "expparse.y"
             {
-                yygotominor.yy332 = ASSIGNcreate(yymsp[-3].minor.yy401, yymsp[-1].minor.yy401);
+                yygotominor.yy332 = ASSIGNcreate( yymsp[-3].minor.yy401, yymsp[-1].minor.yy401 );
             }
 #line 2433 "expparse.c"
             break;
         case 27: /* attribute_type ::= aggregation_type */
         case 28: /* attribute_type ::= basic_type */
-            yytestcase(yyruleno == 28);
+            yytestcase( yyruleno == 28 );
         case 122: /* parameter_type ::= basic_type */
-            yytestcase(yyruleno == 122);
+            yytestcase( yyruleno == 122 );
         case 123: /* parameter_type ::= conformant_aggregation */
-            yytestcase(yyruleno == 123);
+            yytestcase( yyruleno == 123 );
 #line 491 "expparse.y"
             {
-                yygotominor.yy297 = TYPEcreate_from_body_anonymously(yymsp[0].minor.yy477);
-                SCOPEadd_super(yygotominor.yy297);
+                yygotominor.yy297 = TYPEcreate_from_body_anonymously( yymsp[0].minor.yy477 );
+                SCOPEadd_super( yygotominor.yy297 );
             }
 #line 2444 "expparse.c"
             break;
         case 29: /* attribute_type ::= defined_type */
         case 124: /* parameter_type ::= defined_type */
-            yytestcase(yyruleno == 124);
+            yytestcase( yyruleno == 124 );
         case 125: /* parameter_type ::= generic_type */
-            yytestcase(yyruleno == 125);
+            yytestcase( yyruleno == 125 );
 #line 501 "expparse.y"
             {
                 yygotominor.yy297 = yymsp[0].minor.yy297;
@@ -2538,11 +2525,11 @@ static void yy_reduce(
             break;
         case 30: /* explicit_attr_list ::= */
         case 50: /* case_action_list ::= */
-            yytestcase(yyruleno == 50);
+            yytestcase( yyruleno == 50 );
         case 69: /* derive_decl ::= */
-            yytestcase(yyruleno == 69);
+            yytestcase( yyruleno == 69 );
         case 268: /* statement_rep ::= */
-            yytestcase(yyruleno == 268);
+            yytestcase( yyruleno == 268 );
 #line 506 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
@@ -2553,16 +2540,16 @@ static void yy_reduce(
 #line 510 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy371);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy371 );
             }
 #line 2471 "expparse.c"
             break;
         case 32: /* bag_type ::= TOK_BAG bound_spec TOK_OF attribute_type */
         case 138: /* conformant_aggregation ::= TOK_BAG bound_spec TOK_OF parameter_type */
-            yytestcase(yyruleno == 138);
+            yytestcase( yyruleno == 138 );
 #line 516 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(bag_);
+                yygotominor.yy477 = TYPEBODYcreate( bag_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
                 yygotominor.yy477->upper = yymsp[-2].minor.yy253.upper_limit;
                 yygotominor.yy477->lower = yymsp[-2].minor.yy253.lower_limit;
@@ -2572,7 +2559,7 @@ static void yy_reduce(
         case 33: /* bag_type ::= TOK_BAG TOK_OF attribute_type */
 #line 523 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(bag_);
+                yygotominor.yy477 = TYPEBODYcreate( bag_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
             }
 #line 2490 "expparse.c"
@@ -2580,14 +2567,14 @@ static void yy_reduce(
         case 34: /* basic_type ::= TOK_BOOLEAN */
 #line 529 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(boolean_);
+                yygotominor.yy477 = TYPEBODYcreate( boolean_ );
             }
 #line 2497 "expparse.c"
             break;
         case 35: /* basic_type ::= TOK_INTEGER precision_spec */
 #line 533 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(integer_);
+                yygotominor.yy477 = TYPEBODYcreate( integer_ );
                 yygotominor.yy477->precision = yymsp[0].minor.yy401;
             }
 #line 2505 "expparse.c"
@@ -2595,7 +2582,7 @@ static void yy_reduce(
         case 36: /* basic_type ::= TOK_REAL precision_spec */
 #line 538 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(real_);
+                yygotominor.yy477 = TYPEBODYcreate( real_ );
                 yygotominor.yy477->precision = yymsp[0].minor.yy401;
             }
 #line 2513 "expparse.c"
@@ -2603,21 +2590,21 @@ static void yy_reduce(
         case 37: /* basic_type ::= TOK_NUMBER */
 #line 543 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(number_);
+                yygotominor.yy477 = TYPEBODYcreate( number_ );
             }
 #line 2520 "expparse.c"
             break;
         case 38: /* basic_type ::= TOK_LOGICAL */
 #line 547 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(logical_);
+                yygotominor.yy477 = TYPEBODYcreate( logical_ );
             }
 #line 2527 "expparse.c"
             break;
         case 39: /* basic_type ::= TOK_BINARY precision_spec optional_fixed */
 #line 551 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(binary_);
+                yygotominor.yy477 = TYPEBODYcreate( binary_ );
                 yygotominor.yy477->precision = yymsp[-1].minor.yy401;
                 yygotominor.yy477->flags.fixed = yymsp[0].minor.yy252.fixed;
             }
@@ -2626,7 +2613,7 @@ static void yy_reduce(
         case 40: /* basic_type ::= TOK_STRING precision_spec optional_fixed */
 #line 557 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(string_);
+                yygotominor.yy477 = TYPEBODYcreate( string_ );
                 yygotominor.yy477->precision = yymsp[-1].minor.yy401;
                 yygotominor.yy477->flags.fixed = yymsp[0].minor.yy252.fixed;
             }
@@ -2641,7 +2628,7 @@ static void yy_reduce(
             break;
         case 48: /* cardinality_op ::= TOK_LEFT_CURL expression TOK_COLON expression TOK_RIGHT_CURL */
         case 181: /* bound_spec ::= TOK_LEFT_BRACKET expression TOK_COLON expression TOK_RIGHT_BRACKET */
-            yytestcase(yyruleno == 181);
+            yytestcase( yyruleno == 181 );
 #line 593 "expparse.y"
             {
                 yygotominor.yy253.lower_limit = yymsp[-3].minor.yy401;
@@ -2652,8 +2639,8 @@ static void yy_reduce(
         case 49: /* case_action ::= case_labels TOK_COLON statement */
 #line 599 "expparse.y"
             {
-                yygotominor.yy321 = CASE_ITcreate(yymsp[-2].minor.yy371, yymsp[0].minor.yy332);
-                SYMBOLset(yygotominor.yy321);
+                yygotominor.yy321 = CASE_ITcreate( yymsp[-2].minor.yy371, yymsp[0].minor.yy332 );
+                SYMBOLset( yygotominor.yy321 );
             }
 #line 2569 "expparse.c"
             break;
@@ -2664,7 +2651,7 @@ static void yy_reduce(
 
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
 
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy321);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy321 );
             }
 #line 2580 "expparse.c"
             break;
@@ -2673,9 +2660,9 @@ static void yy_reduce(
             {
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
 
-                if(yymsp[0].minor.yy321) {
-                    LISTadd_last(yygotominor.yy371,
-                                 (Generic)yymsp[0].minor.yy321);
+                if( yymsp[0].minor.yy321 ) {
+                    LISTadd_last( yygotominor.yy371,
+                                  ( Generic )yymsp[0].minor.yy321 );
                 }
             }
 #line 2592 "expparse.c"
@@ -2685,7 +2672,7 @@ static void yy_reduce(
             {
                 yygotominor.yy371 = LISTcreate();
 
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy401 );
             }
 #line 2601 "expparse.c"
             break;
@@ -2695,36 +2682,36 @@ static void yy_reduce(
                 yyerrok;
 
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy401 );
             }
 #line 2611 "expparse.c"
             break;
         case 55: /* case_otherwise ::= */
 #line 642 "expparse.y"
             {
-                yygotominor.yy321 = (Case_Item)0;
+                yygotominor.yy321 = ( Case_Item )0;
             }
 #line 2618 "expparse.c"
             break;
         case 56: /* case_otherwise ::= TOK_OTHERWISE TOK_COLON statement */
 #line 646 "expparse.y"
             {
-                yygotominor.yy321 = CASE_ITcreate(LIST_NULL, yymsp[0].minor.yy332);
-                SYMBOLset(yygotominor.yy321);
+                yygotominor.yy321 = CASE_ITcreate( LIST_NULL, yymsp[0].minor.yy332 );
+                SYMBOLset( yygotominor.yy321 );
             }
 #line 2626 "expparse.c"
             break;
         case 57: /* case_statement ::= TOK_CASE expression TOK_OF case_block TOK_END_CASE semicolon */
 #line 653 "expparse.y"
             {
-                yygotominor.yy332 = CASEcreate(yymsp[-4].minor.yy401, yymsp[-2].minor.yy371);
+                yygotominor.yy332 = CASEcreate( yymsp[-4].minor.yy401, yymsp[-2].minor.yy371 );
             }
 #line 2633 "expparse.c"
             break;
         case 58: /* compound_statement ::= TOK_BEGIN statement_rep TOK_END semicolon */
 #line 658 "expparse.y"
             {
-                yygotominor.yy332 = COMP_STMTcreate(yymsp[-2].minor.yy371);
+                yygotominor.yy332 = COMP_STMTcreate( yymsp[-2].minor.yy371 );
             }
 #line 2640 "expparse.c"
             break;
@@ -2748,11 +2735,11 @@ static void yy_reduce(
                 Variable v;
 
                 yymsp[-5].minor.yy401->type = yymsp[-3].minor.yy297;
-                v = VARcreate(yymsp[-5].minor.yy401, yymsp[-3].minor.yy297);
+                v = VARcreate( yymsp[-5].minor.yy401, yymsp[-3].minor.yy297 );
                 v->initializer = yymsp[-1].minor.yy401;
                 v->flags.constant = 1;
-                DICTdefine(CURRENT_SCOPE->symbol_table, yymsp[-5].minor.yy401->symbol.name, (Generic)v,
-                           &yymsp[-5].minor.yy401->symbol, OBJ_VARIABLE);
+                DICTdefine( CURRENT_SCOPE->symbol_table, yymsp[-5].minor.yy401->symbol.name, ( Generic )v,
+                            &yymsp[-5].minor.yy401->symbol, OBJ_VARIABLE );
             }
 #line 2668 "expparse.c"
             break;
@@ -2766,7 +2753,7 @@ static void yy_reduce(
         case 71: /* derived_attribute ::= attribute_decl TOK_COLON attribute_type initializer semicolon */
 #line 726 "expparse.y"
             {
-                yygotominor.yy91 = VARcreate(yymsp[-4].minor.yy401, yymsp[-2].minor.yy297);
+                yygotominor.yy91 = VARcreate( yymsp[-4].minor.yy401, yymsp[-2].minor.yy297 );
                 yygotominor.yy91->initializer = yymsp[-1].minor.yy401;
                 yygotominor.yy91->flags.attribute = true;
             }
@@ -2774,21 +2761,21 @@ static void yy_reduce(
             break;
         case 72: /* derived_attribute_rep ::= derived_attribute */
         case 176: /* inverse_attr_list ::= inverse_attr */
-            yytestcase(yyruleno == 176);
+            yytestcase( yyruleno == 176 );
 #line 733 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy91);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy91 );
             }
 #line 2693 "expparse.c"
             break;
         case 73: /* derived_attribute_rep ::= derived_attribute_rep derived_attribute */
         case 177: /* inverse_attr_list ::= inverse_attr_list inverse_attr */
-            yytestcase(yyruleno == 177);
+            yytestcase( yyruleno == 177 );
 #line 738 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy91);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy91 );
             }
 #line 2702 "expparse.c"
             break;
@@ -2797,10 +2784,10 @@ static void yy_reduce(
             {
                 yygotominor.yy176.attributes = yymsp[-4].minor.yy371;
                 /* this is flattened out in entity_decl - DEL */
-                LISTadd_last(yygotominor.yy176.attributes, (Generic)yymsp[-3].minor.yy371);
+                LISTadd_last( yygotominor.yy176.attributes, ( Generic )yymsp[-3].minor.yy371 );
 
-                if(yymsp[-2].minor.yy371 != LIST_NULL) {
-                    LISTadd_last(yygotominor.yy176.attributes, (Generic)yymsp[-2].minor.yy371);
+                if( yymsp[-2].minor.yy371 != LIST_NULL ) {
+                    LISTadd_last( yygotominor.yy176.attributes, ( Generic )yymsp[-2].minor.yy371 );
                 }
 
                 yygotominor.yy176.unique = yymsp[-1].minor.yy371;
@@ -2813,9 +2800,9 @@ static void yy_reduce(
             {
                 CURRENT_SCOPE->u.entity->subtype_expression = yymsp[-4].minor.yy242.subtypes;
                 CURRENT_SCOPE->u.entity->supertype_symbols = yymsp[-4].minor.yy242.supertypes;
-                LISTdo(yymsp[-2].minor.yy176.attributes, l, Linked_List) {
-                    LISTdo_n(l, a, Variable, b) {
-                        ENTITYadd_attribute(CURRENT_SCOPE, a);
+                LISTdo( yymsp[-2].minor.yy176.attributes, l, Linked_List ) {
+                    LISTdo_n( l, a, Variable, b ) {
+                        ENTITYadd_attribute( CURRENT_SCOPE, a );
                     }
                     LISTod;
                 }
@@ -2830,13 +2817,13 @@ static void yy_reduce(
         case 76: /* entity_header ::= TOK_ENTITY TOK_IDENTIFIER */
 #line 775 "expparse.y"
             {
-                Entity e = ENTITYcreate(yymsp[0].minor.yy0.symbol);
+                Entity e = ENTITYcreate( yymsp[0].minor.yy0.symbol );
 
-                if(print_objects_while_running & OBJ_ENTITY_BITS) {
-                    fprintf(stderr, "parse: %s (entity)\n", yymsp[0].minor.yy0.symbol->name);
+                if( print_objects_while_running & OBJ_ENTITY_BITS ) {
+                    fprintf( stderr, "parse: %s (entity)\n", yymsp[0].minor.yy0.symbol->name );
                 }
 
-                PUSH_SCOPE(e, yymsp[0].minor.yy0.symbol, OBJ_ENTITY);
+                PUSH_SCOPE( e, yymsp[0].minor.yy0.symbol, OBJ_ENTITY );
             }
 #line 2748 "expparse.c"
             break;
@@ -2845,32 +2832,32 @@ static void yy_reduce(
             {
                 int value = 0;
                 Expression x;
-                Symbol *tmp;
+                Symbol * tmp;
                 TypeBody tb;
-                tb = TYPEBODYcreate(enumeration_);
+                tb = TYPEBODYcreate( enumeration_ );
                 CURRENT_SCOPE->u.type->head = 0;
                 CURRENT_SCOPE->u.type->body = tb;
                 tb->list = yymsp[0].minor.yy371;
 
-                if(!CURRENT_SCOPE->symbol_table) {
-                    CURRENT_SCOPE->symbol_table = DICTcreate(25);
+                if( !CURRENT_SCOPE->symbol_table ) {
+                    CURRENT_SCOPE->symbol_table = DICTcreate( 25 );
                 }
-                if(!PREVIOUS_SCOPE->enum_table) {
-                    PREVIOUS_SCOPE->enum_table = DICTcreate(25);
+                if( !PREVIOUS_SCOPE->enum_table ) {
+                    PREVIOUS_SCOPE->enum_table = DICTcreate( 25 );
                 }
-                LISTdo_links(yymsp[0].minor.yy371, id) {
-                    tmp = (Symbol *)id->data;
-                    id->data = (Generic)(x = EXPcreate(CURRENT_SCOPE));
-                    x->symbol = *(tmp);
+                LISTdo_links( yymsp[0].minor.yy371, id ) {
+                    tmp = ( Symbol * )id->data;
+                    id->data = ( Generic )( x = EXPcreate( CURRENT_SCOPE ) );
+                    x->symbol = *( tmp );
                     x->u.integer = ++value;
 
                     /* define both in enum scope and scope of */
                     /* 1st visibility */
-                    DICT_define(CURRENT_SCOPE->symbol_table, x->symbol.name,
-                                (Generic)x, &x->symbol, OBJ_EXPRESSION);
-                    DICTdefine(PREVIOUS_SCOPE->enum_table, x->symbol.name,
-                               (Generic)x, &x->symbol, OBJ_EXPRESSION);
-                    SYMBOL_destroy(tmp);
+                    DICT_define( CURRENT_SCOPE->symbol_table, x->symbol.name,
+                                 ( Generic )x, &x->symbol, OBJ_EXPRESSION );
+                    DICTdefine( PREVIOUS_SCOPE->enum_table, x->symbol.name,
+                                ( Generic )x, &x->symbol, OBJ_EXPRESSION );
+                    SYMBOL_destroy( tmp );
                 }
                 LISTod;
             }
@@ -2886,25 +2873,25 @@ static void yy_reduce(
         case 79: /* attribute_decl ::= TOK_IDENTIFIER */
 #line 834 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate(Type_Attribute);
+                yygotominor.yy401 = EXPcreate( Type_Attribute );
                 yygotominor.yy401->symbol = *yymsp[0].minor.yy0.symbol;
-                SYMBOL_destroy(yymsp[0].minor.yy0.symbol);
+                SYMBOL_destroy( yymsp[0].minor.yy0.symbol );
             }
 #line 2799 "expparse.c"
             break;
         case 80: /* attribute_decl ::= TOK_SELF TOK_BACKSLASH TOK_IDENTIFIER TOK_DOT TOK_IDENTIFIER */
 #line 841 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate(Type_Expression);
-                yygotominor.yy401->e.op1 = EXPcreate(Type_Expression);
+                yygotominor.yy401 = EXPcreate( Type_Expression );
+                yygotominor.yy401->e.op1 = EXPcreate( Type_Expression );
                 yygotominor.yy401->e.op1->e.op_code = OP_GROUP;
-                yygotominor.yy401->e.op1->e.op1 = EXPcreate(Type_Self);
-                yygotominor.yy401->e.op1->e.op2 = EXPcreate_from_symbol(Type_Entity, yymsp[-2].minor.yy0.symbol);
-                SYMBOL_destroy(yymsp[-2].minor.yy0.symbol);
+                yygotominor.yy401->e.op1->e.op1 = EXPcreate( Type_Self );
+                yygotominor.yy401->e.op1->e.op2 = EXPcreate_from_symbol( Type_Entity, yymsp[-2].minor.yy0.symbol );
+                SYMBOL_destroy( yymsp[-2].minor.yy0.symbol );
 
                 yygotominor.yy401->e.op_code = OP_DOT;
-                yygotominor.yy401->e.op2 = EXPcreate_from_symbol(Type_Attribute, yymsp[0].minor.yy0.symbol);
-                SYMBOL_destroy(yymsp[0].minor.yy0.symbol);
+                yygotominor.yy401->e.op2 = EXPcreate_from_symbol( Type_Attribute, yymsp[0].minor.yy0.symbol );
+                SYMBOL_destroy( yymsp[0].minor.yy0.symbol );
             }
 #line 2815 "expparse.c"
             break;
@@ -2912,20 +2899,20 @@ static void yy_reduce(
 #line 855 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy401 );
 
             }
 #line 2824 "expparse.c"
             break;
         case 82: /* attribute_decl_list ::= attribute_decl_list TOK_COMMA attribute_decl */
         case 114: /* expression_list ::= expression_list TOK_COMMA expression */
-            yytestcase(yyruleno == 114);
+            yytestcase( yyruleno == 114 );
         case 314: /* qualified_attr_list ::= qualified_attr_list TOK_COMMA qualified_attr */
-            yytestcase(yyruleno == 314);
+            yytestcase( yyruleno == 314 );
 #line 862 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy401 );
             }
 #line 2834 "expparse.c"
             break;
@@ -2948,11 +2935,11 @@ static void yy_reduce(
             {
                 Variable v;
 
-                LISTdo_links(yymsp[-4].minor.yy371, attr)
-                v = VARcreate((Expression)attr->data, yymsp[-1].minor.yy297);
+                LISTdo_links( yymsp[-4].minor.yy371, attr )
+                v = VARcreate( ( Expression )attr->data, yymsp[-1].minor.yy297 );
                 v->flags.optional = yymsp[-2].minor.yy252.optional;
                 v->flags.attribute = true;
-                attr->data = (Generic)v;
+                attr->data = ( Generic )v;
                 LISTod;
 
                 yygotominor.yy371 = yymsp[-4].minor.yy371;
@@ -2964,7 +2951,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_AND, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_AND, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2873 "expparse.c"
             break;
@@ -2973,7 +2960,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_OR, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_OR, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2882 "expparse.c"
             break;
@@ -2982,7 +2969,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_XOR, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_XOR, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2891 "expparse.c"
             break;
@@ -2991,7 +2978,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_LESS_THAN, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_LESS_THAN, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2900 "expparse.c"
             break;
@@ -3000,7 +2987,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_GREATER_THAN, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_GREATER_THAN, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2909 "expparse.c"
             break;
@@ -3009,7 +2996,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2918 "expparse.c"
             break;
@@ -3018,7 +3005,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_LESS_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_LESS_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2927 "expparse.c"
             break;
@@ -3027,7 +3014,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_GREATER_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_GREATER_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2936 "expparse.c"
             break;
@@ -3036,7 +3023,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_NOT_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_NOT_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2945 "expparse.c"
             break;
@@ -3045,7 +3032,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_INST_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_INST_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2954 "expparse.c"
             break;
@@ -3054,7 +3041,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_INST_NOT_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_INST_NOT_EQUAL, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2963 "expparse.c"
             break;
@@ -3063,7 +3050,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_IN, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_IN, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2972 "expparse.c"
             break;
@@ -3072,15 +3059,15 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_LIKE, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_LIKE, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2981 "expparse.c"
             break;
         case 103: /* expression ::= simple_expression cardinality_op simple_expression */
         case 240: /* right_curl ::= TOK_RIGHT_CURL */
-            yytestcase(yyruleno == 240);
+            yytestcase( yyruleno == 240 );
         case 254: /* semicolon ::= TOK_SEMICOLON */
-            yytestcase(yyruleno == 254);
+            yytestcase( yyruleno == 254 );
 #line 985 "expparse.y"
             {
                 yyerrok;
@@ -3092,7 +3079,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_CONCAT, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_CONCAT, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 2999 "expparse.c"
             break;
@@ -3101,7 +3088,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_EXP, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_EXP, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 3008 "expparse.c"
             break;
@@ -3110,7 +3097,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_TIMES, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_TIMES, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 3017 "expparse.c"
             break;
@@ -3119,7 +3106,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_DIV, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_DIV, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 3026 "expparse.c"
             break;
@@ -3128,7 +3115,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_REAL_DIV, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_REAL_DIV, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 3035 "expparse.c"
             break;
@@ -3137,7 +3124,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_MOD, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_MOD, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 3044 "expparse.c"
             break;
@@ -3146,7 +3133,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_PLUS, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_PLUS, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 3053 "expparse.c"
             break;
@@ -3155,7 +3142,7 @@ static void yy_reduce(
             {
                 yyerrok;
 
-                yygotominor.yy401 = BIN_EXPcreate(OP_MINUS, yymsp[-2].minor.yy401, yymsp[0].minor.yy401);
+                yygotominor.yy401 = BIN_EXPcreate( OP_MINUS, yymsp[-2].minor.yy401, yymsp[0].minor.yy401 );
             }
 #line 3062 "expparse.c"
             break;
@@ -3176,23 +3163,23 @@ static void yy_reduce(
         case 117: /* formal_parameter ::= var id_list TOK_COLON parameter_type */
 #line 1064 "expparse.y"
             {
-                Symbol *tmp;
+                Symbol * tmp;
                 Expression e;
                 Variable v;
 
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
-                LISTdo_links(yygotominor.yy371, param)
-                tmp = (Symbol *)param->data;
+                LISTdo_links( yygotominor.yy371, param )
+                tmp = ( Symbol * )param->data;
 
-                e = EXPcreate_from_symbol(Type_Attribute, tmp);
-                v = VARcreate(e, yymsp[0].minor.yy297);
+                e = EXPcreate_from_symbol( Type_Attribute, tmp );
+                v = VARcreate( e, yymsp[0].minor.yy297 );
                 v->flags.var = yymsp[-3].minor.yy252.var; /* NOTE this was flags.optional... ?! */
                 v->flags.parameter = true;
-                param->data = (Generic)v;
+                param->data = ( Generic )v;
 
                 /* link it in to the current scope's dict */
-                DICTdefine(CURRENT_SCOPE->symbol_table,
-                           tmp->name, (Generic)v, tmp, OBJ_VARIABLE);
+                DICTdefine( CURRENT_SCOPE->symbol_table,
+                            tmp->name, ( Generic )v, tmp, OBJ_VARIABLE );
 
                 LISTod;
             }
@@ -3200,9 +3187,9 @@ static void yy_reduce(
             break;
         case 118: /* formal_parameter_list ::= */
         case 179: /* inverse_clause ::= */
-            yytestcase(yyruleno == 179);
+            yytestcase( yyruleno == 179 );
         case 328: /* where_rule_OPT ::= */
-            yytestcase(yyruleno == 328);
+            yytestcase( yyruleno == 328 );
 #line 1087 "expparse.y"
             {
                 yygotominor.yy371 = LIST_NULL;
@@ -3229,16 +3216,16 @@ static void yy_reduce(
 #line 1104 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
-                LISTadd_all(yygotominor.yy371, yymsp[0].minor.yy371);
+                LISTadd_all( yygotominor.yy371, yymsp[0].minor.yy371 );
             }
 #line 3134 "expparse.c"
             break;
         case 126: /* function_call ::= function_id actual_parameters */
 #line 1129 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate(Type_Funcall);
+                yygotominor.yy401 = EXPcreate( Type_Funcall );
                 yygotominor.yy401->symbol = *yymsp[-1].minor.yy275;
-                SYMBOL_destroy(yymsp[-1].minor.yy275);
+                SYMBOL_destroy( yymsp[-1].minor.yy275 );
                 yygotominor.yy401->u.funcall.list = yymsp[0].minor.yy371;
             }
 #line 3144 "expparse.c"
@@ -3246,8 +3233,8 @@ static void yy_reduce(
         case 127: /* function_decl ::= function_header action_body TOK_END_FUNCTION semicolon */
 #line 1138 "expparse.y"
             {
-                FUNCput_body(CURRENT_SCOPE, yymsp[-2].minor.yy371);
-                ALGput_full_text(CURRENT_SCOPE, yymsp[-3].minor.yy507, SCANtell());
+                FUNCput_body( CURRENT_SCOPE, yymsp[-2].minor.yy371 );
+                ALGput_full_text( CURRENT_SCOPE, yymsp[-3].minor.yy507, SCANtell() );
                 POP_SCOPE();
             }
 #line 3153 "expparse.c"
@@ -3264,9 +3251,9 @@ static void yy_reduce(
             break;
         case 129: /* fh_lineno ::= TOK_FUNCTION */
         case 218: /* ph_get_line ::= */
-            yytestcase(yyruleno == 218);
+            yytestcase( yyruleno == 218 );
         case 247: /* rh_get_line ::= */
-            yytestcase(yyruleno == 247);
+            yytestcase( yyruleno == 247 );
 #line 1154 "expparse.y"
             {
                 yygotominor.yy507 = SCANtell();
@@ -3276,12 +3263,12 @@ static void yy_reduce(
         case 130: /* fh_push_scope ::= TOK_IDENTIFIER */
 #line 1159 "expparse.y"
             {
-                Function f = ALGcreate(OBJ_FUNCTION);
+                Function f = ALGcreate( OBJ_FUNCTION );
                 tag_count = 0;
-                if(print_objects_while_running & OBJ_FUNCTION_BITS) {
-                    fprintf(stderr, "parse: %s (function)\n", yymsp[0].minor.yy0.symbol->name);
+                if( print_objects_while_running & OBJ_FUNCTION_BITS ) {
+                    fprintf( stderr, "parse: %s (function)\n", yymsp[0].minor.yy0.symbol->name );
                 }
-                PUSH_SCOPE(f, yymsp[0].minor.yy0.symbol, OBJ_FUNCTION);
+                PUSH_SCOPE( f, yymsp[0].minor.yy0.symbol, OBJ_FUNCTION );
             }
 #line 3184 "expparse.c"
             break;
@@ -3290,7 +3277,7 @@ static void yy_reduce(
             {
                 Function f = CURRENT_SCOPE;
                 f->u.func->parameters = yymsp[0].minor.yy371;
-                f->u.func->pcount = LISTget_length(yymsp[0].minor.yy371);
+                f->u.func->pcount = LISTget_length( yymsp[0].minor.yy371 );
                 f->u.func->tag_count = tag_count;
                 tag_count = -1;     /* done with parameters, no new tags can be defined */
             }
@@ -3298,9 +3285,9 @@ static void yy_reduce(
             break;
         case 132: /* function_id ::= TOK_IDENTIFIER */
         case 219: /* procedure_id ::= TOK_IDENTIFIER */
-            yytestcase(yyruleno == 219);
+            yytestcase( yyruleno == 219 );
         case 220: /* procedure_id ::= TOK_BUILTIN_PROCEDURE */
-            yytestcase(yyruleno == 220);
+            yytestcase( yyruleno == 220 );
 #line 1178 "expparse.y"
             {
                 yygotominor.yy275 = yymsp[0].minor.yy0.symbol;
@@ -3326,7 +3313,7 @@ static void yy_reduce(
         case 135: /* conformant_aggregation ::= TOK_ARRAY TOK_OF optional_or_unique parameter_type */
 #line 1194 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(array_);
+                yygotominor.yy477 = TYPEBODYcreate( array_ );
                 yygotominor.yy477->flags.optional = yymsp[-1].minor.yy252.optional;
                 yygotominor.yy477->flags.unique = yymsp[-1].minor.yy252.unique;
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
@@ -3336,7 +3323,7 @@ static void yy_reduce(
         case 136: /* conformant_aggregation ::= TOK_ARRAY bound_spec TOK_OF optional_or_unique parameter_type */
 #line 1202 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(array_);
+                yygotominor.yy477 = TYPEBODYcreate( array_ );
                 yygotominor.yy477->flags.optional = yymsp[-1].minor.yy252.optional;
                 yygotominor.yy477->flags.unique = yymsp[-1].minor.yy252.unique;
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
@@ -3348,7 +3335,7 @@ static void yy_reduce(
         case 137: /* conformant_aggregation ::= TOK_BAG TOK_OF parameter_type */
 #line 1211 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(bag_);
+                yygotominor.yy477 = TYPEBODYcreate( bag_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
 
             }
@@ -3357,7 +3344,7 @@ static void yy_reduce(
         case 139: /* conformant_aggregation ::= TOK_LIST TOK_OF unique parameter_type */
 #line 1224 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(list_);
+                yygotominor.yy477 = TYPEBODYcreate( list_ );
                 yygotominor.yy477->flags.unique = yymsp[-1].minor.yy252.unique;
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
 
@@ -3367,7 +3354,7 @@ static void yy_reduce(
         case 140: /* conformant_aggregation ::= TOK_LIST bound_spec TOK_OF unique parameter_type */
 #line 1232 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(list_);
+                yygotominor.yy477 = TYPEBODYcreate( list_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
                 yygotominor.yy477->flags.unique = yymsp[-1].minor.yy252.unique;
                 yygotominor.yy477->upper = yymsp[-3].minor.yy253.upper_limit;
@@ -3377,10 +3364,10 @@ static void yy_reduce(
             break;
         case 141: /* conformant_aggregation ::= TOK_SET TOK_OF parameter_type */
         case 256: /* set_type ::= TOK_SET TOK_OF attribute_type */
-            yytestcase(yyruleno == 256);
+            yytestcase( yyruleno == 256 );
 #line 1240 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(set_);
+                yygotominor.yy477 = TYPEBODYcreate( set_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
             }
 #line 3281 "expparse.c"
@@ -3388,7 +3375,7 @@ static void yy_reduce(
         case 142: /* conformant_aggregation ::= TOK_SET bound_spec TOK_OF parameter_type */
 #line 1245 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(set_);
+                yygotominor.yy477 = TYPEBODYcreate( set_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
                 yygotominor.yy477->upper = yymsp[-2].minor.yy253.upper_limit;
                 yygotominor.yy477->lower = yymsp[-2].minor.yy253.lower_limit;
@@ -3400,12 +3387,12 @@ static void yy_reduce(
             {
                 yygotominor.yy297 = Type_Generic;
 
-                if(tag_count < 0) {
+                if( tag_count < 0 ) {
                     Symbol sym;
                     sym.line = yylineno;
                     sym.filename = current_filename;
-                    ERRORreport_with_symbol(UNLABELLED_PARAM_TYPE, &sym,
-                                            CURRENT_SCOPE_NAME);
+                    ERRORreport_with_symbol( UNLABELLED_PARAM_TYPE, &sym,
+                                             CURRENT_SCOPE_NAME );
                 }
             }
 #line 3306 "expparse.c"
@@ -3413,14 +3400,14 @@ static void yy_reduce(
         case 144: /* generic_type ::= TOK_GENERIC TOK_COLON TOK_IDENTIFIER */
 #line 1265 "expparse.y"
             {
-                TypeBody g = TYPEBODYcreate(generic_);
-                yygotominor.yy297 = TYPEcreate_from_body_anonymously(g);
+                TypeBody g = TYPEBODYcreate( generic_ );
+                yygotominor.yy297 = TYPEcreate_from_body_anonymously( g );
 
-                SCOPEadd_super(yygotominor.yy297);
+                SCOPEadd_super( yygotominor.yy297 );
 
-                g->tag = TYPEcreate_user_defined_tag(yygotominor.yy297, CURRENT_SCOPE, yymsp[0].minor.yy0.symbol);
-                if(g->tag) {
-                    SCOPEadd_super(g->tag);
+                g->tag = TYPEcreate_user_defined_tag( yygotominor.yy297, CURRENT_SCOPE, yymsp[0].minor.yy0.symbol );
+                if( g->tag ) {
+                    SCOPEadd_super( g->tag );
                 }
             }
 #line 3321 "expparse.c"
@@ -3429,7 +3416,7 @@ static void yy_reduce(
 #line 1278 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy0.symbol);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy0.symbol );
 
             }
 #line 3330 "expparse.c"
@@ -3440,14 +3427,14 @@ static void yy_reduce(
                 yyerrok;
 
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy0.symbol);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy0.symbol );
             }
 #line 3340 "expparse.c"
             break;
         case 147: /* identifier ::= TOK_SELF */
 #line 1292 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate(Type_Self);
+                yygotominor.yy401 = EXPcreate( Type_Self );
             }
 #line 3347 "expparse.c"
             break;
@@ -3461,68 +3448,68 @@ static void yy_reduce(
         case 149: /* identifier ::= TOK_IDENTIFIER */
 #line 1300 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate(Type_Identifier);
-                yygotominor.yy401->symbol = *(yymsp[0].minor.yy0.symbol);
-                SYMBOL_destroy(yymsp[0].minor.yy0.symbol);
+                yygotominor.yy401 = EXPcreate( Type_Identifier );
+                yygotominor.yy401->symbol = *( yymsp[0].minor.yy0.symbol );
+                SYMBOL_destroy( yymsp[0].minor.yy0.symbol );
             }
 #line 3363 "expparse.c"
             break;
         case 150: /* if_statement ::= TOK_IF expression TOK_THEN statement_rep TOK_END_IF semicolon */
 #line 1308 "expparse.y"
             {
-                yygotominor.yy332 = CONDcreate(yymsp[-4].minor.yy401, yymsp[-2].minor.yy371, STATEMENT_LIST_NULL);
+                yygotominor.yy332 = CONDcreate( yymsp[-4].minor.yy401, yymsp[-2].minor.yy371, STATEMENT_LIST_NULL );
             }
 #line 3370 "expparse.c"
             break;
         case 151: /* if_statement ::= TOK_IF expression TOK_THEN statement_rep TOK_ELSE statement_rep TOK_END_IF semicolon */
 #line 1313 "expparse.y"
             {
-                yygotominor.yy332 = CONDcreate(yymsp[-6].minor.yy401, yymsp[-4].minor.yy371, yymsp[-2].minor.yy371);
+                yygotominor.yy332 = CONDcreate( yymsp[-6].minor.yy401, yymsp[-4].minor.yy371, yymsp[-2].minor.yy371 );
             }
 #line 3377 "expparse.c"
             break;
         case 152: /* include_directive ::= TOK_INCLUDE TOK_STRING_LITERAL semicolon */
 #line 1318 "expparse.y"
             {
-                SCANinclude_file(yymsp[-1].minor.yy0.string);
+                SCANinclude_file( yymsp[-1].minor.yy0.string );
             }
 #line 3384 "expparse.c"
             break;
         case 153: /* increment_control ::= TOK_IDENTIFIER TOK_ASSIGNMENT expression TOK_TO expression by_expression */
 #line 1324 "expparse.y"
             {
-                Increment i = INCR_CTLcreate(yymsp[-5].minor.yy0.symbol, yymsp[-3].minor.yy401, yymsp[-1].minor.yy401, yymsp[0].minor.yy401);
+                Increment i = INCR_CTLcreate( yymsp[-5].minor.yy0.symbol, yymsp[-3].minor.yy401, yymsp[-1].minor.yy401, yymsp[0].minor.yy401 );
 
                 /* scope doesn't really have/need a name, I suppose */
                 /* naming it by the iterator variable is fine */
 
-                PUSH_SCOPE(i, (Symbol *)0, OBJ_INCREMENT);
+                PUSH_SCOPE( i, ( Symbol * )0, OBJ_INCREMENT );
             }
 #line 3396 "expparse.c"
             break;
         case 155: /* rename ::= TOK_IDENTIFIER */
 #line 1342 "expparse.y"
             {
-                (*interface_func)(CURRENT_SCOPE, interface_schema, yymsp[0].minor.yy0.symbol, yymsp[0].minor.yy0.symbol);
+                ( *interface_func )( CURRENT_SCOPE, interface_schema, yymsp[0].minor.yy0.symbol, yymsp[0].minor.yy0.symbol );
             }
 #line 3403 "expparse.c"
             break;
         case 156: /* rename ::= TOK_IDENTIFIER TOK_AS TOK_IDENTIFIER */
 #line 1346 "expparse.y"
             {
-                (*interface_func)(CURRENT_SCOPE, interface_schema, yymsp[-2].minor.yy0.symbol, yymsp[0].minor.yy0.symbol);
+                ( *interface_func )( CURRENT_SCOPE, interface_schema, yymsp[-2].minor.yy0.symbol, yymsp[0].minor.yy0.symbol );
             }
 #line 3410 "expparse.c"
             break;
         case 158: /* rename_list ::= rename_list TOK_COMMA rename */
         case 161: /* reference_clause ::= reference_head parened_rename_list semicolon */
-            yytestcase(yyruleno == 161);
+            yytestcase( yyruleno == 161 );
         case 164: /* use_clause ::= use_head parened_rename_list semicolon */
-            yytestcase(yyruleno == 164);
+            yytestcase( yyruleno == 164 );
         case 249: /* schema_body ::= interface_specification_list constant_decl block_list */
-            yytestcase(yyruleno == 249);
+            yytestcase( yyruleno == 249 );
         case 295: /* type_decl ::= td_start TOK_END_TYPE semicolon */
-            yytestcase(yyruleno == 295);
+            yytestcase( yyruleno == 295 );
 #line 1355 "expparse.y"
             {
                 yygotominor.yy0 = yymsp[-2].minor.yy0;
@@ -3532,11 +3519,11 @@ static void yy_reduce(
         case 160: /* reference_clause ::= TOK_REFERENCE TOK_FROM TOK_IDENTIFIER semicolon */
 #line 1365 "expparse.y"
             {
-                if(!CURRENT_SCHEMA->ref_schemas) {
+                if( !CURRENT_SCHEMA->ref_schemas ) {
                     CURRENT_SCHEMA->ref_schemas = LISTcreate();
                 }
 
-                LISTadd_last(CURRENT_SCHEMA->ref_schemas, (Generic)yymsp[-1].minor.yy0.symbol);
+                LISTadd_last( CURRENT_SCHEMA->ref_schemas, ( Generic )yymsp[-1].minor.yy0.symbol );
             }
 #line 3432 "expparse.c"
             break;
@@ -3551,11 +3538,11 @@ static void yy_reduce(
         case 163: /* use_clause ::= TOK_USE TOK_FROM TOK_IDENTIFIER semicolon */
 #line 1384 "expparse.y"
             {
-                if(!CURRENT_SCHEMA->use_schemas) {
+                if( !CURRENT_SCHEMA->use_schemas ) {
                     CURRENT_SCHEMA->use_schemas = LISTcreate();
                 }
 
-                LISTadd_last(CURRENT_SCHEMA->use_schemas, (Generic)yymsp[-1].minor.yy0.symbol);
+                LISTadd_last( CURRENT_SCHEMA->use_schemas, ( Generic )yymsp[-1].minor.yy0.symbol );
             }
 #line 3451 "expparse.c"
             break;
@@ -3572,16 +3559,16 @@ static void yy_reduce(
             {
                 Expression    tmp1, tmp2;
 
-                yygotominor.yy401 = (Expression)0;
-                tmp1 = BIN_EXPcreate(yymsp[-4].minor.yy126, yymsp[-5].minor.yy401, yymsp[-3].minor.yy401);
-                tmp2 = BIN_EXPcreate(yymsp[-2].minor.yy126, yymsp[-3].minor.yy401, yymsp[-1].minor.yy401);
-                yygotominor.yy401 = BIN_EXPcreate(OP_AND, tmp1, tmp2);
+                yygotominor.yy401 = ( Expression )0;
+                tmp1 = BIN_EXPcreate( yymsp[-4].minor.yy126, yymsp[-5].minor.yy401, yymsp[-3].minor.yy401 );
+                tmp2 = BIN_EXPcreate( yymsp[-2].minor.yy126, yymsp[-3].minor.yy401, yymsp[-1].minor.yy401 );
+                yygotominor.yy401 = BIN_EXPcreate( OP_AND, tmp1, tmp2 );
             }
 #line 3471 "expparse.c"
             break;
         case 171: /* set_or_bag_of_entity ::= defined_type */
         case 289: /* type ::= defined_type */
-            yytestcase(yyruleno == 289);
+            yytestcase( yyruleno == 289 );
 #line 1432 "expparse.y"
             {
                 yygotominor.yy378.type = yymsp[0].minor.yy297;
@@ -3593,7 +3580,7 @@ static void yy_reduce(
 #line 1437 "expparse.y"
             {
                 yygotominor.yy378.type = 0;
-                yygotominor.yy378.body = TYPEBODYcreate(set_);
+                yygotominor.yy378.body = TYPEBODYcreate( set_ );
                 yygotominor.yy378.body->base = yymsp[0].minor.yy297;
 
             }
@@ -3603,7 +3590,7 @@ static void yy_reduce(
 #line 1444 "expparse.y"
             {
                 yygotominor.yy378.type = 0;
-                yygotominor.yy378.body = TYPEBODYcreate(set_);
+                yygotominor.yy378.body = TYPEBODYcreate( set_ );
                 yygotominor.yy378.body->base = yymsp[0].minor.yy297;
                 yygotominor.yy378.body->upper = yymsp[-2].minor.yy253.upper_limit;
                 yygotominor.yy378.body->lower = yymsp[-2].minor.yy253.lower_limit;
@@ -3614,7 +3601,7 @@ static void yy_reduce(
 #line 1452 "expparse.y"
             {
                 yygotominor.yy378.type = 0;
-                yygotominor.yy378.body = TYPEBODYcreate(bag_);
+                yygotominor.yy378.body = TYPEBODYcreate( bag_ );
                 yygotominor.yy378.body->base = yymsp[0].minor.yy297;
                 yygotominor.yy378.body->upper = yymsp[-2].minor.yy253.upper_limit;
                 yygotominor.yy378.body->lower = yymsp[-2].minor.yy253.lower_limit;
@@ -3625,7 +3612,7 @@ static void yy_reduce(
 #line 1460 "expparse.y"
             {
                 yygotominor.yy378.type = 0;
-                yygotominor.yy378.body = TYPEBODYcreate(bag_);
+                yygotominor.yy378.body = TYPEBODYcreate( bag_ );
                 yygotominor.yy378.body->base = yymsp[0].minor.yy297;
             }
 #line 3521 "expparse.c"
@@ -3633,12 +3620,12 @@ static void yy_reduce(
         case 178: /* inverse_attr ::= attribute_decl TOK_COLON set_or_bag_of_entity TOK_FOR TOK_IDENTIFIER semicolon */
 #line 1487 "expparse.y"
             {
-                if(yymsp[-3].minor.yy378.type) {
-                    yygotominor.yy91 = VARcreate(yymsp[-5].minor.yy401, yymsp[-3].minor.yy378.type);
+                if( yymsp[-3].minor.yy378.type ) {
+                    yygotominor.yy91 = VARcreate( yymsp[-5].minor.yy401, yymsp[-3].minor.yy378.type );
                 } else {
-                    Type t = TYPEcreate_from_body_anonymously(yymsp[-3].minor.yy378.body);
-                    SCOPEadd_super(t);
-                    yygotominor.yy91 = VARcreate(yymsp[-5].minor.yy401, t);
+                    Type t = TYPEcreate_from_body_anonymously( yymsp[-3].minor.yy378.body );
+                    SCOPEadd_super( t );
+                    yygotominor.yy91 = VARcreate( yymsp[-5].minor.yy401, t );
                 }
 
                 yygotominor.yy91->flags.attribute = true;
@@ -3649,7 +3636,7 @@ static void yy_reduce(
         case 182: /* list_type ::= TOK_LIST bound_spec TOK_OF unique attribute_type */
 #line 1521 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(list_);
+                yygotominor.yy477 = TYPEBODYcreate( list_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
                 yygotominor.yy477->flags.unique = yymsp[-1].minor.yy252.unique;
                 yygotominor.yy477->lower = yymsp[-3].minor.yy253.lower_limit;
@@ -3660,7 +3647,7 @@ static void yy_reduce(
         case 183: /* list_type ::= TOK_LIST TOK_OF unique attribute_type */
 #line 1529 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(list_);
+                yygotominor.yy477 = TYPEBODYcreate( list_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
                 yygotominor.yy477->flags.unique = yymsp[-1].minor.yy252.unique;
             }
@@ -3669,14 +3656,14 @@ static void yy_reduce(
         case 184: /* literal ::= TOK_INTEGER_LITERAL */
 #line 1536 "expparse.y"
             {
-                if(yymsp[0].minor.yy0.iVal == 0) {
+                if( yymsp[0].minor.yy0.iVal == 0 ) {
                     yygotominor.yy401 = LITERAL_ZERO;
-                } else if(yymsp[0].minor.yy0.iVal == 1) {
+                } else if( yymsp[0].minor.yy0.iVal == 1 ) {
                     yygotominor.yy401 = LITERAL_ONE;
                 } else {
-                    yygotominor.yy401 = EXPcreate_simple(Type_Integer);
-                    yygotominor.yy401->u.integer = (int)yymsp[0].minor.yy0.iVal;
-                    resolved_all(yygotominor.yy401);
+                    yygotominor.yy401 = EXPcreate_simple( Type_Integer );
+                    yygotominor.yy401->u.integer = ( int )yymsp[0].minor.yy0.iVal;
+                    resolved_all( yygotominor.yy401 );
                 }
             }
 #line 3572 "expparse.c"
@@ -3685,18 +3672,18 @@ static void yy_reduce(
 #line 1548 "expparse.y"
             {
                 /* if rVal (a double) is nonzero and has magnitude <= the smallest non-denormal float, print a warning */
-                if((fabs(yymsp[0].minor.yy0.rVal) <= FLT_MIN) && (fabs(yymsp[0].minor.yy0.rVal) > 0)) {
+                if( ( fabs( yymsp[0].minor.yy0.rVal ) <= FLT_MIN ) && ( fabs( yymsp[0].minor.yy0.rVal ) > 0 ) ) {
                     Symbol sym;
                     sym.line = yylineno;
                     sym.filename = current_filename;
-                    ERRORreport_with_symbol(WARN_SMALL_REAL, &sym, yymsp[0].minor.yy0.rVal);
+                    ERRORreport_with_symbol( WARN_SMALL_REAL, &sym, yymsp[0].minor.yy0.rVal );
                 }
-                if(fabs(yymsp[0].minor.yy0.rVal) < DBL_MIN) {
+                if( fabs( yymsp[0].minor.yy0.rVal ) < DBL_MIN ) {
                     yygotominor.yy401 = LITERAL_ZERO;
                 } else {
-                    yygotominor.yy401 = EXPcreate_simple(Type_Real);
+                    yygotominor.yy401 = EXPcreate_simple( Type_Real );
                     yygotominor.yy401->u.real = yymsp[0].minor.yy0.rVal;
-                    resolved_all(yygotominor.yy401);
+                    resolved_all( yygotominor.yy401 );
                 }
             }
 #line 3592 "expparse.c"
@@ -3704,36 +3691,36 @@ static void yy_reduce(
         case 186: /* literal ::= TOK_STRING_LITERAL */
 #line 1565 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate_simple(Type_String);
+                yygotominor.yy401 = EXPcreate_simple( Type_String );
                 yygotominor.yy401->symbol.name = yymsp[0].minor.yy0.string;
-                resolved_all(yygotominor.yy401);
+                resolved_all( yygotominor.yy401 );
             }
 #line 3601 "expparse.c"
             break;
         case 187: /* literal ::= TOK_STRING_LITERAL_ENCODED */
 #line 1571 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate_simple(Type_String_Encoded);
+                yygotominor.yy401 = EXPcreate_simple( Type_String_Encoded );
                 yygotominor.yy401->symbol.name = yymsp[0].minor.yy0.string;
-                resolved_all(yygotominor.yy401);
+                resolved_all( yygotominor.yy401 );
             }
 #line 3610 "expparse.c"
             break;
         case 188: /* literal ::= TOK_LOGICAL_LITERAL */
 #line 1577 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate_simple(Type_Logical);
+                yygotominor.yy401 = EXPcreate_simple( Type_Logical );
                 yygotominor.yy401->u.logical = yymsp[0].minor.yy0.logical;
-                resolved_all(yygotominor.yy401);
+                resolved_all( yygotominor.yy401 );
             }
 #line 3619 "expparse.c"
             break;
         case 189: /* literal ::= TOK_BINARY_LITERAL */
 #line 1583 "expparse.y"
             {
-                yygotominor.yy401 = EXPcreate_simple(Type_Binary);
+                yygotominor.yy401 = EXPcreate_simple( Type_Binary );
                 yygotominor.yy401->symbol.name = yymsp[0].minor.yy0.binary;
-                resolved_all(yygotominor.yy401);
+                resolved_all( yygotominor.yy401 );
             }
 #line 3628 "expparse.c"
             break;
@@ -3742,18 +3729,18 @@ static void yy_reduce(
             {
                 Expression e;
                 Variable v;
-                LISTdo(yymsp[-3].minor.yy371, sym, Symbol *)
+                LISTdo( yymsp[-3].minor.yy371, sym, Symbol * )
 
                 /* convert symbol to name-expression */
 
-                e = EXPcreate(Type_Attribute);
+                e = EXPcreate( Type_Attribute );
                 e->symbol = *sym;
-                SYMBOL_destroy(sym);
-                v = VARcreate(e, yymsp[-1].minor.yy297);
+                SYMBOL_destroy( sym );
+                v = VARcreate( e, yymsp[-1].minor.yy297 );
                 v->offset = local_var_count++;
-                DICTdefine(CURRENT_SCOPE->symbol_table, e->symbol.name, (Generic)v, &e->symbol, OBJ_VARIABLE);
+                DICTdefine( CURRENT_SCOPE->symbol_table, e->symbol.name, ( Generic )v, &e->symbol, OBJ_VARIABLE );
                 LISTod;
-                LISTfree(yymsp[-3].minor.yy371);
+                LISTfree( yymsp[-3].minor.yy371 );
             }
 #line 3647 "expparse.c"
             break;
@@ -3762,17 +3749,17 @@ static void yy_reduce(
             {
                 Expression e;
                 Variable v;
-                LISTdo(yymsp[-4].minor.yy371, sym, Symbol *)
-                e = EXPcreate(Type_Attribute);
+                LISTdo( yymsp[-4].minor.yy371, sym, Symbol * )
+                e = EXPcreate( Type_Attribute );
                 e->symbol = *sym;
-                SYMBOL_destroy(sym);
-                v = VARcreate(e, yymsp[-2].minor.yy297);
+                SYMBOL_destroy( sym );
+                v = VARcreate( e, yymsp[-2].minor.yy297 );
                 v->offset = local_var_count++;
                 v->initializer = yymsp[-1].minor.yy401;
-                DICTdefine(CURRENT_SCOPE->symbol_table, e->symbol.name, (Generic)v,
-                           &e->symbol, OBJ_VARIABLE);
+                DICTdefine( CURRENT_SCOPE->symbol_table, e->symbol.name, ( Generic )v,
+                            &e->symbol, OBJ_VARIABLE );
                 LISTod;
-                LISTfree(yymsp[-4].minor.yy371);
+                LISTfree( yymsp[-4].minor.yy371 );
             }
 #line 3665 "expparse.c"
             break;
@@ -3794,9 +3781,9 @@ static void yy_reduce(
         case 199: /* defined_type ::= TOK_IDENTIFIER */
 #line 1651 "expparse.y"
             {
-                yygotominor.yy297 = TYPEcreate_name(yymsp[0].minor.yy0.symbol);
-                SCOPEadd_super(yygotominor.yy297);
-                SYMBOL_destroy(yymsp[0].minor.yy0.symbol);
+                yygotominor.yy297 = TYPEcreate_name( yymsp[0].minor.yy0.symbol );
+                SCOPEadd_super( yygotominor.yy297 );
+                SYMBOL_destroy( yymsp[0].minor.yy0.symbol );
             }
 #line 3689 "expparse.c"
             break;
@@ -3804,7 +3791,7 @@ static void yy_reduce(
 #line 1658 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy297);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy297 );
 
             }
 #line 3698 "expparse.c"
@@ -3813,8 +3800,8 @@ static void yy_reduce(
 #line 1664 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
-                LISTadd_last(yygotominor.yy371,
-                             (Generic)yymsp[0].minor.yy297);
+                LISTadd_last( yygotominor.yy371,
+                              ( Generic )yymsp[0].minor.yy297 );
             }
 #line 3707 "expparse.c"
             break;
@@ -3844,7 +3831,7 @@ static void yy_reduce(
             break;
         case 207: /* optional_or_unique ::= TOK_OPTIONAL TOK_UNIQUE */
         case 208: /* optional_or_unique ::= TOK_UNIQUE TOK_OPTIONAL */
-            yytestcase(yyruleno == 208);
+            yytestcase( yyruleno == 208 );
 #line 1696 "expparse.y"
             {
                 yygotominor.yy252.unique = 1;
@@ -3869,13 +3856,13 @@ static void yy_reduce(
         case 211: /* precision_spec ::= */
 #line 1716 "expparse.y"
             {
-                yygotominor.yy401 = (Expression)0;
+                yygotominor.yy401 = ( Expression )0;
             }
 #line 3761 "expparse.c"
             break;
         case 212: /* precision_spec ::= TOK_LEFT_PAREN expression TOK_RIGHT_PAREN */
         case 304: /* unary_expression ::= TOK_LEFT_PAREN expression TOK_RIGHT_PAREN */
-            yytestcase(yyruleno == 304);
+            yytestcase( yyruleno == 304 );
 #line 1720 "expparse.y"
             {
                 yygotominor.yy401 = yymsp[-1].minor.yy401;
@@ -3885,24 +3872,24 @@ static void yy_reduce(
         case 213: /* proc_call_statement ::= procedure_id actual_parameters semicolon */
 #line 1730 "expparse.y"
             {
-                yygotominor.yy332 = PCALLcreate(yymsp[-1].minor.yy371);
-                yygotominor.yy332->symbol = *(yymsp[-2].minor.yy275);
+                yygotominor.yy332 = PCALLcreate( yymsp[-1].minor.yy371 );
+                yygotominor.yy332->symbol = *( yymsp[-2].minor.yy275 );
             }
 #line 3777 "expparse.c"
             break;
         case 214: /* proc_call_statement ::= procedure_id semicolon */
 #line 1735 "expparse.y"
             {
-                yygotominor.yy332 = PCALLcreate((Linked_List)0);
-                yygotominor.yy332->symbol = *(yymsp[-1].minor.yy275);
+                yygotominor.yy332 = PCALLcreate( ( Linked_List )0 );
+                yygotominor.yy332->symbol = *( yymsp[-1].minor.yy275 );
             }
 #line 3785 "expparse.c"
             break;
         case 215: /* procedure_decl ::= procedure_header action_body TOK_END_PROCEDURE semicolon */
 #line 1742 "expparse.y"
             {
-                PROCput_body(CURRENT_SCOPE, yymsp[-2].minor.yy371);
-                ALGput_full_text(CURRENT_SCOPE, yymsp[-3].minor.yy507, SCANtell());
+                PROCput_body( CURRENT_SCOPE, yymsp[-2].minor.yy371 );
+                ALGput_full_text( CURRENT_SCOPE, yymsp[-3].minor.yy507, SCANtell() );
                 POP_SCOPE();
             }
 #line 3794 "expparse.c"
@@ -3912,7 +3899,7 @@ static void yy_reduce(
             {
                 Procedure p = CURRENT_SCOPE;
                 p->u.proc->parameters = yymsp[-1].minor.yy371;
-                p->u.proc->pcount = LISTget_length(yymsp[-1].minor.yy371);
+                p->u.proc->pcount = LISTget_length( yymsp[-1].minor.yy371 );
                 p->u.proc->tag_count = tag_count;
                 tag_count = -1;    /* done with parameters, no new tags can be defined */
                 yygotominor.yy507 = yymsp[-3].minor.yy507;
@@ -3922,52 +3909,52 @@ static void yy_reduce(
         case 217: /* ph_push_scope ::= TOK_IDENTIFIER */
 #line 1760 "expparse.y"
             {
-                Procedure p = ALGcreate(OBJ_PROCEDURE);
+                Procedure p = ALGcreate( OBJ_PROCEDURE );
                 tag_count = 0;
 
-                if(print_objects_while_running & OBJ_PROCEDURE_BITS) {
-                    fprintf(stderr, "parse: %s (procedure)\n", yymsp[0].minor.yy0.symbol->name);
+                if( print_objects_while_running & OBJ_PROCEDURE_BITS ) {
+                    fprintf( stderr, "parse: %s (procedure)\n", yymsp[0].minor.yy0.symbol->name );
                 }
 
-                PUSH_SCOPE(p, yymsp[0].minor.yy0.symbol, OBJ_PROCEDURE);
+                PUSH_SCOPE( p, yymsp[0].minor.yy0.symbol, OBJ_PROCEDURE );
             }
 #line 3820 "expparse.c"
             break;
         case 221: /* group_ref ::= TOK_BACKSLASH TOK_IDENTIFIER */
 #line 1786 "expparse.y"
             {
-                yygotominor.yy401 = BIN_EXPcreate(OP_GROUP, (Expression)0, (Expression)0);
-                yygotominor.yy401->e.op2 = EXPcreate(Type_Identifier);
+                yygotominor.yy401 = BIN_EXPcreate( OP_GROUP, ( Expression )0, ( Expression )0 );
+                yygotominor.yy401->e.op2 = EXPcreate( Type_Identifier );
                 yygotominor.yy401->e.op2->symbol = *yymsp[0].minor.yy0.symbol;
-                SYMBOL_destroy(yymsp[0].minor.yy0.symbol);
+                SYMBOL_destroy( yymsp[0].minor.yy0.symbol );
             }
 #line 3830 "expparse.c"
             break;
         case 222: /* qualifier ::= TOK_DOT TOK_IDENTIFIER */
 #line 1794 "expparse.y"
             {
-                yygotominor.yy46.expr = yygotominor.yy46.first = BIN_EXPcreate(OP_DOT, (Expression)0, (Expression)0);
-                yygotominor.yy46.expr->e.op2 = EXPcreate(Type_Identifier);
+                yygotominor.yy46.expr = yygotominor.yy46.first = BIN_EXPcreate( OP_DOT, ( Expression )0, ( Expression )0 );
+                yygotominor.yy46.expr->e.op2 = EXPcreate( Type_Identifier );
                 yygotominor.yy46.expr->e.op2->symbol = *yymsp[0].minor.yy0.symbol;
-                SYMBOL_destroy(yymsp[0].minor.yy0.symbol);
+                SYMBOL_destroy( yymsp[0].minor.yy0.symbol );
             }
 #line 3840 "expparse.c"
             break;
         case 223: /* qualifier ::= TOK_BACKSLASH TOK_IDENTIFIER */
 #line 1801 "expparse.y"
             {
-                yygotominor.yy46.expr = yygotominor.yy46.first = BIN_EXPcreate(OP_GROUP, (Expression)0, (Expression)0);
-                yygotominor.yy46.expr->e.op2 = EXPcreate(Type_Identifier);
+                yygotominor.yy46.expr = yygotominor.yy46.first = BIN_EXPcreate( OP_GROUP, ( Expression )0, ( Expression )0 );
+                yygotominor.yy46.expr->e.op2 = EXPcreate( Type_Identifier );
                 yygotominor.yy46.expr->e.op2->symbol = *yymsp[0].minor.yy0.symbol;
-                SYMBOL_destroy(yymsp[0].minor.yy0.symbol);
+                SYMBOL_destroy( yymsp[0].minor.yy0.symbol );
             }
 #line 3850 "expparse.c"
             break;
         case 224: /* qualifier ::= TOK_LEFT_BRACKET simple_expression TOK_RIGHT_BRACKET */
 #line 1810 "expparse.y"
             {
-                yygotominor.yy46.expr = yygotominor.yy46.first = BIN_EXPcreate(OP_ARRAY_ELEMENT, (Expression)0,
-                                        (Expression)0);
+                yygotominor.yy46.expr = yygotominor.yy46.first = BIN_EXPcreate( OP_ARRAY_ELEMENT, ( Expression )0,
+                                        ( Expression )0 );
                 yygotominor.yy46.expr->e.op2 = yymsp[-1].minor.yy401;
             }
 #line 3859 "expparse.c"
@@ -3975,8 +3962,8 @@ static void yy_reduce(
         case 225: /* qualifier ::= TOK_LEFT_BRACKET simple_expression TOK_COLON simple_expression TOK_RIGHT_BRACKET */
 #line 1819 "expparse.y"
             {
-                yygotominor.yy46.expr = yygotominor.yy46.first = TERN_EXPcreate(OP_SUBCOMPONENT, (Expression)0,
-                                        (Expression)0, (Expression)0);
+                yygotominor.yy46.expr = yygotominor.yy46.first = TERN_EXPcreate( OP_SUBCOMPONENT, ( Expression )0,
+                                        ( Expression )0, ( Expression )0 );
                 yygotominor.yy46.expr->e.op2 = yymsp[-3].minor.yy401;
                 yygotominor.yy46.expr->e.op3 = yymsp[-1].minor.yy401;
             }
@@ -3994,9 +3981,9 @@ static void yy_reduce(
         case 227: /* query_start ::= TOK_QUERY TOK_LEFT_PAREN TOK_IDENTIFIER TOK_ALL_IN expression TOK_SUCH_THAT */
 #line 1835 "expparse.y"
             {
-                yygotominor.yy401 = QUERYcreate(yymsp[-3].minor.yy0.symbol, yymsp[-1].minor.yy401);
-                SYMBOL_destroy(yymsp[-3].minor.yy0.symbol);
-                PUSH_SCOPE(yygotominor.yy401->u.query->scope, (Symbol *)0, OBJ_QUERY);
+                yygotominor.yy401 = QUERYcreate( yymsp[-3].minor.yy0.symbol, yymsp[-1].minor.yy401 );
+                SYMBOL_destroy( yymsp[-3].minor.yy0.symbol );
+                PUSH_SCOPE( yygotominor.yy401->u.query->scope, ( Symbol * )0, OBJ_QUERY );
             }
 #line 3887 "expparse.c"
             break;
@@ -4059,7 +4046,7 @@ static void yy_reduce(
         case 236: /* repeat_statement ::= TOK_REPEAT increment_control while_control until_control semicolon statement_rep TOK_END_REPEAT semicolon */
 #line 1878 "expparse.y"
             {
-                yygotominor.yy332 = LOOPcreate(CURRENT_SCOPE, yymsp[-5].minor.yy401, yymsp[-4].minor.yy401, yymsp[-2].minor.yy371);
+                yygotominor.yy332 = LOOPcreate( CURRENT_SCOPE, yymsp[-5].minor.yy401, yymsp[-4].minor.yy401, yymsp[-2].minor.yy371 );
 
                 /* matching PUSH_SCOPE is in increment_control */
                 POP_SCOPE();
@@ -4069,30 +4056,30 @@ static void yy_reduce(
         case 237: /* repeat_statement ::= TOK_REPEAT while_control until_control semicolon statement_rep TOK_END_REPEAT semicolon */
 #line 1886 "expparse.y"
             {
-                yygotominor.yy332 = LOOPcreate((struct Scope_ *)0, yymsp[-5].minor.yy401, yymsp[-4].minor.yy401, yymsp[-2].minor.yy371);
+                yygotominor.yy332 = LOOPcreate( ( struct Scope_ * )0, yymsp[-5].minor.yy401, yymsp[-4].minor.yy401, yymsp[-2].minor.yy371 );
             }
 #line 3960 "expparse.c"
             break;
         case 238: /* return_statement ::= TOK_RETURN semicolon */
 #line 1891 "expparse.y"
             {
-                yygotominor.yy332 = RETcreate((Expression)0);
+                yygotominor.yy332 = RETcreate( ( Expression )0 );
             }
 #line 3967 "expparse.c"
             break;
         case 239: /* return_statement ::= TOK_RETURN TOK_LEFT_PAREN expression TOK_RIGHT_PAREN semicolon */
 #line 1896 "expparse.y"
             {
-                yygotominor.yy332 = RETcreate(yymsp[-2].minor.yy401);
+                yygotominor.yy332 = RETcreate( yymsp[-2].minor.yy401 );
             }
 #line 3974 "expparse.c"
             break;
         case 241: /* rule_decl ::= rule_header action_body where_rule TOK_END_RULE semicolon */
 #line 1907 "expparse.y"
             {
-                RULEput_body(CURRENT_SCOPE, yymsp[-3].minor.yy371);
-                RULEput_where(CURRENT_SCOPE, yymsp[-2].minor.yy371);
-                ALGput_full_text(CURRENT_SCOPE, yymsp[-4].minor.yy507, SCANtell());
+                RULEput_body( CURRENT_SCOPE, yymsp[-3].minor.yy371 );
+                RULEput_where( CURRENT_SCOPE, yymsp[-2].minor.yy371 );
+                ALGput_full_text( CURRENT_SCOPE, yymsp[-4].minor.yy507, SCANtell() );
                 POP_SCOPE();
             }
 #line 3984 "expparse.c"
@@ -4104,19 +4091,19 @@ static void yy_reduce(
                 Type t;
 
                 /* it's true that we know it will be an entity_ type later */
-                TypeBody tb = TYPEBODYcreate(set_);
-                tb->base = TYPEcreate_name(yymsp[0].minor.yy0.symbol);
-                SCOPEadd_super(tb->base);
-                t = TYPEcreate_from_body_anonymously(tb);
-                SCOPEadd_super(t);
-                e = EXPcreate_from_symbol(t, yymsp[0].minor.yy0.symbol);
-                yygotominor.yy91 = VARcreate(e, t);
+                TypeBody tb = TYPEBODYcreate( set_ );
+                tb->base = TYPEcreate_name( yymsp[0].minor.yy0.symbol );
+                SCOPEadd_super( tb->base );
+                t = TYPEcreate_from_body_anonymously( tb );
+                SCOPEadd_super( t );
+                e = EXPcreate_from_symbol( t, yymsp[0].minor.yy0.symbol );
+                yygotominor.yy91 = VARcreate( e, t );
                 yygotominor.yy91->flags.attribute = true;
                 yygotominor.yy91->flags.parameter = true;
 
                 /* link it in to the current scope's dict */
-                DICTdefine(CURRENT_SCOPE->symbol_table, yymsp[0].minor.yy0.symbol->name, (Generic)yygotominor.yy91,
-                           yymsp[0].minor.yy0.symbol, OBJ_VARIABLE);
+                DICTdefine( CURRENT_SCOPE->symbol_table, yymsp[0].minor.yy0.symbol->name, ( Generic )yygotominor.yy91,
+                            yymsp[0].minor.yy0.symbol, OBJ_VARIABLE );
             }
 #line 4007 "expparse.c"
             break;
@@ -4124,7 +4111,7 @@ static void yy_reduce(
 #line 1936 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy91);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy91 );
             }
 #line 4015 "expparse.c"
             break;
@@ -4132,7 +4119,7 @@ static void yy_reduce(
 #line 1942 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy91);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy91 );
             }
 #line 4023 "expparse.c"
             break;
@@ -4148,13 +4135,13 @@ static void yy_reduce(
         case 246: /* rh_start ::= TOK_RULE rh_get_line TOK_IDENTIFIER TOK_FOR TOK_LEFT_PAREN */
 #line 1957 "expparse.y"
             {
-                Rule r = ALGcreate(OBJ_RULE);
+                Rule r = ALGcreate( OBJ_RULE );
 
-                if(print_objects_while_running & OBJ_RULE_BITS) {
-                    fprintf(stderr, "parse: %s (rule)\n", yymsp[-2].minor.yy0.symbol->name);
+                if( print_objects_while_running & OBJ_RULE_BITS ) {
+                    fprintf( stderr, "parse: %s (rule)\n", yymsp[-2].minor.yy0.symbol->name );
                 }
 
-                PUSH_SCOPE(r, yymsp[-2].minor.yy0.symbol, OBJ_RULE);
+                PUSH_SCOPE( r, yymsp[-2].minor.yy0.symbol, OBJ_RULE );
 
                 yygotominor.yy507 = yymsp[-3].minor.yy507;
             }
@@ -4170,19 +4157,19 @@ static void yy_reduce(
         case 252: /* schema_header ::= TOK_SCHEMA TOK_IDENTIFIER semicolon */
 #line 1993 "expparse.y"
             {
-                Schema schema = (Schema) DICTlookup(CURRENT_SCOPE->symbol_table, yymsp[-1].minor.yy0.symbol->name);
+                Schema schema = ( Schema ) DICTlookup( CURRENT_SCOPE->symbol_table, yymsp[-1].minor.yy0.symbol->name );
 
-                if(print_objects_while_running & OBJ_SCHEMA_BITS) {
-                    fprintf(stderr, "parse: %s (schema)\n", yymsp[-1].minor.yy0.symbol->name);
+                if( print_objects_while_running & OBJ_SCHEMA_BITS ) {
+                    fprintf( stderr, "parse: %s (schema)\n", yymsp[-1].minor.yy0.symbol->name );
                 }
 
-                if(EXPRESSignore_duplicate_schemas && schema) {
-                    SCANskip_to_end_schema(parseData.scanner);
+                if( EXPRESSignore_duplicate_schemas && schema ) {
+                    SCANskip_to_end_schema( parseData.scanner );
                     PUSH_SCOPE_DUMMY();
                 } else {
                     schema = SCHEMAcreate();
-                    LISTadd_last(PARSEnew_schemas, (Generic)schema);
-                    PUSH_SCOPE(schema, yymsp[-1].minor.yy0.symbol, OBJ_SCHEMA);
+                    LISTadd_last( PARSEnew_schemas, ( Generic )schema );
+                    PUSH_SCOPE( schema, yymsp[-1].minor.yy0.symbol, OBJ_SCHEMA );
                 }
             }
 #line 4074 "expparse.c"
@@ -4190,7 +4177,7 @@ static void yy_reduce(
         case 253: /* select_type ::= TOK_SELECT TOK_LEFT_PAREN defined_type_list TOK_RIGHT_PAREN */
 #line 2012 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(select_);
+                yygotominor.yy477 = TYPEBODYcreate( select_ );
                 yygotominor.yy477->list = yymsp[-1].minor.yy371;
             }
 #line 4082 "expparse.c"
@@ -4198,7 +4185,7 @@ static void yy_reduce(
         case 255: /* set_type ::= TOK_SET bound_spec TOK_OF attribute_type */
 #line 2023 "expparse.y"
             {
-                yygotominor.yy477 = TYPEBODYcreate(set_);
+                yygotominor.yy477 = TYPEBODYcreate( set_ );
                 yygotominor.yy477->base = yymsp[0].minor.yy297;
                 yygotominor.yy477->lower = yymsp[-2].minor.yy253.lower_limit;
                 yygotominor.yy477->upper = yymsp[-2].minor.yy253.upper_limit;
@@ -4214,23 +4201,23 @@ static void yy_reduce(
             break;
         case 258: /* statement ::= alias_statement */
         case 259: /* statement ::= assignment_statement */
-            yytestcase(yyruleno == 259);
+            yytestcase( yyruleno == 259 );
         case 260: /* statement ::= case_statement */
-            yytestcase(yyruleno == 260);
+            yytestcase( yyruleno == 260 );
         case 261: /* statement ::= compound_statement */
-            yytestcase(yyruleno == 261);
+            yytestcase( yyruleno == 261 );
         case 262: /* statement ::= escape_statement */
-            yytestcase(yyruleno == 262);
+            yytestcase( yyruleno == 262 );
         case 263: /* statement ::= if_statement */
-            yytestcase(yyruleno == 263);
+            yytestcase( yyruleno == 263 );
         case 264: /* statement ::= proc_call_statement */
-            yytestcase(yyruleno == 264);
+            yytestcase( yyruleno == 264 );
         case 265: /* statement ::= repeat_statement */
-            yytestcase(yyruleno == 265);
+            yytestcase( yyruleno == 265 );
         case 266: /* statement ::= return_statement */
-            yytestcase(yyruleno == 266);
+            yytestcase( yyruleno == 266 );
         case 267: /* statement ::= skip_statement */
-            yytestcase(yyruleno == 267);
+            yytestcase( yyruleno == 267 );
 #line 2041 "expparse.y"
             {
                 yygotominor.yy332 = yymsp[0].minor.yy332;
@@ -4241,7 +4228,7 @@ static void yy_reduce(
 #line 2090 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[0].minor.yy371;
-                LISTadd_first(yygotominor.yy371, (Generic)yymsp[-1].minor.yy332);
+                LISTadd_first( yygotominor.yy371, ( Generic )yymsp[-1].minor.yy332 );
             }
 #line 4123 "expparse.c"
             break;
@@ -4284,7 +4271,7 @@ static void yy_reduce(
         case 276: /* supertype_decl ::= TOK_ABSTRACT TOK_SUPERTYPE */
 #line 2131 "expparse.y"
             {
-                yygotominor.yy385.subtypes = (Expression)0;
+                yygotominor.yy385.subtypes = ( Expression )0;
                 yygotominor.yy385.abstract = true;
             }
 #line 4167 "expparse.c"
@@ -4315,21 +4302,21 @@ static void yy_reduce(
         case 280: /* supertype_expression ::= supertype_expression TOK_AND supertype_factor */
 #line 2153 "expparse.y"
             {
-                yygotominor.yy401 = BIN_EXPcreate(OP_AND, yymsp[-2].minor.yy401, yymsp[0].minor.yy385.subtypes);
+                yygotominor.yy401 = BIN_EXPcreate( OP_AND, yymsp[-2].minor.yy401, yymsp[0].minor.yy385.subtypes );
             }
 #line 4197 "expparse.c"
             break;
         case 281: /* supertype_expression ::= supertype_expression TOK_ANDOR supertype_factor */
 #line 2158 "expparse.y"
             {
-                yygotominor.yy401 = BIN_EXPcreate(OP_ANDOR, yymsp[-2].minor.yy401, yymsp[0].minor.yy385.subtypes);
+                yygotominor.yy401 = BIN_EXPcreate( OP_ANDOR, yymsp[-2].minor.yy401, yymsp[0].minor.yy385.subtypes );
             }
 #line 4204 "expparse.c"
             break;
         case 283: /* supertype_expression_list ::= supertype_expression_list TOK_COMMA supertype_expression */
 #line 2169 "expparse.y"
             {
-                LISTadd_last(yymsp[-2].minor.yy371, (Generic)yymsp[0].minor.yy401);
+                LISTadd_last( yymsp[-2].minor.yy371, ( Generic )yymsp[0].minor.yy401 );
                 yygotominor.yy371 = yymsp[-2].minor.yy371;
             }
 #line 4212 "expparse.c"
@@ -4344,7 +4331,7 @@ static void yy_reduce(
         case 285: /* supertype_factor ::= oneof_op TOK_LEFT_PAREN supertype_expression_list TOK_RIGHT_PAREN */
 #line 2180 "expparse.y"
             {
-                yygotominor.yy385.subtypes = EXPcreate(Type_Oneof);
+                yygotominor.yy385.subtypes = EXPcreate( Type_Oneof );
                 yygotominor.yy385.subtypes->u.list = yymsp[-1].minor.yy371;
             }
 #line 4227 "expparse.c"
@@ -4358,9 +4345,9 @@ static void yy_reduce(
             break;
         case 287: /* type ::= aggregation_type */
         case 288: /* type ::= basic_type */
-            yytestcase(yyruleno == 288);
+            yytestcase( yyruleno == 288 );
         case 290: /* type ::= select_type */
-            yytestcase(yyruleno == 290);
+            yytestcase( yyruleno == 290 );
 #line 2190 "expparse.y"
             {
                 yygotominor.yy378.type = 0;
@@ -4379,8 +4366,8 @@ static void yy_reduce(
         case 294: /* ti_start ::= TOK_IDENTIFIER TOK_EQUAL */
 #line 2223 "expparse.y"
             {
-                Type t = TYPEcreate_name(yymsp[-1].minor.yy0.symbol);
-                PUSH_SCOPE(t, yymsp[-1].minor.yy0.symbol, OBJ_TYPE);
+                Type t = TYPEcreate_name( yymsp[-1].minor.yy0.symbol );
+                PUSH_SCOPE( t, yymsp[-1].minor.yy0.symbol, OBJ_TYPE );
             }
 #line 4260 "expparse.c"
             break;
@@ -4404,14 +4391,14 @@ static void yy_reduce(
         case 307: /* unary_expression ::= TOK_NOT unary_expression */
 #line 2284 "expparse.y"
             {
-                yygotominor.yy401 = UN_EXPcreate(OP_NOT, yymsp[0].minor.yy401);
+                yygotominor.yy401 = UN_EXPcreate( OP_NOT, yymsp[0].minor.yy401 );
             }
 #line 4284 "expparse.c"
             break;
         case 309: /* unary_expression ::= TOK_MINUS unary_expression */
 #line 2292 "expparse.y"
             {
-                yygotominor.yy401 = UN_EXPcreate(OP_NEGATE, yymsp[0].minor.yy401);
+                yygotominor.yy401 = UN_EXPcreate( OP_NEGATE, yymsp[0].minor.yy401 );
             }
 #line 4291 "expparse.c"
             break;
@@ -4432,7 +4419,7 @@ static void yy_reduce(
         case 315: /* labelled_attrib_list ::= qualified_attr_list semicolon */
 #line 2328 "expparse.y"
             {
-                LISTadd_first(yymsp[-1].minor.yy371, (Generic)EXPRESSION_NULL);
+                LISTadd_first( yymsp[-1].minor.yy371, ( Generic )EXPRESSION_NULL );
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
             }
 #line 4313 "expparse.c"
@@ -4440,7 +4427,7 @@ static void yy_reduce(
         case 316: /* labelled_attrib_list ::= TOK_IDENTIFIER TOK_COLON qualified_attr_list semicolon */
 #line 2334 "expparse.y"
             {
-                LISTadd_first(yymsp[-1].minor.yy371, (Generic)yymsp[-3].minor.yy0.symbol);
+                LISTadd_first( yymsp[-1].minor.yy371, ( Generic )yymsp[-3].minor.yy0.symbol );
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
             }
 #line 4321 "expparse.c"
@@ -4449,21 +4436,21 @@ static void yy_reduce(
 #line 2341 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy371);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy371 );
             }
 #line 4329 "expparse.c"
             break;
         case 318: /* labelled_attrib_list_list ::= labelled_attrib_list_list labelled_attrib_list */
 #line 2347 "expparse.y"
             {
-                LISTadd_last(yymsp[-1].minor.yy371, (Generic)yymsp[0].minor.yy371);
+                LISTadd_last( yymsp[-1].minor.yy371, ( Generic )yymsp[0].minor.yy371 );
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
             }
 #line 4337 "expparse.c"
             break;
         case 321: /* until_control ::= */
         case 330: /* while_control ::= */
-            yytestcase(yyruleno == 330);
+            yytestcase( yyruleno == 330 );
 #line 2362 "expparse.y"
             {
                 yygotominor.yy401 = 0;
@@ -4474,7 +4461,7 @@ static void yy_reduce(
 #line 2371 "expparse.y"
             {
                 yygotominor.yy234 = WHERE_new();
-                yygotominor.yy234->label = SYMBOLcreate("<unnamed>", yylineno, current_filename);
+                yygotominor.yy234->label = SYMBOLcreate( "<unnamed>", yylineno, current_filename );
                 yygotominor.yy234->expr = yymsp[-1].minor.yy401;
             }
 #line 4354 "expparse.c"
@@ -4486,12 +4473,12 @@ static void yy_reduce(
                 yygotominor.yy234->label = yymsp[-3].minor.yy0.symbol;
                 yygotominor.yy234->expr = yymsp[-1].minor.yy401;
 
-                if(!CURRENT_SCOPE->symbol_table) {
-                    CURRENT_SCOPE->symbol_table = DICTcreate(25);
+                if( !CURRENT_SCOPE->symbol_table ) {
+                    CURRENT_SCOPE->symbol_table = DICTcreate( 25 );
                 }
 
-                DICTdefine(CURRENT_SCOPE->symbol_table, yymsp[-3].minor.yy0.symbol->name, (Generic)yygotominor.yy234,
-                           yymsp[-3].minor.yy0.symbol, OBJ_WHERE);
+                DICTdefine( CURRENT_SCOPE->symbol_table, yymsp[-3].minor.yy0.symbol->name, ( Generic )yygotominor.yy234,
+                            yymsp[-3].minor.yy0.symbol, OBJ_WHERE );
             }
 #line 4370 "expparse.c"
             break;
@@ -4499,7 +4486,7 @@ static void yy_reduce(
 #line 2391 "expparse.y"
             {
                 yygotominor.yy371 = LISTcreate();
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy234);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy234 );
             }
 #line 4378 "expparse.c"
             break;
@@ -4507,47 +4494,47 @@ static void yy_reduce(
 #line 2396 "expparse.y"
             {
                 yygotominor.yy371 = yymsp[-1].minor.yy371;
-                LISTadd_last(yygotominor.yy371, (Generic)yymsp[0].minor.yy234);
+                LISTadd_last( yygotominor.yy371, ( Generic )yymsp[0].minor.yy234 );
             }
 #line 4386 "expparse.c"
             break;
         default:
             /* (4) action_body_item_rep ::= */
-            yytestcase(yyruleno == 4);
-            /* (41) block_list ::= */ yytestcase(yyruleno == 41);
-            /* (62) constant_body_list ::= */ yytestcase(yyruleno == 62);
-            /* (86) express_file ::= schema_decl_list */ yytestcase(yyruleno == 86);
-            /* (159) parened_rename_list ::= TOK_LEFT_PAREN rename_list TOK_RIGHT_PAREN */ yytestcase(yyruleno == 159);
-            /* (168) interface_specification_list ::= */ yytestcase(yyruleno == 168);
-            /* (194) local_body ::= */ yytestcase(yyruleno == 194);
-            /* (196) local_decl ::= TOK_LOCAL local_decl_rules_on local_body TOK_END_LOCAL semicolon local_decl_rules_off */ yytestcase(yyruleno == 196);
-            /* (293) type_item ::= ti_start type_item_body semicolon */ yytestcase(yyruleno == 293);
+            yytestcase( yyruleno == 4 );
+            /* (41) block_list ::= */ yytestcase( yyruleno == 41 );
+            /* (62) constant_body_list ::= */ yytestcase( yyruleno == 62 );
+            /* (86) express_file ::= schema_decl_list */ yytestcase( yyruleno == 86 );
+            /* (159) parened_rename_list ::= TOK_LEFT_PAREN rename_list TOK_RIGHT_PAREN */ yytestcase( yyruleno == 159 );
+            /* (168) interface_specification_list ::= */ yytestcase( yyruleno == 168 );
+            /* (194) local_body ::= */ yytestcase( yyruleno == 194 );
+            /* (196) local_decl ::= TOK_LOCAL local_decl_rules_on local_body TOK_END_LOCAL semicolon local_decl_rules_off */ yytestcase( yyruleno == 196 );
+            /* (293) type_item ::= ti_start type_item_body semicolon */ yytestcase( yyruleno == 293 );
             break;
     };
     yygoto = yyRuleInfo[yyruleno].lhs;
     yysize = yyRuleInfo[yyruleno].nrhs;
     yypParser->yyidx -= yysize;
-    yyact = yy_find_reduce_action(yymsp[-yysize].stateno, (YYCODETYPE)yygoto);
-    if(yyact < YYNSTATE) {
+    yyact = yy_find_reduce_action( yymsp[-yysize].stateno, ( YYCODETYPE )yygoto );
+    if( yyact < YYNSTATE ) {
 #ifdef NDEBUG
         /* If we are not debugging and the reduce action popped at least
         ** one element off the stack, then we can push the new element back
         ** onto the stack here, and skip the stack overflow test in yy_shift().
         ** That gives a significant speed improvement. */
-        if(yysize) {
+        if( yysize ) {
             yypParser->yyidx++;
             yymsp -= yysize - 1;
-            yymsp->stateno = (YYACTIONTYPE)yyact;
-            yymsp->major = (YYCODETYPE)yygoto;
+            yymsp->stateno = ( YYACTIONTYPE )yyact;
+            yymsp->major = ( YYCODETYPE )yygoto;
             yymsp->minor = yygotominor;
         } else
 #endif
         {
-            yy_shift(yypParser, yyact, yygoto, &yygotominor);
+            yy_shift( yypParser, yyact, yygoto, &yygotominor );
         }
     } else {
-        assert(yyact == YYNSTATE + YYNRULE + 1);
-        yy_accept(yypParser);
+        assert( yyact == YYNSTATE + YYNRULE + 1 );
+        yy_accept( yypParser );
     }
 }
 
@@ -4556,17 +4543,16 @@ static void yy_reduce(
 */
 #ifndef YYNOERRORRECOVERY
 static void yy_parse_failed(
-    yyParser *yypParser           /* The parser */
-)
-{
+    yyParser * yypParser          /* The parser */
+) {
     ParseARG_FETCH;
 #ifndef NDEBUG
-    if(yyTraceFILE) {
-        fprintf(yyTraceFILE, "%sFail!\n", yyTracePrompt);
+    if( yyTraceFILE ) {
+        fprintf( yyTraceFILE, "%sFail!\n", yyTracePrompt );
     }
 #endif
-    while(yypParser->yyidx >= 0) {
-        yy_pop_parser_stack(yypParser);
+    while( yypParser->yyidx >= 0 ) {
+        yy_pop_parser_stack( yypParser );
     }
     /* Here code is inserted which will be executed whenever the
     ** parser fails */
@@ -4578,26 +4564,25 @@ static void yy_parse_failed(
 ** The following code executes when a syntax error first occurs.
 */
 static void yy_syntax_error(
-    yyParser *yypParser,           /* The parser */
+    yyParser * yypParser,          /* The parser */
     int yymajor,                   /* The major type of the error token */
     YYMINORTYPE yyminor            /* The minor type of the error token */
-)
-{
+) {
     ParseARG_FETCH;
 #define TOKEN (yyminor.yy0)
 #line 2424 "expparse.y"
 
     Symbol sym;
 
-    (void) yymajor; /* quell unused param warning */
-    (void) yyminor;
+    ( void ) yymajor; /* quell unused param warning */
+    ( void ) yyminor;
     yyerrstatus++;
 
     sym.line = yylineno;
     sym.filename = current_filename;
 
-    ERRORreport_with_symbol(SYNTAX, &sym, "Syntax error",
-                            CURRENT_SCOPE_TYPE_PRINTABLE, CURRENT_SCOPE_NAME);
+    ERRORreport_with_symbol( SYNTAX, &sym, "Syntax error",
+                             CURRENT_SCOPE_TYPE_PRINTABLE, CURRENT_SCOPE_NAME );
 #line 4470 "expparse.c"
     ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
@@ -4606,17 +4591,16 @@ static void yy_syntax_error(
 ** The following is executed when the parser accepts
 */
 static void yy_accept(
-    yyParser *yypParser           /* The parser */
-)
-{
+    yyParser * yypParser          /* The parser */
+) {
     ParseARG_FETCH;
 #ifndef NDEBUG
-    if(yyTraceFILE) {
-        fprintf(yyTraceFILE, "%sAccept!\n", yyTracePrompt);
+    if( yyTraceFILE ) {
+        fprintf( yyTraceFILE, "%sAccept!\n", yyTracePrompt );
     }
 #endif
-    while(yypParser->yyidx >= 0) {
-        yy_pop_parser_stack(yypParser);
+    while( yypParser->yyidx >= 0 ) {
+        yy_pop_parser_stack( yypParser );
     }
     /* Here code is inserted which will be executed whenever the
     ** parser accepts */
@@ -4643,28 +4627,27 @@ static void yy_accept(
 ** None.
 */
 void Parse(
-    void *yyp,                   /* The parser */
+    void * yyp,                  /* The parser */
     int yymajor,                 /* The major token code number */
     ParseTOKENTYPE yyminor       /* The value for the token */
     ParseARG_PDECL               /* Optional %extra_argument parameter */
-)
-{
+) {
     YYMINORTYPE yyminorunion;
     int yyact;            /* The parser action. */
     int yyendofinput;     /* True if we are at the end of input */
 #ifdef YYERRORSYMBOL
     int yyerrorhit = 0;   /* True if yymajor has invoked an error */
 #endif
-    yyParser *yypParser;  /* The parser */
+    yyParser * yypParser; /* The parser */
 
     /* (re)initialize the parser, if necessary */
-    yypParser = (yyParser *)yyp;
-    if(yypParser->yyidx < 0) {
+    yypParser = ( yyParser * )yyp;
+    if( yypParser->yyidx < 0 ) {
 #if YYSTACKDEPTH<=0
-        if(yypParser->yystksz <= 0) {
+        if( yypParser->yystksz <= 0 ) {
             /*memset(&yyminorunion, 0, sizeof(yyminorunion));*/
             yyminorunion = yyzerominor;
-            yyStackOverflow(yypParser, &yyminorunion);
+            yyStackOverflow( yypParser, &yyminorunion );
             return;
         }
 #endif
@@ -4674,32 +4657,32 @@ void Parse(
         yypParser->yystack[0].major = 0;
     }
     yyminorunion.yy0 = yyminor;
-    yyendofinput = (yymajor == 0);
+    yyendofinput = ( yymajor == 0 );
     ParseARG_STORE;
 
 #ifndef NDEBUG
-    if(yyTraceFILE) {
-        fprintf(yyTraceFILE, "%sInput %s\n", yyTracePrompt, yyTokenName[yymajor]);
+    if( yyTraceFILE ) {
+        fprintf( yyTraceFILE, "%sInput %s\n", yyTracePrompt, yyTokenName[yymajor] );
     }
 #endif
 
     do {
-        yyact = yy_find_shift_action(yypParser, (YYCODETYPE)yymajor);
-        if(yyact < YYNSTATE) {
-            assert(!yyendofinput);    /* Impossible to shift the $ token */
-            yy_shift(yypParser, yyact, yymajor, &yyminorunion);
+        yyact = yy_find_shift_action( yypParser, ( YYCODETYPE )yymajor );
+        if( yyact < YYNSTATE ) {
+            assert( !yyendofinput );  /* Impossible to shift the $ token */
+            yy_shift( yypParser, yyact, yymajor, &yyminorunion );
             yypParser->yyerrcnt--;
             yymajor = YYNOCODE;
-        } else if(yyact < YYNSTATE + YYNRULE) {
-            yy_reduce(yypParser, yyact - YYNSTATE);
+        } else if( yyact < YYNSTATE + YYNRULE ) {
+            yy_reduce( yypParser, yyact - YYNSTATE );
         } else {
-            assert(yyact == YY_ERROR_ACTION);
+            assert( yyact == YY_ERROR_ACTION );
 #ifdef YYERRORSYMBOL
             int yymx;
 #endif
 #ifndef NDEBUG
-            if(yyTraceFILE) {
-                fprintf(yyTraceFILE, "%sSyntax Error!\n", yyTracePrompt);
+            if( yyTraceFILE ) {
+                fprintf( yyTraceFILE, "%sSyntax Error!\n", yyTracePrompt );
             }
 #endif
 #ifdef YYERRORSYMBOL
@@ -4722,37 +4705,37 @@ void Parse(
             **    shifted successfully.
             **
             */
-            if(yypParser->yyerrcnt < 0) {
-                yy_syntax_error(yypParser, yymajor, yyminorunion);
+            if( yypParser->yyerrcnt < 0 ) {
+                yy_syntax_error( yypParser, yymajor, yyminorunion );
             }
             yymx = yypParser->yystack[yypParser->yyidx].major;
-            if(yymx == YYERRORSYMBOL || yyerrorhit) {
+            if( yymx == YYERRORSYMBOL || yyerrorhit ) {
 #ifndef NDEBUG
-                if(yyTraceFILE) {
-                    fprintf(yyTraceFILE, "%sDiscard input token %s\n",
-                            yyTracePrompt, yyTokenName[yymajor]);
+                if( yyTraceFILE ) {
+                    fprintf( yyTraceFILE, "%sDiscard input token %s\n",
+                             yyTracePrompt, yyTokenName[yymajor] );
                 }
 #endif
-                yy_destructor(yypParser, (YYCODETYPE)yymajor, &yyminorunion);
+                yy_destructor( yypParser, ( YYCODETYPE )yymajor, &yyminorunion );
                 yymajor = YYNOCODE;
             } else {
                 while(
                     yypParser->yyidx >= 0 &&
                     yymx != YYERRORSYMBOL &&
-                    (yyact = yy_find_reduce_action(
-                                 yypParser->yystack[yypParser->yyidx].stateno,
-                                 YYERRORSYMBOL)) >= YYNSTATE
+                    ( yyact = yy_find_reduce_action(
+                                  yypParser->yystack[yypParser->yyidx].stateno,
+                                  YYERRORSYMBOL ) ) >= YYNSTATE
                 ) {
-                    yy_pop_parser_stack(yypParser);
+                    yy_pop_parser_stack( yypParser );
                 }
-                if(yypParser->yyidx < 0 || yymajor == 0) {
-                    yy_destructor(yypParser, (YYCODETYPE)yymajor, &yyminorunion);
-                    yy_parse_failed(yypParser);
+                if( yypParser->yyidx < 0 || yymajor == 0 ) {
+                    yy_destructor( yypParser, ( YYCODETYPE )yymajor, &yyminorunion );
+                    yy_parse_failed( yypParser );
                     yymajor = YYNOCODE;
-                } else if(yymx != YYERRORSYMBOL) {
+                } else if( yymx != YYERRORSYMBOL ) {
                     YYMINORTYPE u2;
                     u2.YYERRSYMDT = 0;
-                    yy_shift(yypParser, yyact, YYERRORSYMBOL, &u2);
+                    yy_shift( yypParser, yyact, YYERRORSYMBOL, &u2 );
                 }
             }
             yypParser->yyerrcnt = 3;
@@ -4765,8 +4748,8 @@ void Parse(
             ** Applications can set this macro (for example inside %include) if
             ** they intend to abandon the parse upon the first syntax error seen.
             */
-            yy_syntax_error(yypParser, yymajor, yyminorunion);
-            yy_destructor(yypParser, (YYCODETYPE)yymajor, &yyminorunion);
+            yy_syntax_error( yypParser, yymajor, yyminorunion );
+            yy_destructor( yypParser, ( YYCODETYPE )yymajor, &yyminorunion );
             yymajor = YYNOCODE;
 
 #else  /* YYERRORSYMBOL is not defined */
@@ -4779,17 +4762,17 @@ void Parse(
             ** As before, subsequent error messages are suppressed until
             ** three input tokens have been successfully shifted.
             */
-            if(yypParser->yyerrcnt <= 0) {
-                yy_syntax_error(yypParser, yymajor, yyminorunion);
+            if( yypParser->yyerrcnt <= 0 ) {
+                yy_syntax_error( yypParser, yymajor, yyminorunion );
             }
             yypParser->yyerrcnt = 3;
-            yy_destructor(yypParser, (YYCODETYPE)yymajor, &yyminorunion);
-            if(yyendofinput) {
-                yy_parse_failed(yypParser);
+            yy_destructor( yypParser, ( YYCODETYPE )yymajor, &yyminorunion );
+            if( yyendofinput ) {
+                yy_parse_failed( yypParser );
             }
             yymajor = YYNOCODE;
 #endif
         }
-    } while(yymajor != YYNOCODE && yypParser->yyidx >= 0);
+    } while( yymajor != YYNOCODE && yypParser->yyidx >= 0 );
     return;
 }

@@ -21,8 +21,7 @@
 class Registry;
 class instMgrAdapter;
 
-class SC_LAZYFILE_EXPORT lazyInstMgr
-{
+class SC_LAZYFILE_EXPORT lazyInstMgr {
     protected:
         /** multimap from instance number to instances that it refers to
          * \sa instanceRefs_pair
@@ -41,7 +40,7 @@ class SC_LAZYFILE_EXPORT lazyInstMgr
          * \sa instanceType_pair
          * \sa instanceType_range
          */
-        instanceTypes_t *_instanceTypes;
+        instanceTypes_t * _instanceTypes;
 
         /** map from instance number to instance pointer (loaded instances only)
          * \sa instancesLoaded_pair
@@ -63,14 +62,14 @@ class SC_LAZYFILE_EXPORT lazyInstMgr
 
         lazyFileReaderVec_t _files;
 
-        Registry *_headerRegistry, * _mainRegistry;
-        ErrorDescriptor *_errors;
+        Registry * _headerRegistry, * _mainRegistry;
+        ErrorDescriptor * _errors;
 
         unsigned long _lazyInstanceCount, _loadedInstanceCount;
         int _longestTypeNameLen;
         std::string _longestTypeName;
 
-        instMgrAdapter *_ima;
+        instMgrAdapter * _ima;
 
 #ifdef _MSC_VER
 #pragma warning( pop )
@@ -79,103 +78,88 @@ class SC_LAZYFILE_EXPORT lazyInstMgr
     public:
         lazyInstMgr();
         ~lazyInstMgr();
-        void openFile(std::string fname);
+        void openFile( std::string fname );
 
-        void addLazyInstance(namedLazyInstance inst);
-        InstMgrBase *getAdapter()
-        {
-            return (InstMgrBase *) _ima;
+        void addLazyInstance( namedLazyInstance inst );
+        InstMgrBase * getAdapter() {
+            return ( InstMgrBase * ) _ima;
         }
 
-        instanceRefs_t *getFwdRefs()
-        {
+        instanceRefs_t * getFwdRefs() {
             return & _fwdInstanceRefs;
         }
 
-        instanceRefs_t *getRevRefs()
-        {
+        instanceRefs_t * getRevRefs() {
             return & _revInstanceRefs;
         }
         /// returns a vector containing the instances that match `type`
-        instanceTypes_t::cvector *getInstances(std::string type, bool caseSensitive = false)      /*const*/
-        {
-            if(!caseSensitive) {
+        instanceTypes_t::cvector * getInstances( std::string type, bool caseSensitive = false ) { /*const*/
+            if( !caseSensitive ) {
                 std::string::iterator it = type.begin();
-                for(; it != type.end(); ++it) {
-                    *it = toupper(*it);
+                for( ; it != type.end(); ++it ) {
+                    *it = toupper( *it );
                 }
             }
-            return _instanceTypes->find(type.c_str());
+            return _instanceTypes->find( type.c_str() );
         }
         /// get the number of instances of a certain type
-        unsigned int countInstances(std::string type)
-        {
-            instanceTypes_t::cvector *v = _instanceTypes->find(type.c_str());
-            if(!v) {
+        unsigned int countInstances( std::string type ) {
+            instanceTypes_t::cvector * v = _instanceTypes->find( type.c_str() );
+            if( !v ) {
                 return 0;
             }
             return v->size();
         }
-        instancesLoaded_t *getHeaderInstances(fileID file)
-        {
+        instancesLoaded_t * getHeaderInstances( fileID file ) {
             return _files[file]->getHeaderInstances();
         }
 
         /// get the number of instances that have been found in the open files.
-        unsigned long totalInstanceCount() const
-        {
+        unsigned long totalInstanceCount() const {
             return _lazyInstanceCount;
         }
 
         /// get the number of instances that are loaded.
-        unsigned long loadedInstanceCount() const
-        {
+        unsigned long loadedInstanceCount() const {
             return _loadedInstanceCount;
         }
 
         /// get the number of data sections that have been identified
-        unsigned int countDataSections()
-        {
+        unsigned int countDataSections() {
             return _dataSections.size();
         }
 
         ///builds the registry using the given initFunct
-        const Registry *initRegistry(CF_init initFunct)
-        {
-            setRegistry(new Registry(initFunct));
+        const Registry * initRegistry( CF_init initFunct ) {
+            setRegistry( new Registry( initFunct ) );
             return _mainRegistry;
         }
 
         /// set the registry to one already initialized
-        void setRegistry(Registry *reg)
-        {
-            assert(_mainRegistry == 0);
+        void setRegistry( Registry * reg ) {
+            assert( _mainRegistry == 0 );
             _mainRegistry = reg;
         }
 
-        const Registry *getHeaderRegistry() const
-        {
+        const Registry * getHeaderRegistry() const {
             return _headerRegistry;
         }
-        const Registry *getMainRegistry() const
-        {
+        const Registry * getMainRegistry() const {
             return _mainRegistry;
         }
 
 
         /// get the longest type name
-        const std::string &getLongestTypeName() const
-        {
+        const std::string & getLongestTypeName() const {
             return _longestTypeName;
         }
 
         /// get the number of types of instances.
         unsigned long getNumTypes() const;
 
-        sectionID registerDataSection(lazyDataSectionReader *sreader);
+        sectionID registerDataSection( lazyDataSectionReader * sreader );
 
-        ErrorDescriptor *getErrorDesc()
-        {
+        ErrorDescriptor * getErrorDesc() {
             return _errors;
         }
 
@@ -183,30 +167,28 @@ class SC_LAZYFILE_EXPORT lazyInstMgr
          * \param id the instance number to look for
          * \param reSeek if true, reset file position to current position when done. only necessary when loading an instance with dependencies; excessive use will cause a performance hit
          */
-        SDAI_Application_instance *loadInstance(instanceID id, bool reSeek = false);
+        SDAI_Application_instance * loadInstance( instanceID id, bool reSeek = false );
 
         //list all instances that one instance depends on (recursive)
-        instanceSet *instanceDependencies(instanceID id);
-        bool isLoaded(instanceID id)
-        {
-            _instancesLoaded.find(id);
+        instanceSet * instanceDependencies( instanceID id );
+        bool isLoaded( instanceID id ) {
+            _instancesLoaded.find( id );
             return _instancesLoaded.success();
         }
 
-        const char *typeFromFile(instanceID id)
-        {
-            instanceStreamPos_t::cvector *cv;
-            cv = _instanceStreamPos.find(id);
-            if(cv) {
-                if(cv->size() != 1) {
+        const char * typeFromFile( instanceID id ) {
+            instanceStreamPos_t::cvector * cv;
+            cv = _instanceStreamPos.find( id );
+            if( cv ) {
+                if( cv->size() != 1 ) {
                     std::cerr << "Error at " << __FILE__ << ":" << __LINE__ << " - multiple instances (" << cv->size() << ") with one instanceID (" << id << ") not supported yet." << std::endl;
                     return 0;
                 }
-                positionAndSection ps = cv->at(0);
+                positionAndSection ps = cv->at( 0 );
                 //extract p, s, call
                 long int off = ps & 0xFFFFFFFFFFFFULL;
                 sectionID sid = ps >> 48;
-                return _dataSections[sid]->getType(off);
+                return _dataSections[sid]->getType( off );
             }
             std::cerr << "Error at " << __FILE__ << ":" << __LINE__ << " - instanceID " << id << " not found." << std::endl;
             return 0;

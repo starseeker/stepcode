@@ -118,29 +118,28 @@ static struct Symbol_ open_comment[MAX_NESTED_COMMENTS];
 #endif
 static_inline
 int
-SCANnextchar(char *buffer)
-{
-    extern bool SCANread(void);
+SCANnextchar( char * buffer ) {
+    extern bool SCANread( void );
 #ifdef keep_nul
     static int escaped = 0;
 #endif
-    if(SCANtext_ready || SCANread()) {
+    if( SCANtext_ready || SCANread() ) {
 #ifdef keep_nul
-        if(!*SCANcurrent) {
+        if( !*SCANcurrent ) {
             buffer[0] = SCAN_ESCAPE;
             *SCANcurrent = '0';
             return 1;
-        } else if((*SCANcurrent == SCAN_ESCAPE) && !escaped) {
+        } else if( ( *SCANcurrent == SCAN_ESCAPE ) && !escaped ) {
             escaped = 1;
             buffer[0] = SCAN_ESCAPE;
             return 1;
         }
         SCANbuffer.numRead--;
 #endif
-        buffer[0] = *(SCANcurrent++);
-        if(!isascii(buffer[0])) {
-            ERRORreport_with_line(NONASCII_CHAR, yylineno,
-                                  0xff & buffer[0]);
+        buffer[0] = *( SCANcurrent++ );
+        if( !isascii( buffer[0] ) ) {
+            ERRORreport_with_line( NONASCII_CHAR, yylineno,
+                                   0xff & buffer[0] );
             buffer[0] = ' ';    /* substitute space */
         }
         return 1;
@@ -154,14 +153,13 @@ SCANnextchar(char *buffer)
 #define LINENO_FUDGE (yylineno - 1)
 /* added for re-initializing parser -snc 22-Apr-1992 */
 void
-SCAN_lex_init(char *filename, FILE *fp)
-{
+SCAN_lex_init( char * filename, FILE * fp ) {
     /* return to initial scan buffer */
     SCAN_current_buffer = 0;
-    *(SCANcurrent = SCANbuffer.text) = '\0';
+    *( SCANcurrent = SCANbuffer.text ) = '\0';
     SCANbuffer.readEof = false;
     SCANbuffer.file = fp;
-    SCANbuffer.filename = (filename ? filename : "");
+    SCANbuffer.filename = ( filename ? filename : "" );
     current_filename = SCANbuffer.filename;
 }
 #define PERPLEX_USING_CONDITIONS
@@ -218,30 +216,28 @@ SCAN_lex_init(char *filename, FILE *fp)
 #include <string.h>
 
 /* --- from flex's flexdef.h --- */
-void buf_init(struct Buf *buf, size_t elem_size);
-void buf_destroy(struct Buf *buf);
-struct Buf *buf_append(struct Buf *buf, const void *ptr, int n_elem);
-struct Buf *buf_concat(struct Buf *dest, const struct Buf *src);
-struct Buf *buf_strappend(struct Buf *, const char *str);
-struct Buf *buf_strnappend(struct Buf *, const char *str, int nchars);
-struct Buf *buf_strdefine(struct Buf *buf, const char *str, const char *def);
-struct Buf *buf_prints(struct Buf *buf, const char *fmt, const char *s);
-struct Buf *buf_m4_define(struct Buf *buf, const char *def, const char *val);
-struct Buf *buf_m4_undefine(struct Buf *buf, const char *def);
-struct Buf *buf_print_strings(struct Buf *buf, FILE *out);
-struct Buf *buf_linedir(struct Buf *buf, const char *filename, int lineno);
+void buf_init( struct Buf * buf, size_t elem_size );
+void buf_destroy( struct Buf * buf );
+struct Buf * buf_append( struct Buf * buf, const void * ptr, int n_elem );
+struct Buf * buf_concat( struct Buf * dest, const struct Buf * src );
+struct Buf * buf_strappend( struct Buf *, const char * str );
+struct Buf * buf_strnappend( struct Buf *, const char * str, int nchars );
+struct Buf * buf_strdefine( struct Buf * buf, const char * str, const char * def );
+struct Buf * buf_prints( struct Buf * buf, const char * fmt, const char * s );
+struct Buf * buf_m4_define( struct Buf * buf, const char * def, const char * val );
+struct Buf * buf_m4_undefine( struct Buf * buf, const char * def );
+struct Buf * buf_print_strings( struct Buf * buf, FILE * out );
+struct Buf * buf_linedir( struct Buf * buf, const char * filename, int lineno );
 
 /* --- from flex's misc.c --- */
 static void *
-allocate_array(int size, size_t element_size)
-{
-    return malloc(element_size * size);
+allocate_array( int size, size_t element_size ) {
+    return malloc( element_size * size );
 }
 
 static void *
-reallocate_array(void *array, int size, size_t element_size)
-{
-    return realloc(array, element_size * size);
+reallocate_array( void * array, int size, size_t element_size ) {
+    return realloc( array, element_size * size );
 }
 
 /* --- from flex's buf.c --- */
@@ -258,18 +254,17 @@ reallocate_array(void *array, int size, size_t element_size)
  */
 
 struct Buf *
-buf_print_strings(struct Buf *buf, FILE *out)
-{
+buf_print_strings( struct Buf * buf, FILE * out ) {
     int i;
 
-    if(!buf || !out) {
+    if( !buf || !out ) {
         return buf;
     }
 
-    for(i = 0; i < buf->nelts; i++) {
-        const char *s = ((char **)buf->elts)[i];
-        if(s) {
-            fprintf(out, "%s", s);
+    for( i = 0; i < buf->nelts; i++ ) {
+        const char * s = ( ( char ** )buf->elts )[i];
+        if( s ) {
+            fprintf( out, "%s", s );
         }
     }
     return buf;
@@ -277,29 +272,27 @@ buf_print_strings(struct Buf *buf, FILE *out)
 
 /* Append a "%s" formatted string to a string buffer */
 struct Buf *
-buf_prints(struct Buf *buf, const char *fmt, const char *s)
-{
-    char *t;
+buf_prints( struct Buf * buf, const char * fmt, const char * s ) {
+    char * t;
 
-    t = (char *)malloc(strlen(fmt) + strlen(s) + 1);
-    sprintf(t, fmt, s);
-    buf = buf_strappend(buf, t);
-    free(t);
+    t = ( char * )malloc( strlen( fmt ) + strlen( s ) + 1 );
+    sprintf( t, fmt, s );
+    buf = buf_strappend( buf, t );
+    free( t );
     return buf;
 }
 
-int numDigits(int n)
-{
+int numDigits( int n ) {
     int digits;
 
     /* take absolute value of n */
     n = n >= 0 ? n : -n;
 
-    if(n == 0) {
+    if( n == 0 ) {
         return 1;
     }
 
-    for(digits = 0; n > 0; digits++) {
+    for( digits = 0; n > 0; digits++ ) {
         n /= 10;
     }
 
@@ -313,15 +306,14 @@ int numDigits(int n)
  * @return buf
  */
 struct Buf *
-buf_linedir(struct Buf *buf, const char *filename, int lineno)
-{
-    char *t;
+buf_linedir( struct Buf * buf, const char * filename, int lineno ) {
+    char * t;
     const char fmt[] = "#line %d \"%s\"\n";
 
-    t = (char *)malloc(strlen(fmt) + strlen(filename) + numDigits(lineno) + 1);
-    sprintf(t, fmt, lineno, filename);
-    buf = buf_strappend(buf, t);
-    free(t);
+    t = ( char * )malloc( strlen( fmt ) + strlen( filename ) + numDigits( lineno ) + 1 );
+    sprintf( t, fmt, lineno, filename );
+    buf = buf_strappend( buf, t );
+    free( t );
     return buf;
 }
 
@@ -332,18 +324,16 @@ buf_linedir(struct Buf *buf, const char *filename, int lineno)
  * @return @a dest
  */
 struct Buf *
-buf_concat(struct Buf *dest, const struct Buf *src)
-{
-    buf_append(dest, src->elts, src->nelts);
+buf_concat( struct Buf * dest, const struct Buf * src ) {
+    buf_append( dest, src->elts, src->nelts );
     return dest;
 }
 
 
 /* Appends n characters in str to buf. */
 struct Buf *
-buf_strnappend(struct Buf *buf, const char *str, int n)
-{
-    buf_append(buf, str, n + 1);
+buf_strnappend( struct Buf * buf, const char * str, int n ) {
+    buf_append( buf, str, n + 1 );
 
     /* "undo" the '\0' character that buf_append() already copied. */
     buf->nelts--;
@@ -353,21 +343,19 @@ buf_strnappend(struct Buf *buf, const char *str, int n)
 
 /* Appends characters in str to buf. */
 struct Buf *
-buf_strappend(struct Buf *buf, const char *str)
-{
-    return buf_strnappend(buf, str, strlen(str));
+buf_strappend( struct Buf * buf, const char * str ) {
+    return buf_strnappend( buf, str, strlen( str ) );
 }
 
 /* appends "#define str def\n" */
 struct Buf *
-buf_strdefine(struct Buf *buf, const char *str, const char *def)
-{
-    buf_strappend(buf, "#define ");
-    buf_strappend(buf, " ");
-    buf_strappend(buf, str);
-    buf_strappend(buf, " ");
-    buf_strappend(buf, def);
-    buf_strappend(buf, "\n");
+buf_strdefine( struct Buf * buf, const char * str, const char * def ) {
+    buf_strappend( buf, "#define " );
+    buf_strappend( buf, " " );
+    buf_strappend( buf, str );
+    buf_strappend( buf, " " );
+    buf_strappend( buf, def );
+    buf_strappend( buf, "\n" );
     return buf;
 }
 
@@ -378,16 +366,15 @@ buf_strdefine(struct Buf *buf, const char *str, const char *def)
  * @return buf
  */
 struct Buf *
-buf_m4_define(struct Buf *buf, const char *def, const char *val)
-{
-    const char *fmt = "m4_define( [[%s]], [[%s]])m4_dnl\n";
-    char *str;
+buf_m4_define( struct Buf * buf, const char * def, const char * val ) {
+    const char * fmt = "m4_define( [[%s]], [[%s]])m4_dnl\n";
+    char * str;
 
     val = val ? val : "";
-    str = (char *)malloc(strlen(fmt) + strlen(def) + strlen(val) + 2);
+    str = ( char * )malloc( strlen( fmt ) + strlen( def ) + strlen( val ) + 2 );
 
-    sprintf(str, fmt, def, val);
-    buf_append(buf, &str, 1);
+    sprintf( str, fmt, def, val );
+    buf_append( buf, &str, 1 );
     return buf;
 }
 
@@ -397,23 +384,21 @@ buf_m4_define(struct Buf *buf, const char *def, const char *val)
  * @return buf
  */
 struct Buf *
-buf_m4_undefine(struct Buf *buf, const char *def)
-{
-    const char *fmt = "m4_undefine( [[%s]])m4_dnl\n";
-    char *str;
+buf_m4_undefine( struct Buf * buf, const char * def ) {
+    const char * fmt = "m4_undefine( [[%s]])m4_dnl\n";
+    char * str;
 
-    str = (char *)malloc(strlen(fmt) + strlen(def) + 2);
+    str = ( char * )malloc( strlen( fmt ) + strlen( def ) + 2 );
 
-    sprintf(str, fmt, def);
-    buf_append(buf, &str, 1);
+    sprintf( str, fmt, def );
+    buf_append( buf, &str, 1 );
     return buf;
 }
 
 /* create buf with 0 elements, each of size elem_size. */
 void
-buf_init(struct Buf *buf, size_t elem_size)
-{
-    buf->elts = (void *)0;
+buf_init( struct Buf * buf, size_t elem_size ) {
+    buf->elts = ( void * )0;
     buf->nelts = 0;
     buf->elt_size = elem_size;
     buf->nmax = 0;
@@ -421,13 +406,12 @@ buf_init(struct Buf *buf, size_t elem_size)
 
 /* frees memory */
 void
-buf_destroy(struct Buf *buf)
-{
-    if(buf && buf->elts) {
-        free(buf->elts);
+buf_destroy( struct Buf * buf ) {
+    if( buf && buf->elts ) {
+        free( buf->elts );
     }
-    if(buf) {
-        buf->elts = (void *)0;
+    if( buf ) {
+        buf->elts = ( void * )0;
     }
 }
 
@@ -437,32 +421,31 @@ buf_destroy(struct Buf *buf)
  * We grow by mod(512) boundaries.
  */
 struct Buf *
-buf_append(struct Buf *buf, const void *ptr, int n_elem)
-{
+buf_append( struct Buf * buf, const void * ptr, int n_elem ) {
     int n_alloc = 0;
 
-    if(!ptr || n_elem == 0) {
+    if( !ptr || n_elem == 0 ) {
         return buf;
     }
 
     /* May need to alloc more. */
-    if(n_elem + buf->nelts > buf->nmax) {
+    if( n_elem + buf->nelts > buf->nmax ) {
         /* exact amount needed... */
-        n_alloc = (n_elem + buf->nelts) * buf->elt_size;
+        n_alloc = ( n_elem + buf->nelts ) * buf->elt_size;
 
         /* ...plus some extra */
-        if(((n_alloc * buf->elt_size) % 512) != 0 && buf->elt_size < 512) {
-            n_alloc += (512 - ((n_alloc * buf->elt_size) % 512)) / buf->elt_size;
+        if( ( ( n_alloc * buf->elt_size ) % 512 ) != 0 && buf->elt_size < 512 ) {
+            n_alloc += ( 512 - ( ( n_alloc * buf->elt_size ) % 512 ) ) / buf->elt_size;
         }
-        if(!buf->elts) {
-            buf->elts = allocate_array(n_alloc, buf->elt_size);
+        if( !buf->elts ) {
+            buf->elts = allocate_array( n_alloc, buf->elt_size );
         } else {
-            buf->elts = reallocate_array(buf->elts, n_alloc, buf->elt_size);
+            buf->elts = reallocate_array( buf->elts, n_alloc, buf->elt_size );
         }
         buf->nmax = n_alloc;
     }
-    memcpy((char *)buf->elts + buf->nelts * buf->elt_size, ptr,
-           n_elem * buf->elt_size);
+    memcpy( ( char * )buf->elts + buf->nelts * buf->elt_size, ptr,
+            n_elem * buf->elt_size );
 
     buf->nelts += n_elem;
 
@@ -476,69 +459,65 @@ buf_append(struct Buf *buf, const void *ptr, int n_elem)
 
 /* get pointer to the start of the first element */
 static char *
-bufferFirstElt(struct Buf *buf)
-{
-    return (char *)buf->elts;
+bufferFirstElt( struct Buf * buf ) {
+    return ( char * )buf->elts;
 }
 
 /* get pointer to the start of the last element */
 static char *
-bufferLastElt(struct Buf *buf)
-{
-    if(buf->nelts < 1) {
+bufferLastElt( struct Buf * buf ) {
+    if( buf->nelts < 1 ) {
         return NULL;
     }
-    return bufferFirstElt(buf) + buf->nelts - 1;
+    return bufferFirstElt( buf ) + buf->nelts - 1;
 }
 
 static void
-bufferAppendChar(struct Buf *buf, char c)
-{
-    char *cp = &c;
-    buf_append(buf, cp, 1);
+bufferAppendChar( struct Buf * buf, char c ) {
+    char * cp = &c;
+    buf_append( buf, cp, 1 );
 }
 
 /* Copy up to n input characters to the end of scanner buffer. If EOF is
  * encountered before n characters are copied, scanner->atEOI flag is set.
  */
 static void
-bufferAppend(perplex_t scanner, size_t n)
-{
-    struct Buf *buf;
-    FILE *in;
+bufferAppend( perplex_t scanner, size_t n ) {
+    struct Buf * buf;
+    FILE * in;
     size_t i;
     int c;
-    char *bufStart;
+    char * bufStart;
     size_t markerOffset, tokenStartOffset, cursorOffset;
 
     buf = scanner->buffer;
     in = scanner->inFile;
 
     /* save marker offsets */
-    bufStart = (char *)buf->elts;
-    cursorOffset = (size_t)(scanner->cursor - bufStart);
-    markerOffset = (size_t)(scanner->marker - bufStart);
-    tokenStartOffset = (size_t)(scanner->tokenStart - bufStart);
+    bufStart = ( char * )buf->elts;
+    cursorOffset = ( size_t )( scanner->cursor - bufStart );
+    markerOffset = ( size_t )( scanner->marker - bufStart );
+    tokenStartOffset = ( size_t )( scanner->tokenStart - bufStart );
 
     /* remove last (null) element */
     buf->nelts--;
 
-    for(i = 0; i < n; i++) {
-        if((c = fgetc(in)) == EOF) {
+    for( i = 0; i < n; i++ ) {
+        if( ( c = fgetc( in ) ) == EOF ) {
             scanner->atEOI = 1;
             break;
         }
-        bufferAppendChar(buf, c);
+        bufferAppendChar( buf, c );
     }
 
     /* (scanner->null - eltSize) should be the last input element,
      * we put a literal null after this element for debugging
      */
-    bufferAppendChar(buf, '\0');
-    scanner->null = bufferLastElt(buf);
+    bufferAppendChar( buf, '\0' );
+    scanner->null = bufferLastElt( buf );
 
     /* update markers in case append caused buffer to be reallocated */
-    bufStart = (char *)buf->elts;
+    bufStart = ( char * )buf->elts;
     scanner->cursor = bufStart + cursorOffset;
     scanner->marker = bufStart + markerOffset;
     scanner->tokenStart = bufStart + tokenStartOffset;
@@ -546,72 +525,70 @@ bufferAppend(perplex_t scanner, size_t n)
 
 /* Appends up to n characters of input to scanner buffer. */
 static void
-bufferFill(perplex_t scanner, size_t n)
-{
-    struct Buf *buf;
+bufferFill( perplex_t scanner, size_t n ) {
+    struct Buf * buf;
     size_t totalElts, usedElts, freeElts;
 
-    if(scanner->atEOI) {
+    if( scanner->atEOI ) {
         /* nothing to add to buffer */
         return;
     }
 
     buf = scanner->buffer;
 
-    totalElts = (size_t)buf->nmax;
-    usedElts = (size_t)buf->nelts;
+    totalElts = ( size_t )buf->nmax;
+    usedElts = ( size_t )buf->nelts;
     freeElts = totalElts - usedElts;
 
     /* not enough room for append, shift buffer contents to avoid realloc */
-    if(n > freeElts) {
-        void *bufFirst, *scannerFirst, *tokenStart, *marker, *null;
+    if( n > freeElts ) {
+        void * bufFirst, *scannerFirst, *tokenStart, *marker, *null;
         size_t bytesInUse, shiftSize;
 
-        tokenStart = (void *)scanner->tokenStart;
-        marker = (void *)scanner->marker;
-        null = (void *)scanner->null;
+        tokenStart = ( void * )scanner->tokenStart;
+        marker = ( void * )scanner->marker;
+        null = ( void * )scanner->null;
 
-        bufFirst = bufferFirstElt(buf);
+        bufFirst = bufferFirstElt( buf );
 
         /* Find first buffer element still in use by scanner. Will be
          * tokenStart unless backtracking marker is in use.
          */
         scannerFirst = tokenStart;
-        if(marker >= bufFirst && marker < tokenStart) {
+        if( marker >= bufFirst && marker < tokenStart ) {
             scannerFirst = marker;
         }
 
         /* bytes of input being used by scanner */
-        bytesInUse = (size_t)null - (size_t)scannerFirst + 1;
+        bytesInUse = ( size_t )null - ( size_t )scannerFirst + 1;
 
         /* copy in-use elements to start of buffer */
-        memmove(bufFirst, scannerFirst, bytesInUse);
+        memmove( bufFirst, scannerFirst, bytesInUse );
 
         /* update number of elements */
         buf->nelts = bytesInUse / buf->elt_size;
 
         /* update markers */
-        shiftSize = (size_t)scannerFirst - (size_t)bufFirst;
+        shiftSize = ( size_t )scannerFirst - ( size_t )bufFirst;
         scanner->marker     -= shiftSize;
         scanner->cursor     -= shiftSize;
         scanner->null       -= shiftSize;
         scanner->tokenStart -= shiftSize;
     }
-    bufferAppend(scanner, n);
+    bufferAppend( scanner, n );
 }
 
 static char *
-getTokenText(perplex_t scanner)
-{
+getTokenText( perplex_t scanner ) {
     int tokenChars = scanner->cursor - scanner->tokenStart;
 
-    if(scanner->tokenText != NULL) {
-        free(scanner->tokenText);
+    if( scanner->tokenText != NULL ) {
+        free( scanner->tokenText );
     }
 
-    scanner->tokenText = (char *)malloc(sizeof(char) * (tokenChars + 1));
+    scanner->tokenText = ( char * )malloc( sizeof( char ) * ( tokenChars + 1 ) );
 
-    memcpy(scanner->tokenText, scanner->tokenStart, tokenChars);
+    memcpy( scanner->tokenText, scanner->tokenStart, tokenChars );
     scanner->tokenText[tokenChars] = '\0';
 
     return scanner->tokenText;
@@ -624,85 +601,78 @@ getTokenText(perplex_t scanner)
 #define      yyextra  scanner->extra
 
 static perplex_t
-newScanner()
-{
+newScanner() {
     perplex_t scanner;
-    scanner = (perplex_t)calloc(1, sizeof(struct perplex));
+    scanner = ( perplex_t )calloc( 1, sizeof( struct perplex ) );
 
     return scanner;
 }
 
 static void
-initBuffer(perplex_t scanner)
-{
-    scanner->buffer = (struct Buf *)malloc(sizeof(struct Buf));
-    buf_init(scanner->buffer, sizeof(char));
+initBuffer( perplex_t scanner ) {
+    scanner->buffer = ( struct Buf * )malloc( sizeof( struct Buf ) );
+    buf_init( scanner->buffer, sizeof( char ) );
 }
 
 /* public functions */
 
 perplex_t
-perplexStringScanner(char *firstChar, size_t numChars)
-{
+perplexStringScanner( char * firstChar, size_t numChars ) {
     size_t i;
-    struct Buf *buf;
+    struct Buf * buf;
     perplex_t scanner = newScanner();
 
     scanner->inFile = NULL;
 
-    initBuffer(scanner);
+    initBuffer( scanner );
     buf = scanner->buffer;
 
     /* copy string to buffer */
-    for(i = 0; i < numChars; i++) {
-        bufferAppendChar(buf, firstChar[i]);
+    for( i = 0; i < numChars; i++ ) {
+        bufferAppendChar( buf, firstChar[i] );
     }
-    bufferAppendChar(buf, '\0');
+    bufferAppendChar( buf, '\0' );
 
-    scanner->marker = scanner->cursor = bufferFirstElt(buf);
-    scanner->null = bufferLastElt(buf);
+    scanner->marker = scanner->cursor = bufferFirstElt( buf );
+    scanner->null = bufferLastElt( buf );
     scanner->atEOI = 1;
 
     return scanner;
 }
 
 perplex_t
-perplexFileScanner(FILE *input)
-{
-    char *bufFirst;
+perplexFileScanner( FILE * input ) {
+    char * bufFirst;
     perplex_t scanner = newScanner();
 
     scanner->inFile = input;
 
-    initBuffer(scanner);
-    bufferAppendChar(scanner->buffer, '\0');
+    initBuffer( scanner );
+    bufferAppendChar( scanner->buffer, '\0' );
 
-    bufFirst = bufferFirstElt(scanner->buffer);
+    bufFirst = bufferFirstElt( scanner->buffer );
     scanner->null = scanner->marker = scanner->cursor = bufFirst;
 
     return scanner;
 }
 
 void
-perplexFree(perplex_t scanner)
-{
-    if(scanner->buffer != NULL) {
-        buf_destroy(scanner->buffer);
-        free(scanner->buffer);
+perplexFree( perplex_t scanner ) {
+    if( scanner->buffer != NULL ) {
+        buf_destroy( scanner->buffer );
+        free( scanner->buffer );
     }
 
-    free(scanner);
+    free( scanner );
 }
 
 void
-perplexSetExtra(perplex_t scanner, void *extra)
-{
+perplexSetExtra( perplex_t scanner, void * extra ) {
     scanner->extra = extra;
 }
 
 void *
-perplexGetExtra(perplex_t scanner)
-{
+perplexGetExtra( perplex_t scanner ) {
     return scanner->extra;
 }
 
@@ -712,33 +682,32 @@ perplexGetExtra(perplex_t scanner)
 *  unchanged.
  */
 void
-perplexUnput(perplex_t scanner, char c)
-{
-    struct Buf *buf;
-    char *curr, *cursor, *bufStart;
+perplexUnput( perplex_t scanner, char c ) {
+    struct Buf * buf;
+    char * curr, *cursor, *bufStart;
     size_t markerOffset, tokenStartOffset, cursorOffset;
 
     buf = scanner->buffer;
 
     /* save marker offsets */
-    bufStart = bufferFirstElt(buf);
-    cursorOffset = (size_t)(scanner->cursor - bufStart);
-    markerOffset = (size_t)(scanner->marker - bufStart);
-    tokenStartOffset = (size_t)(scanner->tokenStart - bufStart);
+    bufStart = bufferFirstElt( buf );
+    cursorOffset = ( size_t )( scanner->cursor - bufStart );
+    markerOffset = ( size_t )( scanner->marker - bufStart );
+    tokenStartOffset = ( size_t )( scanner->tokenStart - bufStart );
 
     /* append character to create room for shift */
-    bufferAppendChar(buf, '\0');
-    scanner->null = bufferLastElt(buf);
+    bufferAppendChar( buf, '\0' );
+    scanner->null = bufferLastElt( buf );
 
     /* update markers in case append caused buffer to be reallocated */
-    bufStart = bufferFirstElt(buf);
+    bufStart = bufferFirstElt( buf );
     scanner->cursor = bufStart + cursorOffset;
     scanner->marker = bufStart + markerOffset;
     scanner->tokenStart = bufStart + tokenStartOffset;
 
     /* input from cursor to null is shifted to the right */
     cursor = scanner->cursor;
-    for(curr = scanner->null; curr != cursor; curr--) {
+    for( curr = scanner->null; curr != cursor; curr-- ) {
         curr[0] = curr[-1];
     }
 
@@ -749,14 +718,12 @@ perplexUnput(perplex_t scanner, char c)
 #ifdef PERPLEX_USING_CONDITIONS
 /* start-condition support */
 static void
-setCondition(perplex_t scanner, int cond)
-{
+setCondition( perplex_t scanner, int cond ) {
     scanner->condition = cond;
 }
 
 static int
-getCondition(perplex_t scanner)
-{
+getCondition( perplex_t scanner ) {
     return scanner->condition;
 }
 
@@ -779,11 +746,10 @@ PERPLEX_PUBLIC_LEXER {
 
     scanner->tokenText = NULL;
 
-    ret = PERPLEX_LEXER_private(scanner);
+    ret = PERPLEX_LEXER_private( scanner );
 
-    if(scanner->tokenText != NULL)
-    {
-        free(scanner->tokenText);
+    if( scanner->tokenText != NULL ) {
+        free( scanner->tokenText );
         scanner->tokenText = NULL;
     }
 
@@ -796,15 +762,14 @@ PERPLEX_PRIVATE_LEXER {
 
     PERPLEX_ON_ENTER;
 
-    while(1)
-    {
-        if(scanner->atEOI && scanner->cursor >= scanner->null) {
+    while( 1 ) {
+        if( scanner->atEOI && scanner->cursor >= scanner->null ) {
             return YYEOF;
         }
 
         {
             unsigned int yyaccept = 0;
-            switch(YYGETCONDITION) {
+            switch( YYGETCONDITION ) {
                 case 0:
                     goto yyc_0;
                 case code:
@@ -817,16 +782,16 @@ PERPLEX_PRIVATE_LEXER {
             /* *********************************** */
 yyc_0:
 
-            YYSETCONDITION(code);
+            YYSETCONDITION( code );
             {
             }
             /* *********************************** */
 yyc_code:
-            if((scanner->null - scanner->cursor) < 4) {
-                YYFILL(4);
+            if( ( scanner->null - scanner->cursor ) < 4 ) {
+                YYFILL( 4 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy8;
@@ -972,17 +937,17 @@ yy9:
             }
 yy11:
             yyaccept = 0;
-            yych = *(scanner->marker = ++scanner->cursor);
+            yych = *( scanner->marker = ++scanner->cursor );
             goto yy121;
 yy12:
             ++scanner->cursor;
 yy13: {
-                ERRORreport_with_line(UNEXPECTED_CHARACTER, yylineno, yytext[0]);
+                ERRORreport_with_line( UNEXPECTED_CHARACTER, yylineno, yytext[0] );
                 IGNORE_TOKEN;
             }
 yy14:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '0':
                 case '1':
                     goto yy117;
@@ -991,11 +956,11 @@ yy14:
             }
 yy15:
             yyaccept = 0;
-            yych = *(scanner->marker = ++scanner->cursor);
+            yych = *( scanner->marker = ++scanner->cursor );
             goto yy112;
 yy16:
             ++scanner->cursor;
-            switch((yych = *scanner->cursor)) {
+            switch( ( yych = *scanner->cursor ) ) {
                 case '*':
                     goto yy109;
                 default:
@@ -1011,7 +976,7 @@ yy18:
             }
 yy20:
             ++scanner->cursor;
-            switch((yych = *scanner->cursor)) {
+            switch( ( yych = *scanner->cursor ) ) {
                 case ')':
                     goto yy105;
                 case '*':
@@ -1034,8 +999,8 @@ yy24:
             }
 yy26:
             yyaccept = 1;
-            yych = *(scanner->marker = ++scanner->cursor);
-            switch(yych) {
+            yych = *( scanner->marker = ++scanner->cursor );
+            switch( yych ) {
                 case '-':
                     goto yy101;
                 default:
@@ -1056,7 +1021,7 @@ yy30:
             }
 yy32:
             ++scanner->cursor;
-            switch((yych = *scanner->cursor)) {
+            switch( ( yych = *scanner->cursor ) ) {
                 case '.':
                     goto yy94;
                 case '0':
@@ -1074,12 +1039,12 @@ yy32:
                     goto yy33;
             }
 yy33: {
-                return SCANprocess_integer_literal(yytext);
+                return SCANprocess_integer_literal( yytext );
             }
 yy34:
             yyaccept = 2;
-            yych = *(scanner->marker = ++scanner->cursor);
-            switch(yych) {
+            yych = *( scanner->marker = ++scanner->cursor );
+            switch( yych ) {
                 case '<':
                     goto yy84;
                 case '=':
@@ -1092,8 +1057,8 @@ yy35: {
             }
 yy36:
             yyaccept = 3;
-            yych = *(scanner->marker = ++scanner->cursor);
-            switch(yych) {
+            yych = *( scanner->marker = ++scanner->cursor );
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy76;
@@ -1103,11 +1068,11 @@ yy36:
                     goto yy37;
             }
 yy37: {
-                return SCANprocess_semicolon(yytext, 0);
+                return SCANprocess_semicolon( yytext, 0 );
             }
 yy38:
             ++scanner->cursor;
-            switch((yych = *scanner->cursor)) {
+            switch( ( yych = *scanner->cursor ) ) {
                 case '*':
                     goto yy74;
                 case '=':
@@ -1127,7 +1092,7 @@ yy40:
             }
 yy42:
             ++scanner->cursor;
-            switch((yych = *scanner->cursor)) {
+            switch( ( yych = *scanner->cursor ) ) {
                 case '=':
                     goto yy68;
                 default:
@@ -1146,7 +1111,7 @@ yy46:
             yych = *scanner->cursor;
             goto yy67;
 yy47: {
-                return SCANprocess_identifier_or_keyword(yytext);
+                return SCANprocess_identifier_or_keyword( yytext );
             }
 yy48:
             ++scanner->cursor;
@@ -1168,8 +1133,8 @@ yy54:
             yych = *scanner->cursor;
             goto yy65;
 yy55: {
-                ERRORreport_with_line(BAD_IDENTIFIER, yylineno, yytext);
-                return SCANprocess_identifier_or_keyword(yytext);
+                ERRORreport_with_line( BAD_IDENTIFIER, yylineno, yytext );
+                return SCANprocess_identifier_or_keyword( yytext );
             }
 yy56:
             ++scanner->cursor;
@@ -1178,7 +1143,7 @@ yy56:
             }
 yy58:
             ++scanner->cursor;
-            switch((yych = *scanner->cursor)) {
+            switch( ( yych = *scanner->cursor ) ) {
                 case '|':
                     goto yy62;
                 default:
@@ -1199,12 +1164,12 @@ yy62:
             }
 yy64:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
 yy65:
-            switch(yych) {
+            switch( yych ) {
                 case '0':
                 case '1':
                 case '2':
@@ -1274,12 +1239,12 @@ yy65:
             }
 yy66:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
 yy67:
-            switch(yych) {
+            switch( yych ) {
                 case '0':
                 case '1':
                 case '2':
@@ -1369,11 +1334,11 @@ yy74:
             }
 yy76:
             ++scanner->cursor;
-            if((scanner->null - scanner->cursor) < 2) {
-                YYFILL(2);
+            if( ( scanner->null - scanner->cursor ) < 2 ) {
+                YYFILL( 2 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy76;
@@ -1384,7 +1349,7 @@ yy76:
             }
 yy78:
             scanner->cursor = scanner->marker;
-            switch(yyaccept) {
+            switch( yyaccept ) {
                 case 0:
                     goto yy7;
                 case 1:
@@ -1400,7 +1365,7 @@ yy78:
             }
 yy79:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '-':
                     goto yy80;
                 default:
@@ -1408,11 +1373,11 @@ yy79:
             }
 yy80:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\n':
                     goto yy82;
                 default:
@@ -1422,11 +1387,11 @@ yy82:
             ++scanner->cursor;
             {
                 NEWLINE;
-                return SCANprocess_semicolon(yytext, 1);
+                return SCANprocess_semicolon( yytext, 1 );
             }
 yy84:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '>':
                     goto yy89;
                 default:
@@ -1434,7 +1399,7 @@ yy84:
             }
 yy85:
             ++scanner->cursor;
-            switch((yych = *scanner->cursor)) {
+            switch( ( yych = *scanner->cursor ) ) {
                 case ':':
                     goto yy87;
                 default:
@@ -1450,7 +1415,7 @@ yy87:
             }
 yy89:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case ':':
                     goto yy90;
                 default:
@@ -1463,11 +1428,11 @@ yy90:
             }
 yy92:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '.':
                     goto yy94;
                 case '0':
@@ -1487,11 +1452,11 @@ yy92:
 yy94:
             yyaccept = 4;
             scanner->marker = ++scanner->cursor;
-            if((scanner->null - scanner->cursor) < 3) {
-                YYFILL(3);
+            if( ( scanner->null - scanner->cursor ) < 3 ) {
+                YYFILL( 3 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '0':
                 case '1':
                 case '2':
@@ -1510,11 +1475,11 @@ yy94:
                     goto yy96;
             }
 yy96: {
-                return SCANprocess_real_literal(yytext);
+                return SCANprocess_real_literal( yytext );
             }
 yy97:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '+':
                 case '-':
                     goto yy98;
@@ -1534,7 +1499,7 @@ yy97:
             }
 yy98:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '0':
                 case '1':
                 case '2':
@@ -1551,11 +1516,11 @@ yy98:
             }
 yy99:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '0':
                 case '1':
                 case '2':
@@ -1572,11 +1537,11 @@ yy99:
             }
 yy101:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\n':
                     goto yy103;
                 default:
@@ -1586,13 +1551,13 @@ yy103:
             ++scanner->cursor;
             {
                 NEWLINE;
-                SCANsave_comment(yytext);
+                SCANsave_comment( yytext );
                 IGNORE_TOKEN;
             }
 yy105:
             ++scanner->cursor;
             {
-                ERRORreport_with_line(UNMATCHED_CLOSE_COMMENT, yylineno);
+                ERRORreport_with_line( UNMATCHED_CLOSE_COMMENT, yylineno );
                 IGNORE_TOKEN;
             }
 yy107:
@@ -1602,9 +1567,9 @@ yy107:
             }
 yy109:
             ++scanner->cursor;
-            YYSETCONDITION(comment);
+            YYSETCONDITION( comment );
             {
-                if(nesting_level < MAX_NESTED_COMMENTS) {
+                if( nesting_level < MAX_NESTED_COMMENTS ) {
                     open_comment[nesting_level].line = yylineno;
                     open_comment[nesting_level].filename = current_filename;
                 }
@@ -1613,12 +1578,12 @@ yy109:
             }
 yy111:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
 yy112:
-            switch(yych) {
+            switch( yych ) {
                 case '\n':
                     goto yy115;
                 case '\'':
@@ -1629,33 +1594,33 @@ yy112:
 yy113:
             yyaccept = 5;
             scanner->marker = ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\'':
                     goto yy111;
                 default:
                     goto yy114;
             }
 yy114: {
-                return SCANprocess_string(yytext);
+                return SCANprocess_string( yytext );
             }
 yy115:
             ++scanner->cursor;
             {
-                ERRORreport_with_line(UNTERMINATED_STRING, LINENO_FUDGE);
+                ERRORreport_with_line( UNTERMINATED_STRING, LINENO_FUDGE );
                 NEWLINE;
-                return SCANprocess_string(yytext);
+                return SCANprocess_string( yytext );
             }
 yy117:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '0':
                 case '1':
                     goto yy117;
@@ -1663,16 +1628,16 @@ yy117:
                     goto yy119;
             }
 yy119: {
-                return SCANprocess_binary_literal(yytext);
+                return SCANprocess_binary_literal( yytext );
             }
 yy120:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
 yy121:
-            switch(yych) {
+            switch( yych ) {
                 case '\n':
                     goto yy122;
                 case '"':
@@ -1683,23 +1648,23 @@ yy121:
 yy122:
             ++scanner->cursor;
             {
-                ERRORreport_with_line(UNTERMINATED_STRING, LINENO_FUDGE);
+                ERRORreport_with_line( UNTERMINATED_STRING, LINENO_FUDGE );
                 NEWLINE;
-                return SCANprocess_encoded_string(yytext);
+                return SCANprocess_encoded_string( yytext );
             }
 yy124:
             ++scanner->cursor;
             {
-                return SCANprocess_encoded_string(yytext);
+                return SCANprocess_encoded_string( yytext );
             }
 yy126:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
 yy127:
-            switch(yych) {
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy126;
@@ -1708,11 +1673,11 @@ yy127:
             }
             /* *********************************** */
 yyc_comment:
-            if((scanner->null - scanner->cursor) < 2) {
-                YYFILL(2);
+            if( ( scanner->null - scanner->cursor ) < 2 ) {
+                YYFILL( 2 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy132;
@@ -1735,7 +1700,7 @@ yy131:
             goto yy144;
 yy132:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy145;
@@ -1750,7 +1715,7 @@ yy133:
             }
 yy135:
             ++scanner->cursor;
-            switch((yych = *scanner->cursor)) {
+            switch( ( yych = *scanner->cursor ) ) {
                 case '*':
                     goto yy141;
                 default:
@@ -1764,7 +1729,7 @@ yy137:
             goto yy136;
 yy138:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case ')':
                     goto yy139;
                 default:
@@ -1773,15 +1738,15 @@ yy138:
 yy139:
             ++scanner->cursor;
             {
-                if(0 == --nesting_level) {
-                    YYSETCONDITION(code);
+                if( 0 == --nesting_level ) {
+                    YYSETCONDITION( code );
                 }
                 IGNORE_TOKEN;
             }
 yy141:
             ++scanner->cursor;
             {
-                if(nesting_level < MAX_NESTED_COMMENTS) {
+                if( nesting_level < MAX_NESTED_COMMENTS ) {
                     open_comment[nesting_level].line = yylineno;
                     open_comment[nesting_level].filename = current_filename;
                 }
@@ -1790,12 +1755,12 @@ yy141:
             }
 yy143:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
 yy144:
-            switch(yych) {
+            switch( yych ) {
                 case '\n':
                 case '(':
                 case ')':
@@ -1806,11 +1771,11 @@ yy144:
             }
 yy145:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy145;
@@ -1824,11 +1789,11 @@ yy145:
             }
             /* *********************************** */
 yyc_return_end_schema:
-            if((scanner->null - scanner->cursor) < 2) {
-                YYFILL(2);
+            if( ( scanner->null - scanner->cursor ) < 2 ) {
+                YYFILL( 2 );
             }
             yych = *scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy152;
@@ -1861,7 +1826,7 @@ yy153:
             }
 yy155:
             yych = *++scanner->cursor;
-            switch(yych) {
+            switch( yych ) {
                 case '*':
                     goto yy158;
                 default:
@@ -1869,15 +1834,15 @@ yy155:
             }
 yy156:
             ++scanner->cursor;
-            YYSETCONDITION(code);
+            YYSETCONDITION( code );
             {
                 return TOK_END_SCHEMA;
             }
 yy158:
             ++scanner->cursor;
-            YYSETCONDITION(comment);
+            YYSETCONDITION( comment );
             {
-                if(nesting_level < MAX_NESTED_COMMENTS) {
+                if( nesting_level < MAX_NESTED_COMMENTS ) {
                     open_comment[nesting_level].line = yylineno;
                     open_comment[nesting_level].filename = current_filename;
                 }
@@ -1886,12 +1851,12 @@ yy158:
             }
 yy160:
             ++scanner->cursor;
-            if(scanner->null <= scanner->cursor) {
-                YYFILL(1);
+            if( scanner->null <= scanner->cursor ) {
+                YYFILL( 1 );
             }
             yych = *scanner->cursor;
 yy161:
-            switch(yych) {
+            switch( yych ) {
                 case '\t':
                 case ' ':
                     goto yy160;
@@ -1905,9 +1870,8 @@ yy161:
 
 /* start code */
 void
-SCANskip_to_end_schema(perplex_t scanner)
-{
-    while(yylex(scanner) != TOK_END_SCHEMA);
-    perplexUnput(scanner, 'X'); /* any old character */
-    YYSETCONDITION(return_end_schema);
+SCANskip_to_end_schema( perplex_t scanner ) {
+    while( yylex( scanner ) != TOK_END_SCHEMA );
+    perplexUnput( scanner, 'X' ); /* any old character */
+    YYSETCONDITION( return_end_schema );
 }

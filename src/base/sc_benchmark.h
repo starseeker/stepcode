@@ -37,15 +37,14 @@ SC_BASE_EXPORT benchVals getMemAndTime();
  * depends on getMemAndTime() above - may not work on all platforms.
  */
 
-class SC_BASE_EXPORT benchmark
-{
+class SC_BASE_EXPORT benchmark {
     protected:
         benchVals initialVals, laterVals;
         bool debug, stopped;
-        char *benchVals_str = NULL;
+        char * benchVals_str = NULL;
 
     public:
-        benchmark(bool debugMessages = true);
+        benchmark( bool debugMessages = true );
 
         /// if 'stopped' is false, uses str(true) to print to ostream
         ~benchmark();
@@ -54,13 +53,13 @@ class SC_BASE_EXPORT benchmark
         void stop();
 
         /// converts data member 'laterVals' into a string and returns it
-        const char *str();
+        const char * str();
 
         /// outputs result of str() on ostream 'ostr'
         void out();
 
         /// converts 'bv' into a string, prefixed by data member 'descr'
-        const char *str(const benchVals &bv);
+        const char * str( const benchVals & bv );
 };
 
 

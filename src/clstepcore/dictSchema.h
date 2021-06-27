@@ -9,16 +9,15 @@
 
 #include "dictionaryInstance.h"
 
-typedef  SDAI_Model_contents_ptr(* ModelContentsCreator)();
+typedef  SDAI_Model_contents_ptr( * ModelContentsCreator )();
 
 /**
  * \class Schema (was SchemaDescriptor) - a class of this type is generated and contains schema info.
  */
-class SC_CORE_EXPORT Schema : public Dictionary_instance
-{
+class SC_CORE_EXPORT Schema : public Dictionary_instance {
 
     protected:
-        const char   *_name;
+        const char  * _name;
         EntityDescriptorList _entList; // list of entities in the schema
         EntityDescriptorList _entsWithInverseAttrs;
         TypeDescriptorList _typeList; // list of types in the schema
@@ -43,125 +42,104 @@ class SC_CORE_EXPORT Schema : public Dictionary_instance
     public:
         ModelContentsCreator CreateNewModelContents;
 
-        Schema(const char *schemaName);
+        Schema( const char * schemaName );
         virtual ~Schema();
 
-        void AssignModelContentsCreator(ModelContentsCreator f = 0)
-        {
+        void AssignModelContentsCreator( ModelContentsCreator f = 0 ) {
             CreateNewModelContents = f;
         }
 
-        const char *Name() const
-        {
+        const char * Name() const {
             return _name;
         }
-        void Name(const char   *n)
-        {
+        void Name( const char  * n ) {
             _name = n;
         }
 
-        Interface_spec &interface_()
-        {
+        Interface_spec & interface_() {
             return _interface;
         }
 
-        Interface_spec__set_var use_interface_list_()
-        {
+        Interface_spec__set_var use_interface_list_() {
             return
                 _use_interface_list;
         }
 
-        Interface_spec__set_var ref_interface_list_()
-        {
+        Interface_spec__set_var ref_interface_list_() {
             return _ref_interface_list;
         }
 
-        std::vector< std::string > function_list_()
-        {
+        std::vector< std::string > function_list_() {
             return _function_list;
         }
 
-        void AddFunction(const std::string &f);
+        void AddFunction( const std::string & f );
 
-        Global_rule__set_var global_rules_()   // const
-        {
+        Global_rule__set_var global_rules_() { // const
             return _global_rules;
         }
 
-        void AddGlobal_rule(Global_rule_ptr gr);
+        void AddGlobal_rule( Global_rule_ptr gr );
 
-        void global_rules_(Global_rule__set_var &grs);    // not implemented
+        void global_rules_( Global_rule__set_var & grs ); // not implemented
 
-        std::vector< std::string > procedure_list_()
-        {
+        std::vector< std::string > procedure_list_() {
             return _procedure_list;
         }
 
-        void AddProcedure(const std::string &p);
+        void AddProcedure( const std::string & p );
 
-        EntityDescLinkNode *AddEntity(EntityDescriptor *ed)
-        {
-            return _entList.AddNode(ed);
+        EntityDescLinkNode * AddEntity( EntityDescriptor * ed ) {
+            return _entList.AddNode( ed );
         }
         /// must be called in addition to AddEntity()
-        EntityDescLinkNode *AddEntityWInverse(EntityDescriptor *ed)
-        {
-            return _entsWithInverseAttrs.AddNode(ed);
+        EntityDescLinkNode * AddEntityWInverse( EntityDescriptor * ed ) {
+            return _entsWithInverseAttrs.AddNode( ed );
         }
 
-        TypeDescLinkNode *AddType(TypeDescriptor *td)
-        {
-            return _typeList.AddNode(td);
+        TypeDescLinkNode * AddType( TypeDescriptor * td ) {
+            return _typeList.AddNode( td );
         }
-        TypeDescLinkNode *AddUnnamedType(TypeDescriptor *td)
-        {
-            return _unnamed_typeList.AddNode(td);
+        TypeDescLinkNode * AddUnnamedType( TypeDescriptor * td ) {
+            return _unnamed_typeList.AddNode( td );
         }
 
-        const EntityDescriptorList *Entities() const
-        {
+        const EntityDescriptorList * Entities() const {
             return & _entList;
         }
-        const EntityDescriptorList *EntsWInverse() const
-        {
+        const EntityDescriptorList * EntsWInverse() const {
             return & _entsWithInverseAttrs;
         }
-        const TypeDescriptorList *Types() const
-        {
+        const TypeDescriptorList * Types() const {
             return & _typeList;
         }
-        const TypeDescriptorList *UnnamedTypes() const
-        {
+        const TypeDescriptorList * UnnamedTypes() const {
             return & _unnamed_typeList;
         }
-        EntityDescriptorList *Entities()
-        {
+        EntityDescriptorList * Entities() {
             return & _entList;
         }
-        EntityDescriptorList *EntsWInverse()
-        {
+        EntityDescriptorList * EntsWInverse() {
             return & _entsWithInverseAttrs;
         }
-        TypeDescriptorList *Types()
-        {
+        TypeDescriptorList * Types() {
             return & _typeList;
         }
-        TypeDescriptorList *UnnamedTypes()
-        {
+        TypeDescriptorList * UnnamedTypes() {
             return & _unnamed_typeList;
         }
 
         // the whole schema
-        void GenerateExpress(ostream &out) const;
+        void GenerateExpress( ostream & out ) const;
 
         // USE, REFERENCE definitions
-        void GenerateUseRefExpress(ostream &out) const;
+        void GenerateUseRefExpress( ostream & out ) const;
 
         // TYPE definitions
-        void GenerateTypesExpress(ostream &out) const;
+        void GenerateTypesExpress( ostream & out ) const;
 
         // Entity definitions
-        void GenerateEntitiesExpress(ostream &out) const;
+        void GenerateEntitiesExpress( ostream & out ) const;
 };
 
 typedef Schema SchemaDescriptor;

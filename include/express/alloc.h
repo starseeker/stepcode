@@ -35,7 +35,7 @@
 typedef long Align;
 
 union freelist {
-    union freelist *next;   /**< next block on freelist */
+    union freelist * next;  /**< next block on freelist */
     char memory;        /**< user data */
     Align aligner;      /**< force alignment of blocks */
 };
@@ -48,17 +48,17 @@ struct freelist_head {
     int alloc;          /**< # of allocations */
     int dealloc;
     int create;         /**< number of calls to create a new freelist */
-    void *max;        /**< end of freelist */
+    void * max;       /**< end of freelist */
 #endif
     int size;           /**< size of a single elt incl. next ptr */
     int bytes;          /**< if we run out, allocate memory by this many bytes */
-    Freelist *freelist;
+    Freelist * freelist;
 #ifdef SPACE_PROFILE
     int count;
 #endif
 };
 
-char *nnew();
+char * nnew();
 
 #include "error.h"
 
@@ -75,10 +75,10 @@ extern SC_EXPRESS_EXPORT int yylineno;
         fprintf(stderr,"fedex: out of space");\
     } else {}
 
-SC_EXPRESS_EXPORT void    _ALLOCinitialize(void);
-SC_EXPRESS_EXPORT void    ALLOCinitialize(struct freelist_head *flh, unsigned int size, int alloc1, int alloc2);
-SC_EXPRESS_EXPORT void    ALLOC_destroy(struct freelist_head *, Freelist *);
-SC_EXPRESS_EXPORT void   *ALLOC_new(struct freelist_head *);
+SC_EXPRESS_EXPORT void    _ALLOCinitialize( void );
+SC_EXPRESS_EXPORT void    ALLOCinitialize( struct freelist_head * flh, unsigned int size, int alloc1, int alloc2 );
+SC_EXPRESS_EXPORT void    ALLOC_destroy( struct freelist_head *, Freelist * );
+SC_EXPRESS_EXPORT void  * ALLOC_new( struct freelist_head * );
 
 #endif /* ALLOC_H */
 

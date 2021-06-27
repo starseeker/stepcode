@@ -10,67 +10,60 @@
  *
  * TODO verify that this iterates correctly!
  */
-class superInvAttrIter
-{
+class superInvAttrIter {
     protected:
         supertypesIterator sit;
-        InverseAItr *invIter;
-        const Inverse_attribute *nextInv;
+        InverseAItr * invIter;
+        const Inverse_attribute * nextInv;
         bool isempty; ///< if true, don't try to access invIter - it is not initialized
     public:
         /// WARNING this will not iterate over the ia's in the first ed, only in its supertypes! change that?
-        superInvAttrIter(const EntityDescriptor *ed): sit(ed), invIter(0), nextInv(0), isempty(false)
-        {
+        superInvAttrIter( const EntityDescriptor * ed ): sit( ed ), invIter( 0 ), nextInv( 0 ), isempty( false ) {
             reset();
         }
-        void reset(const EntityDescriptor *ed = 0)
-        {
-            sit.reset(ed);
-            if(invIter) {
+        void reset( const EntityDescriptor * ed = 0 ) {
+            sit.reset( ed );
+            if( invIter ) {
                 delete invIter;
                 invIter = 0;
             }
-            if(sit.empty()) {
+            if( sit.empty() ) {
                 isempty = true;
             } else {
-                invIter = new InverseAItr(&(sit.current()->InverseAttr()));
+                invIter = new InverseAItr( &( sit.current()->InverseAttr() ) );
                 nextInv = invIter->NextInverse_attribute();
-                if(!nextInv) {
+                if( !nextInv ) {
                     next();
                 }
             }
         }
-        ~superInvAttrIter()
-        {
-            if(invIter) {
+        ~superInvAttrIter() {
+            if( invIter ) {
                 delete invIter;
                 invIter = 0;
             }
         }
-        const EntityDescriptor *currentEDesc()
-        {
-            if(isempty) {
+        const EntityDescriptor * currentEDesc() {
+            if( isempty ) {
                 return NULL;
             }
             return sit.current();
         }
-        bool empty()
-        {
-            if(isempty) {
+        bool empty() {
+            if( isempty ) {
                 return true;
             }
-            return (!sit.hasNext() && !nextInv);
+            return ( !sit.hasNext() && !nextInv );
         }
-        const Inverse_attribute *next()
-        {
-            if(isempty) {
+        const Inverse_attribute * next() {
+            if( isempty ) {
                 return NULL;
             }
-            const Inverse_attribute *ia = nextInv;
+            const Inverse_attribute * ia = nextInv;
             /* if we're on the last inverse attr for the current super, go to the next super
              * keep going until we find an ia or run out of supers */
-            while((0 == (nextInv = invIter->NextInverse_attribute())) && sit.hasNext()) {
-                invIter->ResetItr(&(sit.next()->InverseAttr()));
+            while( ( 0 == ( nextInv = invIter->NextInverse_attribute() ) ) && sit.hasNext() ) {
+                invIter->ResetItr( &( sit.next()->InverseAttr() ) );
             }
             return ia;
         }

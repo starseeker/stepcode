@@ -121,7 +121,7 @@ SOFTWARE.
     }
 /* -- END INTERNAL HELPER MACROS -- */
 
-typedef void (*fff_function_t)(void);
+typedef void ( *fff_function_t )( void );
 typedef struct {
     fff_function_t call_history[FFF_CALL_HISTORY_LEN];
     unsigned int call_history_idx;
