@@ -52,7 +52,7 @@ class judyS2Array {
             _judyarray = judy_clone( other._judyarray );
             _buff = new unsigned char[_maxKeyLen];
             strncpy( ( char * )_buff, ( const char * )other._buff, _maxKeyLen );
-            _buff[ _maxKeyLen ] = '\0'; //ensure that _buff is null-terminated, since strncpy won't necessarily do so
+            _buff[ _maxKeyLen - 1 ] = '\0'; //ensure that _buff is null-terminated, since strncpy won't necessarily do so
             find( _buff ); //set _lastSlot
         }
 
