@@ -41,10 +41,11 @@ STEPattribute & STEPattributeList::operator []( int n ) {
         return *( a->attr );
     }
 
-    // else
+    // else - error case: return a static error object to avoid undefined behavior
+    static STEPattribute errorAttr;
     cerr << "\nERROR in STEP Core library:  " << __FILE__ <<  ":"
          << __LINE__ << "\n" << _POC_ << "\n\n";
-    return *( STEPattribute * ) 0;
+    return errorAttr;
 }
 
 int STEPattributeList::list_length() {
