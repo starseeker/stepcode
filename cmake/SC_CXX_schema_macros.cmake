@@ -27,12 +27,10 @@ endmacro()
 
 # Create p21read_sdai_*, lazy_sdai_*, any exes listed in SC_SDAI_ADDITIONAL_EXES_SRCS
 macro(SCHEMA_EXES)
-  RELATIVE_PATH_TO_TOPLEVEL(${CMAKE_CURRENT_SOURCE_DIR} RELATIVE_PATH_COMPONENT)
-  
   # Test executables are not installed and excluded from all unless testing is enabled
   add_executable(p21read_${PROJECT_NAME}
-    "${RELATIVE_PATH_COMPONENT}/src/test/p21read/p21read.cc"
-    "${RELATIVE_PATH_COMPONENT}/src/test/p21read/sc_benchmark.cc"
+    "${SC_ROOT}/src/test/p21read/p21read.cc"
+    "${SC_ROOT}/src/test/p21read/sc_benchmark.cc"
   )
   target_link_libraries(p21read_${PROJECT_NAME} ${PROJECT_NAME} stepdai stepcore stepeditor steputils)
   if(NOT SC_ENABLE_TESTING)
@@ -41,8 +39,8 @@ macro(SCHEMA_EXES)
   
   if(NOT WIN32)
     add_executable(lazy_${PROJECT_NAME}
-      "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/lazy_test.cc"
-      "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/sc_benchmark.cc"
+      "${SC_ROOT}/src/cllazyfile/lazy_test.cc"
+      "${SC_ROOT}/src/cllazyfile/sc_benchmark.cc"
     )
     target_link_libraries(lazy_${PROJECT_NAME} ${PROJECT_NAME} steplazyfile stepdai stepcore stepeditor steputils)
     if(NOT SC_ENABLE_TESTING)
@@ -104,14 +102,14 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
   add_custom_command(OUTPUT ${sourceFiles}
     COMMAND ${CMAKE_COMMAND} -DEXE=\"$<TARGET_FILE:exp2cxx>\"  -DEXP=\"${expFile}\"
     -DONESHOT=\"${SC_GENERATE_CXX_ONESHOT}\" -DSDIR=\"${CMAKE_CURRENT_LIST_DIR}\"
-    -P ${PROJECT_SOURCE_DIR}/cmake/SC_Run_exp2cxx.cmake
+    -P ${SC_ROOT}/cmake/SC_Run_exp2cxx.cmake
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     COMMENT "[exp2cxx] Generating ${${PROJECT_NAME}_file_count} C++ files for ${PROJECT_NAME}."
   )
   include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}         ${PROJECT_SOURCE_DIR}/src/cldai          ${PROJECT_SOURCE_DIR}/src/cleditor
-    ${PROJECT_SOURCE_DIR}/src/clutils        ${PROJECT_SOURCE_DIR}/src/clstepcore     ${PROJECT_SOURCE_DIR}/src/cllazyfile
-    ${PROJECT_SOURCE_DIR}/src/cllazyfile/judy/src
+    ${CMAKE_CURRENT_SOURCE_DIR}         ${SC_ROOT}/src/cldai          ${SC_ROOT}/src/cleditor
+    ${SC_ROOT}/src/clutils        ${SC_ROOT}/src/clstepcore     ${SC_ROOT}/src/cllazyfile
+    ${SC_ROOT}/src/cllazyfile/judy/src
   )
   # Schema libraries should be installed
   if(BUILD_SHARED_LIBS)

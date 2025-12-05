@@ -67,7 +67,8 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 # Use standard GNU installation directories
 include(GNUInstallDirs)
 
-# This variable is used by generated schema CMakeLists.txt files
+# These variables are used by generated schema CMakeLists.txt files
+set(SC_ROOT "${PROJECT_SOURCE_DIR}")
 set(SC_CMAKE_DIR "${PROJECT_SOURCE_DIR}/cmake")
 
 # OpenBSD has its own naming conventions.  Set a platform variable based on
