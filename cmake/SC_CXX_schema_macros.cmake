@@ -25,19 +25,40 @@ macro(P21_TESTS sfile)
   endforeach()
 endmacro()
 
-# create p21read_sdai_*, lazy_sdai_*, any exes listed in SC_SDAI_ADDITIONAL_EXES_SRCS
+# Create p21read_sdai_*, lazy_sdai_*, any exes listed in SC_SDAI_ADDITIONAL_EXES_SRCS
 macro(SCHEMA_EXES)
   RELATIVE_PATH_TO_TOPLEVEL(${CMAKE_CURRENT_SOURCE_DIR} RELATIVE_PATH_COMPONENT)
-  SC_ADDEXEC(p21read_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/test/p21read/p21read.cc;${RELATIVE_PATH_COMPONENT}/src/test/p21read/sc_benchmark.cc" LINK_LIBRARIES ${PROJECT_NAME} stepdai stepcore stepeditor steputils TESTABLE)
+  
+  # Test executables are not installed and excluded from all unless testing is enabled
+  add_executable(p21read_${PROJECT_NAME}
+    "${RELATIVE_PATH_COMPONENT}/src/test/p21read/p21read.cc"
+    "${RELATIVE_PATH_COMPONENT}/src/test/p21read/sc_benchmark.cc"
+  )
+  target_link_libraries(p21read_${PROJECT_NAME} ${PROJECT_NAME} stepdai stepcore stepeditor steputils)
+  if(NOT SC_ENABLE_TESTING)
+    set_target_properties(p21read_${PROJECT_NAME} PROPERTIES EXCLUDE_FROM_ALL ON)
+  endif()
+  
   if(NOT WIN32)
-    SC_ADDEXEC(lazy_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/lazy_test.cc;${RELATIVE_PATH_COMPONENT}/src/cllazyfile/sc_benchmark.cc" LINK_LIBRARIES ${PROJECT_NAME} steplazyfile stepdai stepcore stepeditor steputils TESTABLE)
+    add_executable(lazy_${PROJECT_NAME}
+      "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/lazy_test.cc"
+      "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/sc_benchmark.cc"
+    )
+    target_link_libraries(lazy_${PROJECT_NAME} ${PROJECT_NAME} steplazyfile stepdai stepcore stepeditor steputils)
+    if(NOT SC_ENABLE_TESTING)
+      set_target_properties(lazy_${PROJECT_NAME} PROPERTIES EXCLUDE_FROM_ALL ON)
+    endif()
   endif()
 
   # Add user-defined executables
   foreach(src ${SC_SDAI_ADDITIONAL_EXES_SRCS})
     get_filename_component(name ${src} NAME_WE)
     get_filename_component(path ${src} ABSOLUTE)
-    SC_ADDEXEC(${name}_${PROJECT_NAME} SOURCES ${src} LINK_LIBRARIES ${PROJECT_NAME} stepdai stepcore stepeditor steputils TESTABLE)
+    add_executable(${name}_${PROJECT_NAME} ${src})
+    target_link_libraries(${name}_${PROJECT_NAME} ${PROJECT_NAME} stepdai stepcore stepeditor steputils)
+    if(NOT SC_ENABLE_TESTING)
+      set_target_properties(${name}_${PROJECT_NAME} PROPERTIES EXCLUDE_FROM_ALL ON)
+    endif()
   endforeach()
 endmacro()
 
@@ -83,38 +104,54 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
   add_custom_command(OUTPUT ${sourceFiles}
     COMMAND ${CMAKE_COMMAND} -DEXE=\"$<TARGET_FILE:exp2cxx>\"  -DEXP=\"${expFile}\"
     -DONESHOT=\"${SC_GENERATE_CXX_ONESHOT}\" -DSDIR=\"${CMAKE_CURRENT_LIST_DIR}\"
-    -P ${SC_CMAKE_DIR}/SC_Run_exp2cxx.cmake
+    -P ${PROJECT_SOURCE_DIR}/cmake/SC_Run_exp2cxx.cmake
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     COMMENT "[exp2cxx] Generating ${${PROJECT_NAME}_file_count} C++ files for ${PROJECT_NAME}."
   )
   include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}         ${SC_SOURCE_DIR}/src/cldai          ${SC_SOURCE_DIR}/src/cleditor
-    ${SC_SOURCE_DIR}/src/clutils        ${SC_SOURCE_DIR}/src/clstepcore     ${SC_SOURCE_DIR}/src/cllazyfile
-    ${SC_SOURCE_DIR}/src/cllazyfile/judy/src
+    ${CMAKE_CURRENT_SOURCE_DIR}         ${PROJECT_SOURCE_DIR}/src/cldai          ${PROJECT_SOURCE_DIR}/src/cleditor
+    ${PROJECT_SOURCE_DIR}/src/clutils        ${PROJECT_SOURCE_DIR}/src/clstepcore     ${PROJECT_SOURCE_DIR}/src/cllazyfile
+    ${PROJECT_SOURCE_DIR}/src/cllazyfile/judy/src
   )
-  # schema libraries should be installed
+  # Schema libraries should be installed
   if(BUILD_SHARED_LIBS)
-    SC_ADDLIB(${PROJECT_NAME} SHARED SOURCES ${sourceFiles} LINK_LIBRARIES stepdai stepcore stepeditor steputils)
+    add_library(${PROJECT_NAME} SHARED ${sourceFiles})
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+      VERSION ${PROJECT_VERSION}
+      SOVERSION ${PROJECT_VERSION_MAJOR}
+    )
     add_dependencies(${PROJECT_NAME} generate_cpp_${PROJECT_NAME})
+    target_link_libraries(${PROJECT_NAME} stepdai stepcore stepeditor steputils)
     if(WIN32)
-      target_compile_definitions("${PROJECT_NAME}" PRIVATE SC_SCHEMA_DLL_EXPORTS)
+      target_compile_definitions(${PROJECT_NAME} PRIVATE SC_SCHEMA_DLL_EXPORTS)
       if(MSVC)
-        target_compile_options("${PROJECT_NAME}" PRIVATE "/bigobj")
+        target_compile_options(${PROJECT_NAME} PRIVATE "/bigobj")
       endif()
     endif()
     # Suppress verbose warnings from generated code
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      target_compile_options("${PROJECT_NAME}" PRIVATE "-Wno-ignored-qualifiers")
+      target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-ignored-qualifiers")
     endif()
+    install(TARGETS ${PROJECT_NAME}
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
   endif()
 
   if(BUILD_STATIC_LIBS)
-    SC_ADDLIB(${PROJECT_NAME}-static STATIC SOURCES ${sourceFiles} LINK_LIBRARIES stepdai-static stepcore-static stepeditor-static steputils-static)
+    add_library(${PROJECT_NAME}-static STATIC ${sourceFiles})
     add_dependencies(${PROJECT_NAME}-static generate_cpp_${PROJECT_NAME})
-    target_compile_definitions("${PROJECT_NAME}-static" PRIVATE SC_STATIC)
+    target_compile_definitions(${PROJECT_NAME}-static PRIVATE SC_STATIC)
+    target_link_libraries(${PROJECT_NAME}-static stepdai-static stepcore-static stepeditor-static steputils-static)
     if(MSVC)
-      target_compile_options("${PROJECT_NAME}-static" PRIVATE "/bigobj")
+      target_compile_options(${PROJECT_NAME}-static PRIVATE "/bigobj")
     endif()
+    install(TARGETS ${PROJECT_NAME}-static
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
   endif()
 
   SCHEMA_EXES()

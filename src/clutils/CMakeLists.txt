@@ -9,23 +9,38 @@ set(UTILS_SRCS
   )
 
 include_directories(
-  ${SC_BINARY_DIR}/include
+  ${PROJECT_BINARY_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}
-  )
+)
 
 if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(steputils SHARED SOURCES ${UTILS_SRCS})
+  add_library(steputils SHARED ${UTILS_SRCS})
+  set_target_properties(steputils PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+  )
   if(WIN32)
     target_compile_definitions(steputils PRIVATE SC_UTILS_DLL_EXPORTS)
     target_link_libraries(steputils shlwapi)
   endif()
+  install(TARGETS steputils
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
 endif()
 
 if(BUILD_STATIC_LIBS)
-  SC_ADDLIB(steputils-static STATIC SOURCES ${UTILS_SRCS})
+  add_library(steputils-static STATIC ${UTILS_SRCS})
+  target_compile_definitions(steputils-static PRIVATE SC_STATIC)
   if(WIN32)
     target_link_libraries(steputils-static shlwapi)
   endif()
+  install(TARGETS steputils-static
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
 endif()
 
 # Local Variables:

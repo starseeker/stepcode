@@ -63,20 +63,35 @@ set(CORE_SRCS
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/include/stepcode
-  )
-
-set(_libdeps steputils stepdai)
+  ${PROJECT_SOURCE_DIR}/include/stepcode
+)
 
 if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(stepcore SHARED SOURCES ${CORE_SRCS} LINK_LIBRARIES ${_libdeps})
+  add_library(stepcore SHARED ${CORE_SRCS})
+  set_target_properties(stepcore PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+  )
+  target_link_libraries(stepcore steputils stepdai)
   if(WIN32)
     target_compile_definitions(stepcore PRIVATE SC_CORE_DLL_EXPORTS)
   endif()
+  install(TARGETS stepcore
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
 endif()
 
 if(BUILD_STATIC_LIBS)
-  SC_ADDLIB(stepcore-static STATIC SOURCES ${CORE_SRCS} LINK_LIBRARIES $<JOIN:${_libdeps},-static>-static)
+  add_library(stepcore-static STATIC ${CORE_SRCS})
+  target_compile_definitions(stepcore-static PRIVATE SC_STATIC)
+  target_link_libraries(stepcore-static steputils-static stepdai-static)
+  install(TARGETS stepcore-static
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
 endif()
 
 if(SC_ENABLE_TESTING)

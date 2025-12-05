@@ -50,11 +50,7 @@ project(SC
   DESCRIPTION "STEPcode - STEP file tools and libraries"
 )
 
-# SC version (use PROJECT_VERSION from project() command)
-set(SC_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-set(SC_VERSION_MINOR ${PROJECT_VERSION_MINOR})
-set(SC_VERSION_PATCH ${PROJECT_VERSION_PATCH})
-set(SC_VERSION ${PROJECT_VERSION})
+# Version information is defined in project() command above
 
 # Set language standards
 set(CMAKE_C_EXTENSIONS OFF)
@@ -66,15 +62,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # CMake derives much of its functionality from modules, typically
 # stored in one directory - let CMake know where to find them.
-set(SC_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-list(APPEND CMAKE_MODULE_PATH "${SC_CMAKE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # Use standard GNU installation directories
 include(GNUInstallDirs)
-
-# Backward compatibility variables for legacy code
-set(SC_SOURCE_DIR "${PROJECT_SOURCE_DIR}")
-set(SC_BINARY_DIR "${PROJECT_BINARY_DIR}")
 
 # OpenBSD has its own naming conventions.  Set a platform variable based on
 # the OS name so we can test for it succinctly.
