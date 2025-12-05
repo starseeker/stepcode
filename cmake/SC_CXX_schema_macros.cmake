@@ -102,14 +102,14 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
   add_custom_command(OUTPUT ${sourceFiles}
     COMMAND ${CMAKE_COMMAND} -DEXE=\"$<TARGET_FILE:exp2cxx>\"  -DEXP=\"${expFile}\"
     -DONESHOT=\"${SC_GENERATE_CXX_ONESHOT}\" -DSDIR=\"${CMAKE_CURRENT_LIST_DIR}\"
-    -P ${SC_ROOT}/cmake/SC_Run_exp2cxx.cmake
+    -P "${SC_ROOT}/cmake/SC_Run_exp2cxx.cmake"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     COMMENT "[exp2cxx] Generating ${${PROJECT_NAME}_file_count} C++ files for ${PROJECT_NAME}."
   )
   include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}         ${SC_ROOT}/src/cldai          ${SC_ROOT}/src/cleditor
-    ${SC_ROOT}/src/clutils        ${SC_ROOT}/src/clstepcore     ${SC_ROOT}/src/cllazyfile
-    ${SC_ROOT}/src/cllazyfile/judy/src
+    ${CMAKE_CURRENT_SOURCE_DIR}         "${SC_ROOT}/src/cldai"          "${SC_ROOT}/src/cleditor"
+    "${SC_ROOT}/src/clutils"        "${SC_ROOT}/src/clstepcore"     "${SC_ROOT}/src/cllazyfile"
+    "${SC_ROOT}/src/cllazyfile/judy/src"
   )
   # Schema libraries should be installed
   if(BUILD_SHARED_LIBS)
