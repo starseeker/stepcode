@@ -27,6 +27,9 @@ if(BUILD_STATIC_LIBS)
   SC_ADDLIB(steplazyfile-static STATIC SOURCES ${LAZY_SRCS} LINK_LIBRARIES ${_libdeps})
 endif()
 
+# lazy_test is only built for shared libraries. For static builds, there are
+# transitive dependency issues with steplazyfile-static's dependencies that
+# would require additional CMake infrastructure to resolve properly.
 if(BUILD_SHARED_LIBS)
   SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile NO_INSTALL)
   target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
