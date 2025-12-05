@@ -36,6 +36,7 @@ set(initial_scanner_cache ${SCANNER_BUILD_DIR}/initial_scanner_cache.cmake)
 file(WRITE ${initial_scanner_cache} "
 set(SC_ROOT \"${PROJECT_SOURCE_DIR}\" CACHE STRING \"root dir\")
 set(SC_BUILDDIR \"${PROJECT_BINARY_DIR}\" CACHE PATH \"build dir\")
+set(SC_CMAKE_DIR \"${PROJECT_SOURCE_DIR}/cmake\" CACHE PATH \"cmake dir\")
 set(CALLED_FROM \"STEPCODE_CMAKELISTS\" CACHE STRING \"verification\")
 set(CMAKE_BUILD_TYPE \"Debug\" CACHE STRING \"build type\")
 set(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\" CACHE STRING \"compiler\")
