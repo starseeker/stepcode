@@ -33,12 +33,24 @@ set(exp2cxx_SOURCES
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${SC_SOURCE_DIR}/include
-  ${SC_SOURCE_DIR}/include/exppp
-  ${SC_SOURCE_DIR}/include/express
-  )
+  ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/include/exppp
+  ${PROJECT_SOURCE_DIR}/include/express
+)
 
-SC_ADDEXEC(exp2cxx SOURCES ${exp2cxx_SOURCES} LINK_LIBRARIES libexppp express)
+if(BUILD_SHARED_LIBS)
+  add_executable(exp2cxx ${exp2cxx_SOURCES})
+  target_link_libraries(exp2cxx libexppp express)
+  install(TARGETS exp2cxx
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+elseif(BUILD_STATIC_LIBS)
+  add_executable(exp2cxx ${exp2cxx_SOURCES})
+  target_link_libraries(exp2cxx libexppp-static express-static)
+  install(TARGETS exp2cxx
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+endif()
 
 if(SC_ENABLE_TESTING)
   add_subdirectory(test)
