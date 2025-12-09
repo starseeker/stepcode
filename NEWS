@@ -3,6 +3,15 @@
                http://github.com/stepcode/stepcode
 ************************************************************************
 
+Development version 0.9.1
+
+New since v0.8:
+* Updated parser generation to use modern lemon version from starseeker/lemon
+* Added compatibility wrappers for modern lemon memory allocation API
+* Compatible with re2c (available via package managers) and perplex from BRL-CAD
+* Parser generation enabled with SC_GENERATE_LEXER_PARSER=ON
+
+************************************************************************
 Release 0.8 (December, 2014)
 
 New since v0.7:

@@ -9,7 +9,10 @@ available:
 - CMake                  (v2.8.7 or greater)
 - mingw                  (only on Windows)
 - a lexer and parser (i.e. flex, bison) are NOT necessary anymore
-  -if you modify the lexer or parser, you will need LEMON, RE2C, PERPLEX from BRL-CAD
+  -if you modify the lexer or parser, you will need:
+    - LEMON from https://github.com/starseeker/lemon
+    - RE2C (can be installed via package manager: apt install re2c)
+    - PERPLEX from https://github.com/BRL-CAD/perplex
 
 --------------------
 Installation
