@@ -1,8 +1,21 @@
 /** Lemon grammar for Express parser, based on SCL's expparse.y.  */
 %include {
 #include <assert.h>
+#include <stdlib.h>
 #include "token_type.h"
 #include "parse_data.h"
+
+/* Wrapper functions for modern lemon compatibility */
+/* Modern lemon passes a context parameter to memory allocation functions */
+static void *exp_realloc(void *ptr, size_t size, void *ctx) {
+    (void)ctx;  /* unused */
+    return realloc(ptr, size);
+}
+
+static void exp_free(void *ptr, void *ctx) {
+    (void)ctx;  /* unused */
+    free(ptr);
+}
 
 int yyerrstatus = 0;
 #define yyerrok (yyerrstatus = 0)
@@ -120,6 +133,8 @@ void parserInitState( void )
 } /* include */
 
 %extra_argument { parse_data_t parseData }
+%realloc exp_realloc
+%free exp_free
 
 %destructor statement_list {
     if (parseData.scanner == NULL) {
