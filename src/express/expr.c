@@ -631,7 +631,12 @@ Type EXPresolve_op_unknown( Expression e, Scope s ) {
 typedef Type (Resolve_expr_func) ( Expression , Scope );
 
 Type EXPresolve_op_logical( Expression e, Scope s ) {
-    EXPresolve_op_default( e, s );
+    /* Special handling for AND to support flow-sensitive type narrowing */
+    if( e->e.op_code == OP_AND ) {
+        EXP_resolve_op_and_with_narrowing( e, s );
+    } else {
+        EXPresolve_op_default( e, s );
+    }
     return( Type_Logical );
 }
 Type EXPresolve_op_array_like( Expression e, Scope s ) {
