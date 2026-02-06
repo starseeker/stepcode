@@ -1,0 +1,19 @@
+(*
+  Test to demonstrate permissive vs strict mode behavior
+*)
+
+SCHEMA permissive_strict_test;
+
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE select_with_aggregate = SELECT (int_set);
+END_TYPE;
+
+ENTITY test_permissive_behavior;
+  data : select_with_aggregate;
+WHERE
+  wr1: SIZEOF(QUERY(x <* data | x > 0)) >= 0;
+END_ENTITY;
+
+END_SCHEMA;
