@@ -1,0 +1,61 @@
+(*
+  Test to expose the bug in extract_all_refinements
+  
+  The function recursively extracts from BOTH sides of AND,
+  but it should only extract from the LEFT (guard) side.
+*)
+
+SCHEMA extraction_bug_test;
+
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE str_set = SET OF STRING;
+END_TYPE;
+
+TYPE mixed_select = SELECT
+  (int_set,
+   str_set);
+END_TYPE;
+
+(* This entity tests if guards are incorrectly extracted from the RHS *)
+ENTITY test_extraction_bug;
+  data1 : mixed_select;
+  data2 : mixed_select;
+WHERE
+  (* Structure: GUARD1 AND (GUARD2 AND USAGE)
+     
+     With the bug:
+     - extract_all_refinements is called on the outer AND
+     - It extracts from left: GUARD1 -> refines data1
+     - It recursively calls on right: (GUARD2 AND USAGE)
+       - This extracts from left of inner AND: GUARD2 -> refines data2
+       - This ALSO recursively calls on right: USAGE
+         - If USAGE contains a guard-like pattern, it gets extracted!
+     
+     The problem: We're extracting guards from the USAGE part,
+     which should only be using the refinements, not adding new ones.
+  *)
+  wr1: ('int_set' IN TYPEOF(data1)) AND
+       (('str_set' IN TYPEOF(data2)) AND
+        (SIZEOF(QUERY(x <* data1 | x > 0)) >= 0));
+        
+  (* This should work correctly with current implementation *)
+  (* But let's verify the refinement is actually applied *)
+END_ENTITY;
+
+(* More complex case that might expose issues *)
+ENTITY test_complex_extraction;
+  a : mixed_select;
+  b : mixed_select;
+  c : mixed_select;
+WHERE
+  (* Pattern: (G_a AND G_b) AND (G_c AND USE_a)
+     Current code will extract G_a, G_b, G_c all into the context
+     But should it extract G_c? That's inside the RHS of the outer AND.
+  *)
+  wr1: (('int_set' IN TYPEOF(a)) AND ('str_set' IN TYPEOF(b))) AND
+       (('int_set' IN TYPEOF(c)) AND (SIZEOF(QUERY(x <* a | x > 0)) >= 0));
+END_ENTITY;
+
+END_SCHEMA;

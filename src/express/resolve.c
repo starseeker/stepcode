@@ -223,6 +223,51 @@ static const char * get_string_literal( Expression expr ) {
 }
 
 /**
+ * Check if a type is a member of a SELECT type (or the SELECT itself).
+ * This validates that a refinement is type-safe.
+ * 
+ * \param select_type The SELECT type to check
+ * \param target_type The type to check for membership
+ * \return true if target_type is a member of select_type, false otherwise
+ */
+static bool is_type_in_select( Type select_type, Type target_type ) {
+    if( !select_type || !target_type ) {
+        return false;
+    }
+    
+    /* If they're the same type, it's trivially a member */
+    if( select_type == target_type ) {
+        return true;
+    }
+    
+    /* Check if select_type is actually a SELECT */
+    if( !TYPEis_select( select_type ) ) {
+        return false;
+    }
+    
+    /* Check each member of the SELECT */
+    if( select_type->u.type && select_type->u.type->body && select_type->u.type->body->list ) {
+        LISTdo_links( select_type->u.type->body->list, link )
+            Type member_type = ( Type )link->data;
+            
+            /* Direct match */
+            if( member_type == target_type ) {
+                return true;
+            }
+            
+            /* If member is itself a SELECT, recurse */
+            if( TYPEis_select( member_type ) ) {
+                if( is_type_in_select( member_type, target_type ) ) {
+                    return true;
+                }
+            }
+        LISTod;
+    }
+    
+    return false;
+}
+
+/**
  * Try to extract a type refinement from a TYPEOF guard expression.
  * Handles patterns like: 'TYPE_NAME' IN TYPEOF(var)
  * Returns true if refinement was extracted and added to context.
@@ -279,9 +324,16 @@ static bool extract_typeof_refinement( Expression expr, Scope scope, RefinementC
                     }
                     
                     if( refined_type ) {
-                        /* Add the refinement: var -> refined_type */
-                        refinement_context_add( ctx, var, refined_type );
-                        return true;
+                        /* Validate that refined_type is actually a member of var's type */
+                        /* This ensures type safety - we only refine SELECTs to their actual members */
+                        Type var_type = var->type;
+                        if( var_type && is_type_in_select( var_type, refined_type ) ) {
+                            /* Add the refinement: var -> refined_type */
+                            refinement_context_add( ctx, var, refined_type );
+                            return true;
+                        }
+                        /* If refined_type is not in the SELECT, don't refine */
+                        /* This is correct: the guard would be false at runtime */
                     }
                 }
             }
