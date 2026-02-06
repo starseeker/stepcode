@@ -634,7 +634,7 @@ typedef Type (Resolve_expr_func) ( Expression , Scope, RefinementContext * );
 Type EXPresolve_op_logical( Expression e, Scope s, RefinementContext * ctx ) {
     /* Special handling for AND to support flow-sensitive type narrowing */
     if( e->e.op_code == OP_AND ) {
-        EXP_resolve_op_and_with_narrowing( e, s );
+        EXP_resolve_op_and_with_narrowing( e, s, ctx );
     } else {
         EXPresolve_op_default( e, s, ctx );
     }

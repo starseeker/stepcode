@@ -77,7 +77,7 @@ extern SC_EXPRESS_EXPORT void SCHEMAresolve( Scope );
 extern SC_EXPRESS_EXPORT void RENAMEresolve( Rename *, Schema );
 
 /* Flow-sensitive type narrowing support */
-extern SC_EXPRESS_EXPORT void EXP_resolve_op_and_with_narrowing( Expression, Scope );
+extern SC_EXPRESS_EXPORT void EXP_resolve_op_and_with_narrowing( Expression, Scope, RefinementContext * );
 
 /*
  * for unit tests, no extern / export

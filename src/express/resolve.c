@@ -165,6 +165,29 @@ static void refinement_context_free( RefinementContext * ctx ) {
 }
 
 /**
+ * Create a new context that merges a parent context with new refinements.
+ * This is used for nested AND expressions to inherit outer refinements.
+ * 
+ * \param parent_ctx The parent/outer context (may be NULL)
+ * \return A new context containing all parent refinements (parent can be NULL after this)
+ */
+static RefinementContext * refinement_context_create_from_parent( RefinementContext * parent_ctx ) {
+    RefinementContext * ctx = refinement_context_create();
+    if( !ctx ) {
+        return NULL;
+    }
+    
+    /* Copy all entries from parent context if it exists */
+    if( parent_ctx ) {
+        for( RefinementEntry * parent_entry = parent_ctx->entries; parent_entry; parent_entry = parent_entry->next ) {
+            refinement_context_add( ctx, parent_entry->var, parent_entry->refined_type );
+        }
+    }
+    
+    return ctx;
+}
+
+/**
  * Check if an expression is a TYPEOF function call and extract its argument.
  * Returns the argument expression if it's TYPEOF, NULL otherwise.
  */
@@ -1472,31 +1495,44 @@ struct tag * TAGcreate_tags(void) {
  *   ('TYPE' IN TYPEOF(var)) AND (QUERY(... <* var | ...))
  * where var is a SELECT and TYPE is an aggregate member, allowing QUERY
  * to work based on the type guard.
+ *
+ * \param e The AND expression to resolve
+ * \param s The scope for resolution
+ * \param parent_ctx Parent refinement context from outer AND expressions (may be NULL)
  */
-void EXP_resolve_op_and_with_narrowing( Expression e, Scope s ) {
+void EXP_resolve_op_and_with_narrowing( Expression e, Scope s, RefinementContext * parent_ctx ) {
     if( !e || e->e.op_code != OP_AND ) {
         /* Not an AND expression, use default resolution */
         if( e->e.op1 ) {
-            EXPresolve( e->e.op1, s, Type_Dont_Care );
+            EXPresolve_ctx( e->e.op1, s, Type_Dont_Care, parent_ctx );
         }
         if( e->e.op2 ) {
-            EXPresolve( e->e.op2, s, Type_Dont_Care );
+            EXPresolve_ctx( e->e.op2, s, Type_Dont_Care, parent_ctx );
         }
         return;
     }
 
-    /* Resolve left operand first */
+    /* Resolve left operand first with parent context */
     if( e->e.op1 ) {
-        EXPresolve( e->e.op1, s, Type_Dont_Care );
+        EXPresolve_ctx( e->e.op1, s, Type_Dont_Care, parent_ctx );
     }
 
-    /* Extract refinements from left operand */
-    RefinementContext * ctx = refinement_context_create();
-    if( ctx && e->e.op1 ) {
+    /* Create a new context that inherits from parent and add new refinements */
+    RefinementContext * ctx = refinement_context_create_from_parent( parent_ctx );
+    if( !ctx ) {
+        /* Failed to create context - proceed without narrowing */
+        if( e->e.op2 ) {
+            EXPresolve_ctx( e->e.op2, s, Type_Dont_Care, parent_ctx );
+        }
+        return;
+    }
+    
+    /* Extract refinements from left operand and add to context */
+    if( e->e.op1 ) {
         extract_all_refinements( e->e.op1, s, ctx );
     }
 
-    /* Resolve right operand with refinement context */
+    /* Resolve right operand with merged context (parent + new refinements) */
     if( e->e.op2 ) {
         EXPresolve_ctx( e->e.op2, s, Type_Dont_Care, ctx );
     }
