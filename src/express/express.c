@@ -113,6 +113,7 @@ Dictionary EXPRESSbuiltins; /* procedures/functions */
 struct Scope_ * FUNC_NVL;
 struct Scope_ * FUNC_USEDIN;
 struct Scope_ * FUNC_TREAT;
+struct Scope_ * FUNC_TYPEOF;
 extern Express yyexpresult;
 
 
@@ -831,7 +832,7 @@ void BUILTINSinitialize(void) {
     funcdef("SIZEOF", 1, Type_Integer );
     funcdef("SQRT",   1, Type_Real );
     funcdef("TAN",    1, Type_Real );
-    funcdef("TYPEOF", 1, Type_Set_Of_String );
+    FUNC_TYPEOF = funcdef("TYPEOF", 1, Type_Set_Of_String );
     funcdef("VALUE",   1, Type_Number );
     funcdef("VALUE_IN",    2, Type_Logical );
     funcdef("VALUE_UNIQUE", 1, Type_Logical );

@@ -197,8 +197,9 @@ static Expression is_typeof_call( Expression expr, Scope scope ) {
     }
     /* Check if this is a function call */
     if( expr->type->u.type->body->type == funcall_ ) {
-        /* Check if the function name is TYPEOF */
-        if( expr->symbol.name && strcmp( expr->symbol.name, "TYPEOF" ) == 0 ) {
+        /* Check if the function is TYPEOF by comparing function pointers */
+        /* Note: expr->u.funcall.function is set during resolution in EXP_resolve */
+        if( expr->u.funcall.function == FUNC_TYPEOF ) {
             /* Get the first (and only) argument */
             if( expr->u.funcall.list && LISTget_length( expr->u.funcall.list ) == 1 ) {
                 return ( Expression )LISTget_first( expr->u.funcall.list );
@@ -210,13 +211,17 @@ static Expression is_typeof_call( Expression expr, Scope scope ) {
 
 /**
  * Check if an expression is a string literal and return its value.
+ * Only returns non-NULL for actual string literal expressions (e.g., 'TEXT'),
+ * not for arbitrary expressions that happen to have string type.
  */
 static const char * get_string_literal( Expression expr ) {
     if( !expr || !expr->type ) {
         return NULL;
     }
-    if( TYPEis_string( expr->type ) || TYPEis_string( expr->return_type ) ) {
-        /* It's a string literal, return the symbol name (the string value) */
+    /* Check if this is a string literal by checking the expression kind */
+    if( expr->type->u.type && expr->type->u.type->body && 
+        expr->type->u.type->body->type == string_ ) {
+        /* It's a string literal expression, return the string value */
         return expr->symbol.name;
     }
     return NULL;
@@ -344,7 +349,23 @@ static bool extract_typeof_refinement( Expression expr, Scope scope, RefinementC
 
 /**
  * Extract all TYPEOF refinements from an expression into a context.
- * Handles AND chains: A AND B extracts from both A and B.
+ * 
+ * IMPORTANT: This function only extracts refinements from boolean expressions
+ * that are guaranteed to be true when execution reaches the point where the
+ * refinements are used. Specifically:
+ * 
+ * - For AND expressions: extracts from both operands (both must be true)
+ * - For other expressions: only attempts to extract from that expression directly
+ * - Does NOT descend into OR, NOT, or other operators that could invalidate guards
+ * 
+ * This conservative approach ensures type safety: we only refine based on
+ * guards that definitely hold when the refined code executes.
+ * 
+ * Example: In "('T' IN TYPEOF(x)) AND (QUERY(... x ...))", the guard on the left
+ * definitely holds when the QUERY on the right executes, so it's safe to refine x.
+ * 
+ * Counter-example: In "(('T' IN TYPEOF(x)) OR something) AND (QUERY(... x ...))",
+ * the guard might not hold (if 'something' is true), so we must NOT refine x.
  */
 static void extract_all_refinements( Expression expr, Scope scope, RefinementContext * ctx ) {
     if( !expr || !ctx ) {
@@ -354,45 +375,40 @@ static void extract_all_refinements( Expression expr, Scope scope, RefinementCon
     /* Try to extract from this expression directly */
     extract_typeof_refinement( expr, scope, ctx );
 
-    /* If it's an AND expression, recursively extract from both sides */
+    /* If it's an AND expression, recursively extract from both sides.
+     * For AND, both operands must be true, so refinements from both sides
+     * are valid at the point after the AND completes.
+     * 
+     * We explicitly DO NOT traverse into OR, NOT, or other operators
+     * because those could create execution paths where the guard doesn't hold.
+     */
     if( TYPEis_expression( expr->type ) && expr->e.op_code == OP_AND ) {
         extract_all_refinements( expr->e.op1, scope, ctx );
         extract_all_refinements( expr->e.op2, scope, ctx );
     }
+    /* Note: We intentionally do NOT have cases for OP_OR, OP_NOT, etc.
+     * This ensures we only extract refinements from guaranteed-true guards.
+     */
 }
 
 /**
 ** Retrieve the aggregate type from the underlying types of the select type t_select
 ** \param t_select the select type to retrieve the aggregate type from
 ** \param t_agg the current aggregate type
-** \return the aggregate type, or NULL if no aggregate members or inconsistent aggregates
+** \return the aggregate type, or 0 if t_select is a SELECT (SELECTs are not aggregates per standard)
+** 
+** NOTE: Per EXPRESS standard, SELECT types are not aggregate types.
+** Type narrowing via TYPEOF guards should be used to refine SELECT to specific aggregate members
+** before using aggregate operations like QUERY.
 */
 Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
     if( TYPEis_select( t_select ) ) {
-        /* parse the underlying types */
-        LISTdo_links( t_select->u.type->body->list, link )
-        /* the current underlying type */
-        Type t = ( Type ) link->data;
-        if( TYPEis_select( t ) ) {
-            t_agg = TYPE_retrieve_aggregate( t, t_agg );
-            if( !t_agg ) {
-                /* Nested SELECT has non-aggregate members */
-                return 0;
-            }
-        } else if( TYPEis_aggregate( t ) ) {
-            if( t_agg ) {
-                if( t_agg != t->u.type->body->base ) {
-                    /* 2 underlying types do not have the same base */
-                    return 0;
-                }
-            } else {
-                t_agg = t->u.type->body->base;
-            }
-        } else {
-            /* Non-aggregate member found - SELECT is not a pure aggregate */
-            return 0;
-        }
-        LISTod;
+        /* SELECT is not an aggregate type per EXPRESS standard.
+         * Return 0 to indicate this is not an aggregate.
+         * Use flow-sensitive type narrowing with TYPEOF guards
+         * to refine SELECT to a specific aggregate member type.
+         */
+        return 0;
     }
 
     return t_agg;
