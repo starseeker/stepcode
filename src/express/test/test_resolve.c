@@ -25,6 +25,7 @@ int __SCOPE_search_id;
 int EXPRESSpass;
 struct Scope_ * FUNC_NVL;
 struct Scope_ * FUNC_USEDIN;
+struct Scope_ * FUNC_TREAT;
 
 struct EXPop_entry EXPop_table[OP_LAST];
 

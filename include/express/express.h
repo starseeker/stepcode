@@ -106,6 +106,7 @@ extern SC_EXPRESS_EXPORT Dictionary EXPRESSbuiltins;  /* procedures/functions */
 
 extern SC_EXPRESS_EXPORT struct Scope_ * FUNC_NVL;
 extern SC_EXPRESS_EXPORT struct Scope_ * FUNC_USEDIN;
+extern SC_EXPRESS_EXPORT struct Scope_ * FUNC_TREAT;
 
 /******************************/
 /* macro function definitions */
