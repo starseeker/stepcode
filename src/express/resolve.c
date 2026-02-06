@@ -57,6 +57,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "express/resolve.h"
 #include "express/schema.h"
@@ -231,6 +233,21 @@ static bool extract_typeof_refinement( Expression expr, Scope scope, RefinementC
                 if( var ) {
                     /* Look up the type by name in the schema */
                     Type refined_type = ( Type )SCOPEfind( scope, type_name, SCOPE_FIND_TYPE );
+                    
+                    /* Try lowercase version if uppercase failed */
+                    if( !refined_type && type_name ) {
+                        size_t len = strlen( type_name );
+                        char * lower_name = (char *)malloc( len + 1 );
+                        if( lower_name ) {
+                            for( size_t i = 0; i < len; i++ ) {
+                                lower_name[i] = tolower( (unsigned char)type_name[i] );
+                            }
+                            lower_name[len] = '\0';
+                            refined_type = ( Type )SCOPEfind( scope, lower_name, SCOPE_FIND_TYPE );
+                            free( lower_name );
+                        }
+                    }
+                    
                     if( refined_type ) {
                         /* Add the refinement: var -> refined_type */
                         refinement_context_add( ctx, var, refined_type );
