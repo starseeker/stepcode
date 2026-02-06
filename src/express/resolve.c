@@ -94,7 +94,7 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
         LISTdo_links( t_select->u.type->body->list, link )
         /* the current underlying type */
         Type t = ( Type ) link->data;
-        
+
         if( TYPEis_select( t ) ) {
             t_agg = TYPE_retrieve_aggregate( t, t_agg );
         } else if( TYPEinherits_from( t, aggregate_ ) ) {
@@ -105,7 +105,7 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
                 return 0;
             }
             if( t_agg ) {
-                /* Compare element types. 
+                /* Compare element types.
                  * We need to compare by body->type, not pointer equality,
                  * because different aggregate definitions may create separate Type instances
                  * for the same underlying type (e.g., INTEGER). */
@@ -113,7 +113,7 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
                     /* 2 underlying types do not have the same base type */
                     return 0;
                 }
-                /* Additional check: if they're both named types (entities, etc.), 
+                /* Additional check: if they're both named types (entities, etc.),
                  * make sure they refer to the same entity/type */
                 if( TYPEis_entity( t_agg ) && TYPEis_entity( member_base ) ) {
                     if( t_agg->u.type->body->entity != member_base->u.type->body->entity ) {
