@@ -1,0 +1,28 @@
+(*
+  Definitive test for type compatibility - use incompatible operations
+*)
+
+SCHEMA definitive_type_test;
+
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE string_set = SET OF STRING;
+END_TYPE;
+
+TYPE int_only_select = SELECT (int_set);
+END_TYPE;
+
+(* This MUST fail: trying to refine to string_set (not in SELECT)
+   and then use string operation on it *)
+ENTITY must_fail_wrong_type;
+  data : int_only_select;
+WHERE
+  (* If refinement happens incorrectly (to string_set),
+     the QUERY will try to use string LENGTH on data,
+     but data is actually int_only_select!
+     This should cause a type error in the QUERY. *)
+  wr1: ('string_set' IN TYPEOF(data)) AND (SIZEOF(QUERY(s <* data | LENGTH(s) > 0)) >= 0);
+END_ENTITY;
+
+END_SCHEMA;

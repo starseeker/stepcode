@@ -72,6 +72,10 @@
 /* typedefs */
 /************/
 
+/* Forward declaration for refinement context */
+struct RefinementContext_;
+typedef struct RefinementContext_ RefinementContext;
+
 typedef enum {
     OP_AND,         OP_ANDOR,
     OP_ARRAY_ELEMENT,   OP_CONCAT,
@@ -178,7 +182,7 @@ struct Expression_ {
 /** indexed by the op enumeration values */
 struct EXPop_entry {
     char * token;       /**< literal token, e.g., "<>" */
-    Type( *resolve )( Expression, struct Scope_ * );
+    Type( *resolve )( Expression, struct Scope_ *, RefinementContext * );
 };
 
 /********************/
@@ -261,6 +265,6 @@ extern SC_EXPRESS_EXPORT void     EXPcleanup( void );
 extern SC_EXPRESS_EXPORT Type     EXPtype( Expression, struct Scope_ * );
 extern SC_EXPRESS_EXPORT int      EXPget_integer_value( Expression );
 
-Type EXPresolve_op_dot( Expression, Scope );
+Type EXPresolve_op_dot( Expression, Scope, RefinementContext * );
 
 #endif /*EXPRESSION_H*/

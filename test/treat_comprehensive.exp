@@ -1,10 +1,10 @@
 (*
-  Test schema for TREAT built-in function and QUERY on SELECT types
+  Test schema for TREAT built-in function and flow-sensitive type narrowing
   
   This schema tests:
   1. TREAT function with SELECT types
-  2. QUERY expressions on SELECT types containing aggregate members
-  3. Type casting from SELECT to specific member types
+  2. Flow-sensitive type narrowing with TYPEOF guards
+  3. QUERY expressions with type guards (AP242 pattern)
 *)
 
 SCHEMA treat_test;
@@ -26,7 +26,7 @@ TYPE mixed_select = SELECT
    int_type);
 END_TYPE;
 
--- Test entity that uses TREAT
+-- Test entity that uses TREAT to explicitly cast SELECT to SET type
 ENTITY test_with_treat;
   data : mixed_select;
 WHERE
@@ -34,14 +34,26 @@ WHERE
   wr1: SIZEOF(QUERY(x <* TREAT(data, int_set) | x > 0)) >= 0;
 END_ENTITY;
 
--- Test entity that uses QUERY directly on SELECT (no TREAT needed)
--- This works because stepcode now allows QUERY on SELECT types
--- that contain at least one aggregate member
-ENTITY test_without_treat;
+-- Test entity that uses TYPEOF guard for type narrowing (AP242 pattern)
+-- This tests flow-sensitive type narrowing: the guard proves data is int_set,
+-- allowing QUERY to work on it
+ENTITY test_with_typeof_guard;
   data : mixed_select;
 WHERE
-  -- QUERY on SELECT type - works if at least one member is aggregate
-  wr1: SIZEOF(QUERY(x <* data | x > 0)) >= 0;
+  -- Type guard followed by QUERY - narrowing should allow this
+  -- Try without schema prefix first
+  wr1: ('INT_SET' IN TYPEOF(data)) AND 
+       (SIZEOF(QUERY(x <* data | x > 0)) >= 0);
+END_ENTITY;
+
+-- Test entity with multiple guards (should also work with narrowing)
+ENTITY test_with_multiple_guards;
+  data : mixed_select;
+  other_data : mixed_select;
+WHERE
+  -- Multiple independent guards in the same expression
+  wr1: (('INT_SET' IN TYPEOF(data)) AND (SIZEOF(QUERY(x <* data | x > 5)) = 0)) AND
+       (('INT_SET' IN TYPEOF(other_data)) AND (SIZEOF(QUERY(y <* other_data | y < 0)) = 0));
 END_ENTITY;
 
 END_SCHEMA;

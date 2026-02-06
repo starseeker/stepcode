@@ -1,0 +1,54 @@
+(*
+  Test schema for nested TYPEOF guards with flow-sensitive type narrowing
+  
+  This schema tests that refinements from outer AND expressions
+  are properly inherited by inner AND expressions.
+*)
+
+SCHEMA nested_typeof_test;
+
+-- Define some types
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE str_set = SET OF STRING;
+END_TYPE;
+
+-- A SELECT type with multiple aggregate and non-aggregate members
+TYPE multi_aggregate_select = SELECT
+  (int_set,
+   str_set);
+END_TYPE;
+
+-- Test entity with nested AND expressions
+-- The inner QUERY should have access to refinements from both outer and inner guards
+ENTITY test_nested_guards;
+  data : multi_aggregate_select;
+  other_data : multi_aggregate_select;
+WHERE
+  -- Outer guard refines 'data' to int_set
+  -- Inner guard refines 'other_data' to str_set
+  -- Inner QUERY should be able to use 'data' from outer context
+  wr1: ('int_set' IN TYPEOF(data)) AND 
+       (('str_set' IN TYPEOF(other_data)) AND 
+        ((SIZEOF(QUERY(x <* data | x > 0)) >= 0) AND
+         (SIZEOF(QUERY(y <* other_data | LENGTH(y) > 0)) >= 0)));
+END_ENTITY;
+
+-- Test entity with deeply nested guards
+ENTITY test_deeply_nested;
+  x : multi_aggregate_select;
+  y : multi_aggregate_select;
+  z : multi_aggregate_select;
+WHERE
+  -- Three levels of nesting
+  -- Innermost QUERY should have access to all three refinements
+  wr1: ('int_set' IN TYPEOF(x)) AND
+       (('str_set' IN TYPEOF(y)) AND
+        (('int_set' IN TYPEOF(z)) AND
+         (SIZEOF(QUERY(i <* x | i > 0)) >= 0) AND
+         (SIZEOF(QUERY(s <* y | LENGTH(s) > 0)) >= 0) AND
+         (SIZEOF(QUERY(j <* z | j < 100)) >= 0)));
+END_ENTITY;
+
+END_SCHEMA;

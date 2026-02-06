@@ -1,0 +1,55 @@
+(*
+  Correctness review test cases for flow-sensitive type narrowing
+  
+  These tests verify edge cases and potential bugs in the implementation
+*)
+
+SCHEMA correctness_test;
+
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE str_set = SET OF STRING;
+END_TYPE;
+
+TYPE mixed_select = SELECT
+  (int_set,
+   str_set);
+END_TYPE;
+
+(* Test 1: Verify refinements only come from left side of AND, not right *)
+ENTITY test_refinement_direction;
+  data : mixed_select;
+WHERE
+  (* This should work - guard on left, use on right *)
+  wr1: ('int_set' IN TYPEOF(data)) AND (SIZEOF(QUERY(x <* data | x > 0)) >= 0);
+  
+  (* This should NOT work - guard on right side shouldn't refine for left *)
+  (* The QUERY on the left should fail because data isn't refined yet *)
+  -- wr2: (SIZEOF(QUERY(x <* data | x > 0)) >= 0) AND ('int_set' IN TYPEOF(data));
+END_ENTITY;
+
+(* Test 2: Same variable refined twice should use last refinement *)
+ENTITY test_multiple_refinements;
+  data : mixed_select;
+WHERE
+  (* Both refinements for 'data' - should this work or fail? *)
+  (* Current implementation: later refinement should override *)
+  wr1: ('int_set' IN TYPEOF(data)) AND 
+       ('str_set' IN TYPEOF(data)) AND 
+       (SIZEOF(data) >= 0);  (* Using data without QUERY to avoid type checking *)
+END_ENTITY;
+
+(* Test 3: Refining non-SELECT should be harmless *)
+ENTITY test_refine_non_select;
+  data : INTEGER;
+WHERE
+  (* This guard is meaningless but shouldn't crash *)
+  wr1: ('int_set' IN TYPEOF(data)) AND (data >= 0);
+END_ENTITY;
+
+(* Test 6: Type not in SELECT should not refine *)
+TYPE other_type = SET OF REAL;
+END_TYPE;
+
+END_SCHEMA;

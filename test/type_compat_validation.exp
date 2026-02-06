@@ -1,0 +1,29 @@
+(*
+  Test for type compatibility validation in refinement
+*)
+
+SCHEMA type_compat_test;
+
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE real_set = SET OF REAL;
+END_TYPE;
+
+(* SELECT that only includes int_set *)
+TYPE int_only_select = SELECT (int_set);
+END_TYPE;
+
+(* Test refining to a type not in the SELECT *)
+ENTITY test_invalid_type_refinement;
+  data : int_only_select;
+WHERE
+  (* Trying to refine to real_set which is NOT in int_only_select *)
+  (* This should either:
+     a) Not refine (safe - keeps data as SELECT)
+     b) Refine and cause QUERY to work (UNSAFE - violates type system!)
+  *)
+  wr1: ('real_set' IN TYPEOF(data)) AND (SIZEOF(QUERY(x <* data | x > 0.0)) >= 0);
+END_ENTITY;
+
+END_SCHEMA;

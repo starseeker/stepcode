@@ -57,6 +57,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "express/resolve.h"
 #include "express/schema.h"
@@ -67,6 +69,13 @@ int print_objects_while_running = 0;
 static Type self = 0;   /**< always points to current value of SELF or 0 if none */
 
 static bool found_self;  /**< remember whether we've seen a SELF in a WHERE clause */
+
+/***********************/
+/* Type Refinement Context - forward declarations */
+/***********************/
+
+typedef struct RefinementEntry_ RefinementEntry;
+typedef struct RefinementContext_ RefinementContext;
 
 /***********************/
 /* function prototypes */
@@ -80,6 +89,276 @@ void RESOLVEinitialize( void ) {
 
 /** Clean up the Fed-X second pass */
 void RESOLVEcleanup( void ) {
+}
+
+/***********************/
+/* Type Refinement Context for flow-sensitive narrowing */
+/***********************/
+
+/**
+ * A refinement entry maps a Variable to a refined Type.
+ * Used for flow-sensitive type narrowing based on TYPEOF guards.
+ */
+struct RefinementEntry_ {
+    Variable var;
+    Type refined_type;
+    RefinementEntry * next;
+};
+
+/**
+ * Refinement context tracks type narrowings in the current scope.
+ * Used when resolving expressions with TYPEOF guards like:
+ *   ('TYPE' IN TYPEOF(var)) AND (QUERY(... <* var | ...))
+ */
+struct RefinementContext_ {
+    RefinementEntry * entries;
+};
+
+/** Create a new refinement context */
+static RefinementContext * refinement_context_create( void ) {
+    RefinementContext * ctx = ( RefinementContext * )malloc( sizeof( RefinementContext ) );
+    if( ctx ) {
+        ctx->entries = NULL;
+    }
+    return ctx;
+}
+
+/** Add a refinement to the context */
+static void refinement_context_add( RefinementContext * ctx, Variable var, Type refined_type ) {
+    if( !ctx || !var || !refined_type ) {
+        return;
+    }
+    RefinementEntry * entry = ( RefinementEntry * )malloc( sizeof( RefinementEntry ) );
+    if( entry ) {
+        entry->var = var;
+        entry->refined_type = refined_type;
+        entry->next = ctx->entries;
+        ctx->entries = entry;
+    }
+}
+
+/** Look up a refinement in the context */
+static Type refinement_context_lookup( RefinementContext * ctx, Variable var ) {
+    if( !ctx || !var ) {
+        return NULL;
+    }
+    for( RefinementEntry * entry = ctx->entries; entry; entry = entry->next ) {
+        if( entry->var == var ) {
+            return entry->refined_type;
+        }
+    }
+    return NULL;
+}
+
+/** Free a refinement context */
+static void refinement_context_free( RefinementContext * ctx ) {
+    if( !ctx ) {
+        return;
+    }
+    RefinementEntry * entry = ctx->entries;
+    while( entry ) {
+        RefinementEntry * next = entry->next;
+        free( entry );
+        entry = next;
+    }
+    free( ctx );
+}
+
+/**
+ * Create a new context that merges a parent context with new refinements.
+ * This is used for nested AND expressions to inherit outer refinements.
+ * 
+ * \param parent_ctx The parent/outer context (may be NULL)
+ * \return A new context containing all parent refinements (parent can be NULL after this)
+ */
+static RefinementContext * refinement_context_create_from_parent( RefinementContext * parent_ctx ) {
+    RefinementContext * ctx = refinement_context_create();
+    if( !ctx ) {
+        return NULL;
+    }
+    
+    /* Copy all entries from parent context if it exists */
+    if( parent_ctx ) {
+        for( RefinementEntry * parent_entry = parent_ctx->entries; parent_entry; parent_entry = parent_entry->next ) {
+            refinement_context_add( ctx, parent_entry->var, parent_entry->refined_type );
+        }
+    }
+    
+    return ctx;
+}
+
+/**
+ * Check if an expression is a TYPEOF function call and extract its argument.
+ * Returns the argument expression if it's TYPEOF, NULL otherwise.
+ */
+static Expression is_typeof_call( Expression expr, Scope scope ) {
+    if( !expr || !expr->type ) {
+        return NULL;
+    }
+    /* Check if this is a function call */
+    if( expr->type->u.type->body->type == funcall_ ) {
+        /* Check if the function name is TYPEOF */
+        if( expr->symbol.name && strcmp( expr->symbol.name, "TYPEOF" ) == 0 ) {
+            /* Get the first (and only) argument */
+            if( expr->u.funcall.list && LISTget_length( expr->u.funcall.list ) == 1 ) {
+                return ( Expression )LISTget_first( expr->u.funcall.list );
+            }
+        }
+    }
+    return NULL;
+}
+
+/**
+ * Check if an expression is a string literal and return its value.
+ */
+static const char * get_string_literal( Expression expr ) {
+    if( !expr || !expr->type ) {
+        return NULL;
+    }
+    if( TYPEis_string( expr->type ) || TYPEis_string( expr->return_type ) ) {
+        /* It's a string literal, return the symbol name (the string value) */
+        return expr->symbol.name;
+    }
+    return NULL;
+}
+
+/**
+ * Check if a type is a member of a SELECT type (or the SELECT itself).
+ * This validates that a refinement is type-safe.
+ * 
+ * \param select_type The SELECT type to check
+ * \param target_type The type to check for membership
+ * \return true if target_type is a member of select_type, false otherwise
+ */
+static bool is_type_in_select( Type select_type, Type target_type ) {
+    if( !select_type || !target_type ) {
+        return false;
+    }
+    
+    /* If they're the same type, it's trivially a member */
+    if( select_type == target_type ) {
+        return true;
+    }
+    
+    /* Check if select_type is actually a SELECT */
+    if( !TYPEis_select( select_type ) ) {
+        return false;
+    }
+    
+    /* Check each member of the SELECT */
+    if( select_type->u.type && select_type->u.type->body && select_type->u.type->body->list ) {
+        LISTdo_links( select_type->u.type->body->list, link )
+            Type member_type = ( Type )link->data;
+            
+            /* Direct match */
+            if( member_type == target_type ) {
+                return true;
+            }
+            
+            /* If member is itself a SELECT, recurse */
+            if( TYPEis_select( member_type ) ) {
+                if( is_type_in_select( member_type, target_type ) ) {
+                    return true;
+                }
+            }
+        LISTod;
+    }
+    
+    return false;
+}
+
+/**
+ * Try to extract a type refinement from a TYPEOF guard expression.
+ * Handles patterns like: 'TYPE_NAME' IN TYPEOF(var)
+ * Returns true if refinement was extracted and added to context.
+ */
+static bool extract_typeof_refinement( Expression expr, Scope scope, RefinementContext * ctx ) {
+    if( !expr || !expr->type || !ctx ) {
+        return false;
+    }
+
+    /* Check if this is an IN operation: op1 IN op2 */
+    if( TYPEis_expression( expr->type ) && expr->e.op_code == OP_IN ) {
+        Expression left = expr->e.op1;
+        Expression right = expr->e.op2;
+        
+        /* Check if right operand is TYPEOF(var) */
+        Expression typeof_arg = is_typeof_call( right, scope );
+        if( typeof_arg ) {
+            /* Check if left operand is a string literal (type name) */
+            const char * type_name = get_string_literal( left );
+            if( type_name ) {
+                /* Extract the variable from the TYPEOF argument */
+                Variable var = NULL;
+                if( typeof_arg->type && typeof_arg->type->u.type->body->type == identifier_ ) {
+                    /* It's an identifier - try to find the variable */
+                    var = ( Variable )SCOPEfind( scope, typeof_arg->symbol.name, SCOPE_FIND_VARIABLE );
+                }
+                
+                if( var ) {
+                    /* Look up the type by name in the schema */
+                    Type refined_type = ( Type )SCOPEfind( scope, type_name, SCOPE_FIND_TYPE );
+                    
+                    /* Try various name variations if the direct lookup failed */
+                    if( !refined_type && type_name ) {
+                        /* Try to strip schema prefix (SCHEMA.TYPE -> TYPE) */
+                        const char * dot = strrchr( type_name, '.' );
+                        const char * simple_name = dot ? (dot + 1) : type_name;
+                        
+                        /* Try simple name as-is */
+                        refined_type = ( Type )SCOPEfind( scope, simple_name, SCOPE_FIND_TYPE );
+                        
+                        /* Try lowercase version of simple name */
+                        if( !refined_type ) {
+                            size_t len = strlen( simple_name );
+                            char * lower_name = (char *)malloc( len + 1 );
+                            if( lower_name ) {
+                                for( size_t i = 0; i < len; i++ ) {
+                                    lower_name[i] = tolower( (unsigned char)simple_name[i] );
+                                }
+                                lower_name[len] = '\0';
+                                refined_type = ( Type )SCOPEfind( scope, lower_name, SCOPE_FIND_TYPE );
+                                free( lower_name );
+                            }
+                        }
+                    }
+                    
+                    if( refined_type ) {
+                        /* Validate that refined_type is actually a member of var's type */
+                        /* This ensures type safety - we only refine SELECTs to their actual members */
+                        Type var_type = var->type;
+                        if( var_type && is_type_in_select( var_type, refined_type ) ) {
+                            /* Add the refinement: var -> refined_type */
+                            refinement_context_add( ctx, var, refined_type );
+                            return true;
+                        }
+                        /* If refined_type is not in the SELECT, don't refine */
+                        /* This is correct: the guard would be false at runtime */
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * Extract all TYPEOF refinements from an expression into a context.
+ * Handles AND chains: A AND B extracts from both A and B.
+ */
+static void extract_all_refinements( Expression expr, Scope scope, RefinementContext * ctx ) {
+    if( !expr || !ctx ) {
+        return;
+    }
+
+    /* Try to extract from this expression directly */
+    extract_typeof_refinement( expr, scope, ctx );
+
+    /* If it's an AND expression, recursively extract from both sides */
+    if( TYPEis_expression( expr->type ) && expr->e.op_code == OP_AND ) {
+        extract_all_refinements( expr->e.op1, scope, ctx );
+        extract_all_refinements( expr->e.op2, scope, ctx );
+    }
 }
 
 /**
@@ -96,6 +375,10 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
         Type t = ( Type ) link->data;
         if( TYPEis_select( t ) ) {
             t_agg = TYPE_retrieve_aggregate( t, t_agg );
+            if( !t_agg ) {
+                /* Nested SELECT has non-aggregate members */
+                return 0;
+            }
         } else if( TYPEis_aggregate( t ) ) {
             if( t_agg ) {
                 if( t_agg != t->u.type->body->base ) {
@@ -105,12 +388,10 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
             } else {
                 t_agg = t->u.type->body->base;
             }
+        } else {
+            /* Non-aggregate member found - SELECT is not a pure aggregate */
+            return 0;
         }
-        /* Note: We allow non-aggregate members in the SELECT.
-         * If at least one member is an aggregate, we use that.
-         * This allows QUERY to work on SELECT types that include
-         * at least one aggregate member type. */
-
         LISTod;
     }
 
@@ -121,11 +402,12 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
 ** \param expr expression to resolve
 ** \param scope scope in which to resolve
 ** \param typecheck type to verify against (?)
+** \param ctx refinement context for flow-sensitive type narrowing (may be NULL)
 **
 ** Resolve all references in an expression.
 ** \note the macro 'EXPresolve' calls this function after checking if expr is already resolved
 */
-void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
+void EXP_resolve( Expression expr, Scope scope, Type typecheck, RefinementContext * ctx ) {
     Function f = 0;
     Symbol * sym;
     void *x;
@@ -188,8 +470,8 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
 
                 /* should make this data-driven! */
                 if( f == FUNC_NVL ) {
-                    EXPresolve( ( Expression )LISTget_first( expr->u.funcall.list ), scope, typecheck );
-                    EXPresolve( ( Expression )LISTget_second( expr->u.funcall.list ), scope, typecheck );
+                    EXPresolve_ctx( ( Expression )LISTget_first( expr->u.funcall.list ), scope, typecheck, ctx );
+                    EXPresolve_ctx( ( Expression )LISTget_second( expr->u.funcall.list ), scope, typecheck, ctx );
                     func_args_checked = true;
                 }
 
@@ -200,7 +482,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                     
                     /* Resolve the first argument (the expression to be treated) */
                     if( arg1 ) {
-                        EXPresolve( arg1, scope, typecheck );
+                        EXPresolve_ctx( arg1, scope, typecheck, ctx );
                     }
                     
                     /* The second argument should be a type identifier */
@@ -212,17 +494,18 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                             /* Return type is the target type */
                             expr->return_type = target_type;
                         } else {
-                            /* If not found as type, treat as expression for now */
-                            EXPresolve( arg2, scope, Type_Dont_Care );
-                            /* Use Generic type as fallback */
+                            /* Type not found - report error and use Generic as fallback */
+                            ERRORreport_with_symbol(UNDEFINED_TYPE, &arg2->symbol, arg2->symbol.name );
                             expr->return_type = Type_Generic;
                         }
                     } else if( arg2 ) {
-                        /* If second arg is not identifier or type chain is incomplete, resolve it anyway */
-                        EXPresolve( arg2, scope, Type_Dont_Care );
+                        /* If second arg is not identifier, it's an error */
+                        ERRORreport_with_symbol(UNDEFINED_TYPE, &expr->symbol, "TREAT second argument must be a type name" );
+                        EXPresolve_ctx( arg2, scope, Type_Dont_Care, ctx );
                         expr->return_type = Type_Generic;
                     } else {
-                        /* No second argument - use Generic as fallback */
+                        /* No second argument - error */
+                        ERRORreport_with_symbol(WRONG_ARG_COUNT, &expr->symbol, expr->symbol.name, 1, 2 );
                         expr->return_type = Type_Generic;
                     }
                     func_args_checked = true;
@@ -235,7 +518,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             }
             if( !func_args_checked ) {
                 LISTdo( expr->u.funcall.list, param, Expression )
-                EXPresolve( param, scope, Type_Dont_Care );
+                EXPresolve_ctx( param, scope, Type_Dont_Care, ctx );
                 if( is_resolve_failed( param ) ) {
                     resolve_failed( expr );
                     break;
@@ -253,7 +536,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             break;
         case aggregate_:
             LISTdo( expr->u.list, elt, Expression )
-            EXPresolve( elt, scope, Type_Dont_Care );
+            EXPresolve_ctx( elt, scope, Type_Dont_Care, ctx );
             if( is_resolve_failed( elt ) ) {
                 resolve_failed( expr );
                 break;
@@ -316,7 +599,17 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                     }
 #endif
                     /* Geez, don't wipe out original type! */
-                    expr->return_type = expr->u.variable->type;
+                    /* Check if there's a refined type for this variable */
+                    if( ctx ) {
+                        Type refined = refinement_context_lookup( ctx, expr->u.variable );
+                        if( refined ) {
+                            expr->return_type = refined;
+                        } else {
+                            expr->return_type = expr->u.variable->type;
+                        }
+                    } else {
+                        expr->return_type = expr->u.variable->type;
+                    }
                     if( expr->u.variable->flags.attribute ) {
                         found_self = true;
                     }
@@ -364,7 +657,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             }
             break;
         case op_:
-            expr->return_type = ( *EXPop_table[expr->e.op_code].resolve )( expr, scope );
+            expr->return_type = ( *EXPop_table[expr->e.op_code].resolve )( expr, scope, ctx );
             break;
         case entity_:           /* only 'self' is seen this way */
         case self_:
@@ -382,7 +675,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             }
             break;
         case query_:
-            EXPresolve( expr->u.query->aggregate, expr->u.query->scope, Type_Dont_Care );
+            EXPresolve_ctx( expr->u.query->aggregate, expr->u.query->scope, Type_Dont_Care, ctx );
             expr->return_type = expr->u.query->aggregate->return_type;
 
             /* verify that it's an aggregate */
@@ -409,7 +702,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             }
             expr->u.query->local->type = t;
             expr->u.query->local->name->return_type = t;
-            EXPresolve( expr->u.query->expression, expr->u.query->scope, Type_Dont_Care );
+            EXPresolve_ctx( expr->u.query->expression, expr->u.query->scope, Type_Dont_Care, ctx );
             expr->symbol.resolved = expr->u.query->expression->symbol.resolved;
             break;
         case integer_:
@@ -1243,4 +1536,59 @@ struct tag * TAGcreate_tags(void) {
     extern int tag_count;
 
     return( ( struct tag * )calloc( tag_count, sizeof( struct tag ) ) );
+}
+
+/**
+ * Resolve an AND expression with flow-sensitive type narrowing.
+ * Extracts TYPEOF refinements from the left operand and applies them
+ * when resolving the right operand.
+ *
+ * This enables patterns like:
+ *   ('TYPE' IN TYPEOF(var)) AND (QUERY(... <* var | ...))
+ * where var is a SELECT and TYPE is an aggregate member, allowing QUERY
+ * to work based on the type guard.
+ *
+ * \param e The AND expression to resolve
+ * \param s The scope for resolution
+ * \param parent_ctx Parent refinement context from outer AND expressions (may be NULL)
+ */
+void EXP_resolve_op_and_with_narrowing( Expression e, Scope s, RefinementContext * parent_ctx ) {
+    if( !e || e->e.op_code != OP_AND ) {
+        /* Not an AND expression, use default resolution */
+        if( e->e.op1 ) {
+            EXPresolve_ctx( e->e.op1, s, Type_Dont_Care, parent_ctx );
+        }
+        if( e->e.op2 ) {
+            EXPresolve_ctx( e->e.op2, s, Type_Dont_Care, parent_ctx );
+        }
+        return;
+    }
+
+    /* Resolve left operand first with parent context */
+    if( e->e.op1 ) {
+        EXPresolve_ctx( e->e.op1, s, Type_Dont_Care, parent_ctx );
+    }
+
+    /* Create a new context that inherits from parent and add new refinements */
+    RefinementContext * ctx = refinement_context_create_from_parent( parent_ctx );
+    if( !ctx ) {
+        /* Failed to create context - proceed without narrowing */
+        if( e->e.op2 ) {
+            EXPresolve_ctx( e->e.op2, s, Type_Dont_Care, parent_ctx );
+        }
+        return;
+    }
+    
+    /* Extract refinements from left operand and add to context */
+    if( e->e.op1 ) {
+        extract_all_refinements( e->e.op1, s, ctx );
+    }
+
+    /* Resolve right operand with merged context (parent + new refinements) */
+    if( e->e.op2 ) {
+        EXPresolve_ctx( e->e.op2, s, Type_Dont_Care, ctx );
+    }
+
+    /* Clean up */
+    refinement_context_free( ctx );
 }
