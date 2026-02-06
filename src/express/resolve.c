@@ -234,17 +234,27 @@ static bool extract_typeof_refinement( Expression expr, Scope scope, RefinementC
                     /* Look up the type by name in the schema */
                     Type refined_type = ( Type )SCOPEfind( scope, type_name, SCOPE_FIND_TYPE );
                     
-                    /* Try lowercase version if uppercase failed */
+                    /* Try various name variations if the direct lookup failed */
                     if( !refined_type && type_name ) {
-                        size_t len = strlen( type_name );
-                        char * lower_name = (char *)malloc( len + 1 );
-                        if( lower_name ) {
-                            for( size_t i = 0; i < len; i++ ) {
-                                lower_name[i] = tolower( (unsigned char)type_name[i] );
+                        /* Try to strip schema prefix (SCHEMA.TYPE -> TYPE) */
+                        const char * dot = strrchr( type_name, '.' );
+                        const char * simple_name = dot ? (dot + 1) : type_name;
+                        
+                        /* Try simple name as-is */
+                        refined_type = ( Type )SCOPEfind( scope, simple_name, SCOPE_FIND_TYPE );
+                        
+                        /* Try lowercase version of simple name */
+                        if( !refined_type ) {
+                            size_t len = strlen( simple_name );
+                            char * lower_name = (char *)malloc( len + 1 );
+                            if( lower_name ) {
+                                for( size_t i = 0; i < len; i++ ) {
+                                    lower_name[i] = tolower( (unsigned char)simple_name[i] );
+                                }
+                                lower_name[len] = '\0';
+                                refined_type = ( Type )SCOPEfind( scope, lower_name, SCOPE_FIND_TYPE );
+                                free( lower_name );
                             }
-                            lower_name[len] = '\0';
-                            refined_type = ( Type )SCOPEfind( scope, lower_name, SCOPE_FIND_TYPE );
-                            free( lower_name );
                         }
                     }
                     
