@@ -1,9 +1,9 @@
 (*
   Test to verify that refinements are NOT extracted from OR/NOT branches
-  This should FAIL because the guard is inside an OR
+  This should FAIL - guards inside OR/NOT don't guarantee the condition holds
 *)
 
-SCHEMA or_not_test;
+SCHEMA or_not_test_fail;
 
 TYPE int_set = SET OF INTEGER;
 END_TYPE;
@@ -20,7 +20,6 @@ END_TYPE;
    The pattern is: (GUARD OR something) AND QUERY
    The guard doesn't necessarily hold when QUERY executes,
    so refinement should NOT happen, and QUERY on SELECT should fail.
-   Note: >= 0 is always true, but test is designed to fail at compile time
 *)
 ENTITY test_guard_in_or;
   data : mixed_select;
@@ -34,22 +33,11 @@ END_ENTITY;
    Pattern: NOT(NOT(GUARD)) AND QUERY
    Even though double negation is logically equivalent to GUARD,
    we should be conservative and not extract through NOT.
-   Note: >= 0 is always true, but test is designed to fail at compile time
 *)
 ENTITY test_not_guard;
   data : mixed_select;
 WHERE
   wr2: NOT(NOT('int_set' IN TYPEOF(data))) AND 
-       (SIZEOF(QUERY(x <* data | x > 0)) >= 0);
-END_ENTITY;
-
-(* Test 3: Correct pattern - should PASS
-   This is the correct pattern: GUARD AND QUERY
-*)
-ENTITY test_correct_pattern;
-  data : mixed_select;
-WHERE
-  wr3: ('int_set' IN TYPEOF(data)) AND 
        (SIZEOF(QUERY(x <* data | x > 0)) >= 0);
 END_ENTITY;
 

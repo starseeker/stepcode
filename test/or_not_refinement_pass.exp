@@ -1,0 +1,29 @@
+(*
+  Test to verify that correct TYPEOF guard patterns work properly
+  This should PASS - demonstrates the correct pattern
+*)
+
+SCHEMA or_not_test_pass;
+
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE str_type = STRING;
+END_TYPE;
+
+TYPE mixed_select = SELECT
+  (int_set,
+   str_type);
+END_TYPE;
+
+(* Test: Correct pattern - should PASS
+   This is the correct pattern: GUARD AND QUERY
+*)
+ENTITY test_correct_pattern;
+  data : mixed_select;
+WHERE
+  wr3: ('int_set' IN TYPEOF(data)) AND 
+       (SIZEOF(QUERY(x <* data | x > 0)) >= 0);
+END_ENTITY;
+
+END_SCHEMA;

@@ -1,0 +1,29 @@
+(*
+  Permissive vs Strict Mode Test
+  
+  This schema demonstrates the difference between permissive and strict modes:
+  - Permissive mode (default): Allows QUERY on SELECT with aggregate member
+  - Strict mode (EXPRESS_STRICT): Requires TYPEOF guard or fails
+  
+  Expected behavior:
+  - Permissive mode: PASS (SELECT member is aggregate)
+  - Strict mode: FAIL (SELECT is not an aggregate per EXPRESS standard)
+*)
+
+SCHEMA permissive_strict_test;
+
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE select_with_aggregate = SELECT (int_set);
+END_TYPE;
+
+(* Test: QUERY directly on SELECT without guard - should fail *)
+ENTITY test_permissive_behavior;
+  data : select_with_aggregate;
+WHERE
+  (* This should FAIL - data is SELECT, not an aggregate *)
+  wr1: SIZEOF(QUERY(x <* data | x > 0)) >= 0;
+END_ENTITY;
+
+END_SCHEMA;
