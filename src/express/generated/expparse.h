@@ -79,6 +79,7 @@
 #define TOK_INCLUDE                    79
 #define TOK_STRING_LITERAL             80
 #define TOK_TO                         81
+#define TOK_TREAT                      121
 #define TOK_AS                         82
 #define TOK_REFERENCE                  83
 #define TOK_FROM                       84
