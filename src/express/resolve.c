@@ -77,9 +77,6 @@ static bool found_self;  /**< remember whether we've seen a SELF in a WHERE clau
 typedef struct RefinementEntry_ RefinementEntry;
 typedef struct RefinementContext_ RefinementContext;
 
-/** Active refinement context for flow-sensitive type narrowing (NULL when not in use) */
-static RefinementContext * active_refinement_context = NULL;
-
 /***********************/
 /* function prototypes */
 /***********************/
@@ -330,11 +327,12 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
 ** \param expr expression to resolve
 ** \param scope scope in which to resolve
 ** \param typecheck type to verify against (?)
+** \param ctx refinement context for flow-sensitive type narrowing (may be NULL)
 **
 ** Resolve all references in an expression.
 ** \note the macro 'EXPresolve' calls this function after checking if expr is already resolved
 */
-void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
+void EXP_resolve( Expression expr, Scope scope, Type typecheck, RefinementContext * ctx ) {
     Function f = 0;
     Symbol * sym;
     void *x;
@@ -397,8 +395,8 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
 
                 /* should make this data-driven! */
                 if( f == FUNC_NVL ) {
-                    EXPresolve( ( Expression )LISTget_first( expr->u.funcall.list ), scope, typecheck );
-                    EXPresolve( ( Expression )LISTget_second( expr->u.funcall.list ), scope, typecheck );
+                    EXPresolve_ctx( ( Expression )LISTget_first( expr->u.funcall.list ), scope, typecheck, ctx );
+                    EXPresolve_ctx( ( Expression )LISTget_second( expr->u.funcall.list ), scope, typecheck, ctx );
                     func_args_checked = true;
                 }
 
@@ -409,7 +407,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                     
                     /* Resolve the first argument (the expression to be treated) */
                     if( arg1 ) {
-                        EXPresolve( arg1, scope, typecheck );
+                        EXPresolve_ctx( arg1, scope, typecheck, ctx );
                     }
                     
                     /* The second argument should be a type identifier */
@@ -428,7 +426,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                     } else if( arg2 ) {
                         /* If second arg is not identifier, it's an error */
                         ERRORreport_with_symbol(UNDEFINED_TYPE, &expr->symbol, "TREAT second argument must be a type name" );
-                        EXPresolve( arg2, scope, Type_Dont_Care );
+                        EXPresolve_ctx( arg2, scope, Type_Dont_Care, ctx );
                         expr->return_type = Type_Generic;
                     } else {
                         /* No second argument - error */
@@ -445,7 +443,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             }
             if( !func_args_checked ) {
                 LISTdo( expr->u.funcall.list, param, Expression )
-                EXPresolve( param, scope, Type_Dont_Care );
+                EXPresolve_ctx( param, scope, Type_Dont_Care, ctx );
                 if( is_resolve_failed( param ) ) {
                     resolve_failed( expr );
                     break;
@@ -463,7 +461,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             break;
         case aggregate_:
             LISTdo( expr->u.list, elt, Expression )
-            EXPresolve( elt, scope, Type_Dont_Care );
+            EXPresolve_ctx( elt, scope, Type_Dont_Care, ctx );
             if( is_resolve_failed( elt ) ) {
                 resolve_failed( expr );
                 break;
@@ -527,8 +525,8 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
 #endif
                     /* Geez, don't wipe out original type! */
                     /* Check if there's a refined type for this variable */
-                    if( active_refinement_context ) {
-                        Type refined = refinement_context_lookup( active_refinement_context, expr->u.variable );
+                    if( ctx ) {
+                        Type refined = refinement_context_lookup( ctx, expr->u.variable );
                         if( refined ) {
                             expr->return_type = refined;
                         } else {
@@ -584,7 +582,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             }
             break;
         case op_:
-            expr->return_type = ( *EXPop_table[expr->e.op_code].resolve )( expr, scope );
+            expr->return_type = ( *EXPop_table[expr->e.op_code].resolve )( expr, scope, ctx );
             break;
         case entity_:           /* only 'self' is seen this way */
         case self_:
@@ -602,7 +600,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             }
             break;
         case query_:
-            EXPresolve( expr->u.query->aggregate, expr->u.query->scope, Type_Dont_Care );
+            EXPresolve_ctx( expr->u.query->aggregate, expr->u.query->scope, Type_Dont_Care, ctx );
             expr->return_type = expr->u.query->aggregate->return_type;
 
             /* verify that it's an aggregate */
@@ -629,7 +627,7 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
             }
             expr->u.query->local->type = t;
             expr->u.query->local->name->return_type = t;
-            EXPresolve( expr->u.query->expression, expr->u.query->scope, Type_Dont_Care );
+            EXPresolve_ctx( expr->u.query->expression, expr->u.query->scope, Type_Dont_Care, ctx );
             expr->symbol.resolved = expr->u.query->expression->symbol.resolved;
             break;
         case integer_:
@@ -1498,16 +1496,10 @@ void EXP_resolve_op_and_with_narrowing( Expression e, Scope s ) {
         extract_all_refinements( e->e.op1, s, ctx );
     }
 
-    /* Set active context and resolve right operand */
-    RefinementContext * saved_ctx = active_refinement_context;
-    active_refinement_context = ctx;
-
+    /* Resolve right operand with refinement context */
     if( e->e.op2 ) {
-        EXPresolve( e->e.op2, s, Type_Dont_Care );
+        EXPresolve_ctx( e->e.op2, s, Type_Dont_Care, ctx );
     }
-
-    /* Restore previous context */
-    active_refinement_context = saved_ctx;
 
     /* Clean up */
     refinement_context_free( ctx );

@@ -54,11 +54,16 @@ extern SC_EXPRESS_EXPORT int print_objects_while_running;
 #define TYPEresolve(t)        if (is_resolvable((*(t)))) TYPE_resolve((t))
 #define VARresolve_types(v)       if (is_resolvable((v)->name)) VAR_resolve_types((v))
 #define VARresolve_expressions(v,s) if (is_resolvable((v)->name)) VAR_resolve_expressions((v),(s))
-#define EXPresolve(expr,scope,type) if (!is_resolved(expr)) EXP_resolve(expr,scope,type)
+#define EXPresolve(expr,scope,type) if (!is_resolved(expr)) EXP_resolve(expr,scope,type,NULL)
+#define EXPresolve_ctx(expr,scope,type,ctx) if (!is_resolved(expr)) EXP_resolve(expr,scope,type,ctx)
 
 /***********************/
 /* function prototypes */
 /***********************/
+
+/* Forward declaration for refinement context */
+struct RefinementContext_;
+typedef struct RefinementContext_ RefinementContext;
 
 extern SC_EXPRESS_EXPORT void RESOLVEinitialize( void );
 extern SC_EXPRESS_EXPORT void RESOLVEcleanup( void );
@@ -66,7 +71,7 @@ extern SC_EXPRESS_EXPORT void SCOPEresolve_expressions_statements( Scope );
 extern SC_EXPRESS_EXPORT void SCOPEresolve_subsupers( Scope );
 extern SC_EXPRESS_EXPORT void SCOPEresolve_types( Scope );
 extern SC_EXPRESS_EXPORT void TYPE_resolve( Type * );
-extern SC_EXPRESS_EXPORT void EXP_resolve( Expression, Scope, Type );
+extern SC_EXPRESS_EXPORT void EXP_resolve( Expression, Scope, Type, RefinementContext * );
 extern SC_EXPRESS_EXPORT void ALGresolve( Scope );
 extern SC_EXPRESS_EXPORT void SCHEMAresolve( Scope );
 extern SC_EXPRESS_EXPORT void RENAMEresolve( Rename *, Schema );

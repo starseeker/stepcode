@@ -239,7 +239,7 @@ static int EXP_resolve_op_dot_fuzzy( Type selection, Symbol sref, Expression * e
     }
 }
 
-Type EXPresolve_op_dot( Expression expr, Scope scope ) {
+Type EXPresolve_op_dot( Expression expr, Scope scope, RefinementContext * ctx ) {
     Expression op1 = expr->e.op1;
     Expression op2 = expr->e.op2;
     Variable v = 0;
@@ -255,7 +255,7 @@ Type EXPresolve_op_dot( Expression expr, Scope scope ) {
     /* op1 is entity expression, op2 is attribute */
     /* could be very impossible to determine except */
     /* at run-time, .... */
-    EXPresolve( op1, scope, Type_Dont_Care );
+    EXPresolve_ctx( op1, scope, Type_Dont_Care, ctx );
     if( is_resolve_failed( op1 ) ) {
         resolve_failed( expr );
         return( Type_Bad );
@@ -455,7 +455,7 @@ static int EXP_resolve_op_group_fuzzy( Type selection, Symbol sref, Entity * e,
     }
 }
 
-Type EXPresolve_op_group( Expression expr, Scope scope ) {
+Type EXPresolve_op_group( Expression expr, Scope scope, RefinementContext * ctx ) {
     Expression op1 = expr->e.op1;
     Expression op2 = expr->e.op2;
     Entity ent_ref = ENTITY_NULL;
@@ -468,7 +468,7 @@ Type EXPresolve_op_group( Expression expr, Scope scope ) {
     /* op1 is entity expression, op2 is entity */
     /* could be very impossible to determine except */
     /* at run-time, .... */
-    EXPresolve( op1, scope, Type_Dont_Care );
+    EXPresolve_ctx( op1, scope, Type_Dont_Care, ctx );
     if( is_resolve_failed( op1 ) ) {
         resolve_failed( expr );
         return( Type_Bad );
@@ -558,14 +558,14 @@ Type EXPresolve_op_group( Expression expr, Scope scope ) {
     }
 }
 
-Type EXPresolve_op_relational( Expression e, Scope s ) {
+Type EXPresolve_op_relational( Expression e, Scope s, RefinementContext * ctx ) {
     Type t = 0;
     int failed = 0;
     Type op1type;
 
     /* Prevent op1 from complaining if it fails */
 
-    EXPresolve( e->e.op1, s, Type_Unknown );
+    EXPresolve_ctx( e->e.op1, s, Type_Unknown, ctx );
     failed = is_resolve_failed( e->e.op1 );
     op1type = e->e.op1->return_type;
 
@@ -579,7 +579,7 @@ Type EXPresolve_op_relational( Expression e, Scope s ) {
         t = op1type;
     }
 
-    EXPresolve( e->e.op2, s, t );
+    EXPresolve_ctx( e->e.op2, s, t, ctx );
     if( is_resolve_failed( e->e.op2 ) ) {
         failed = 1;
     }
@@ -587,7 +587,7 @@ Type EXPresolve_op_relational( Expression e, Scope s ) {
     /* If op1 wasn't successfully resolved, retry it now with new information */
 
     if( ( failed == 0 ) && !is_resolved( e->e.op1 ) ) {
-        EXPresolve( e->e.op1, s, e->e.op2->return_type );
+        EXPresolve_ctx( e->e.op1, s, e->e.op2->return_type, ctx );
         if( is_resolve_failed( e->e.op1 ) ) {
             failed = 1;
         }
@@ -601,18 +601,18 @@ Type EXPresolve_op_relational( Expression e, Scope s ) {
     return( Type_Logical );
 }
 
-void EXPresolve_op_default( Expression e, Scope s ) {
+void EXPresolve_op_default( Expression e, Scope s, RefinementContext * ctx ) {
     int failed = 0;
 
     if( OPget_number_of_operands( e->e.op_code ) == 3 ) {
-        EXPresolve( e->e.op3, s, Type_Dont_Care );
+        EXPresolve_ctx( e->e.op3, s, Type_Dont_Care, ctx );
         failed = is_resolve_failed( e->e.op3 );
     }
     if( OPget_number_of_operands( e->e.op_code ) == 2 ) {
-        EXPresolve( e->e.op2, s, Type_Dont_Care );
+        EXPresolve_ctx( e->e.op2, s, Type_Dont_Care, ctx );
         failed |= is_resolve_failed( e->e.op2 );
     }
-    EXPresolve( e->e.op1, s, Type_Dont_Care );
+    EXPresolve_ctx( e->e.op1, s, Type_Dont_Care, ctx );
     if( failed || is_resolve_failed( e->e.op1 ) ) {
         resolve_failed( e );
     } else {
@@ -621,28 +621,29 @@ void EXPresolve_op_default( Expression e, Scope s ) {
 }
 
 /* prototype for this func cannot change - it is passed as a fn pointer */
-Type EXPresolve_op_unknown( Expression e, Scope s ) {
+Type EXPresolve_op_unknown( Expression e, Scope s, RefinementContext * ctx ) {
     (void) e; /* quell unused param warning */
     (void) s;
+    (void) ctx;
     ERRORreport( INTERNAL_UNRECOGNISED_OP_IN_EXPRESOLVE );
     return Type_Bad;
 }
 
-typedef Type (Resolve_expr_func) ( Expression , Scope );
+typedef Type (Resolve_expr_func) ( Expression , Scope, RefinementContext * );
 
-Type EXPresolve_op_logical( Expression e, Scope s ) {
+Type EXPresolve_op_logical( Expression e, Scope s, RefinementContext * ctx ) {
     /* Special handling for AND to support flow-sensitive type narrowing */
     if( e->e.op_code == OP_AND ) {
         EXP_resolve_op_and_with_narrowing( e, s );
     } else {
-        EXPresolve_op_default( e, s );
+        EXPresolve_op_default( e, s, ctx );
     }
     return( Type_Logical );
 }
-Type EXPresolve_op_array_like( Expression e, Scope s ) {
+Type EXPresolve_op_array_like( Expression e, Scope s, RefinementContext * ctx ) {
 
     Type op1type;
-    EXPresolve_op_default( e, s );
+    EXPresolve_op_default( e, s, ctx );
     op1type = e->e.op1->return_type;
 
     if( TYPEis_aggregate( op1type ) ) {
@@ -706,20 +707,20 @@ Type EXPresolve_op_array_like( Expression e, Scope s ) {
     return( Type_Unknown );
 }
 
-Type EXPresolve_op_entity_constructor( Expression e, Scope s ) {
-    EXPresolve_op_default( e, s );
+Type EXPresolve_op_entity_constructor( Expression e, Scope s, RefinementContext * ctx ) {
+    EXPresolve_op_default( e, s, ctx );
     /* perhaps should return Type_Runtime? */
     return Type_Entity;
 }
 
-Type EXPresolve_op_int_div_like( Expression e, Scope s ) {
-    EXPresolve_op_default( e, s );
+Type EXPresolve_op_int_div_like( Expression e, Scope s, RefinementContext * ctx ) {
+    EXPresolve_op_default( e, s, ctx );
     return Type_Integer;
 }
 
-Type EXPresolve_op_plus_like( Expression e, Scope s ) {
+Type EXPresolve_op_plus_like( Expression e, Scope s, RefinementContext * ctx ) {
     /* i.e., Integer or Real */
-    EXPresolve_op_default( e, s );
+    EXPresolve_op_default( e, s, ctx );
     if( is_resolve_failed( e ) ) {
         resolve_failed( e );
         return( Type_Unknown );
@@ -746,8 +747,8 @@ Type EXPresolve_op_plus_like( Expression e, Scope s ) {
     return Type_Integer;
 }
 
-Type EXPresolve_op_unary_minus( Expression e, Scope s ) {
-    EXPresolve_op_default( e, s );
+Type EXPresolve_op_unary_minus( Expression e, Scope s, RefinementContext * ctx ) {
+    EXPresolve_op_default( e, s, ctx );
     return e->e.op1->return_type;
 }
 
