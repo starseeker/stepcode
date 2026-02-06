@@ -112,6 +112,7 @@ Dictionary EXPRESSbuiltins; /* procedures/functions */
 
 struct Scope_ * FUNC_NVL;
 struct Scope_ * FUNC_USEDIN;
+struct Scope_ * FUNC_TREAT;
 extern Express yyexpresult;
 
 
@@ -837,4 +838,5 @@ void BUILTINSinitialize(void) {
 
     FUNC_NVL = funcdef("NVL",    2, Type_Generic );
     FUNC_USEDIN = funcdef("USEDIN",  2, Type_Bag_Of_Generic );
+    FUNC_TREAT = funcdef("TREAT", 2, Type_Generic );
 }

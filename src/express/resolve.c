@@ -86,7 +86,7 @@ void RESOLVEcleanup( void ) {
 ** Retrieve the aggregate type from the underlying types of the select type t_select
 ** \param t_select the select type to retrieve the aggregate type from
 ** \param t_agg the current aggregate type
-** \return the aggregate type
+** \return the aggregate type, or NULL if no aggregate members or inconsistent aggregates
 */
 Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
     if( TYPEis_select( t_select ) ) {
@@ -99,16 +99,17 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
         } else if( TYPEis_aggregate( t ) ) {
             if( t_agg ) {
                 if( t_agg != t->u.type->body->base ) {
-                    /* 2 underlying types do not have to the same base */
+                    /* 2 underlying types do not have the same base */
                     return 0;
                 }
             } else {
                 t_agg = t->u.type->body->base;
             }
-        } else {
-            /* the underlying type is neither a select nor an aggregate */
-            return 0;
         }
+        /* Note: We allow non-aggregate members in the SELECT.
+         * If at least one member is an aggregate, we use that.
+         * This allows QUERY to work on SELECT types that include
+         * at least one aggregate member type. */
 
         LISTod;
     }
@@ -189,6 +190,34 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                 if( f == FUNC_NVL ) {
                     EXPresolve( ( Expression )LISTget_first( expr->u.funcall.list ), scope, typecheck );
                     EXPresolve( ( Expression )LISTget_second( expr->u.funcall.list ), scope, typecheck );
+                    func_args_checked = true;
+                }
+
+                if( f == FUNC_TREAT ) {
+                    /* TREAT(expr, type) - first arg is expression, second is type identifier */
+                    Expression arg1 = ( Expression )LISTget_first( expr->u.funcall.list );
+                    Expression arg2 = ( Expression )LISTget_second( expr->u.funcall.list );
+                    
+                    /* Resolve the first argument (the expression to be treated) */
+                    EXPresolve( arg1, scope, typecheck );
+                    
+                    /* The second argument should be a type identifier */
+                    if( arg2 && arg2->type->u.type->body->type == identifier_ ) {
+                        Type target_type = ( Type )SCOPEfind( scope, arg2->symbol.name, SCOPE_FIND_TYPE );
+                        if( target_type ) {
+                            /* Return type is the target type */
+                            expr->return_type = target_type;
+                        } else {
+                            /* If not found as type, treat as expression for now */
+                            EXPresolve( arg2, scope, Type_Dont_Care );
+                            /* Use Generic type as fallback */
+                            expr->return_type = Type_Generic;
+                        }
+                    } else {
+                        /* If second arg is not identifier, resolve it anyway */
+                        EXPresolve( arg2, scope, Type_Dont_Care );
+                        expr->return_type = Type_Generic;
+                    }
                     func_args_checked = true;
                 }
 

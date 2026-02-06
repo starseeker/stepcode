@@ -186,6 +186,7 @@ static struct keyword_entry {
     { "SUPERTYPE",      TOK_SUPERTYPE },
     { "TAN",        TOK_BUILTIN_FUNCTION },
     { "THEN",       TOK_THEN },
+    { "TREAT",      TOK_BUILTIN_FUNCTION },
     { "TO",         TOK_TO },
     { "TRUE",       TOK_LOGICAL_LITERAL },
     { "TYPE",       TOK_TYPE },
