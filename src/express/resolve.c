@@ -219,6 +219,7 @@ static const char * get_string_literal( Expression expr ) {
         return NULL;
     }
     /* Check if this is a string literal by checking the expression kind */
+    /* Verify all intermediate pointers before dereferencing */
     if( expr->type->u.type && expr->type->u.type->body && 
         expr->type->u.type->body->type == string_ ) {
         /* It's a string literal expression, return the string value */
