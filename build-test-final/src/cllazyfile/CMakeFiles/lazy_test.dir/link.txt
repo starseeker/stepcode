@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/lazy_test.dir/link.d CMakeFiles/lazy_test.dir/lazy_test.cc.o CMakeFiles/lazy_test.dir/sc_benchmark.cc.o -o ../../bin/lazy_test  -lsteplazyfile -lstepeditor

@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libsdai_ap203-static.a "CMakeFiles/sdai_ap203-static.dir/SdaiCONFIG_CONTROL_DESIGN_unity_entities.cc.o" "CMakeFiles/sdai_ap203-static.dir/SdaiCONFIG_CONTROL_DESIGN_unity_types.cc.o" "CMakeFiles/sdai_ap203-static.dir/SdaiAll.cc.o" "CMakeFiles/sdai_ap203-static.dir/compstructs.cc.o" "CMakeFiles/sdai_ap203-static.dir/schema.cc.o" "CMakeFiles/sdai_ap203-static.dir/SdaiCONFIG_CONTROL_DESIGN.cc.o" "CMakeFiles/sdai_ap203-static.dir/SdaiCONFIG_CONTROL_DESIGN.init.cc.o"
-/usr/bin/ranlib ../../lib/libsdai_ap203-static.a

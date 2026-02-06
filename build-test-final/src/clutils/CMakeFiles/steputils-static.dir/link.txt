@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libsteputils-static.a "CMakeFiles/steputils-static.dir/Str.cc.o" "CMakeFiles/steputils-static.dir/dirobj.cc.o" "CMakeFiles/steputils-static.dir/gennode.cc.o" "CMakeFiles/steputils-static.dir/gennodelist.cc.o" "CMakeFiles/steputils-static.dir/gennodearray.cc.o" "CMakeFiles/steputils-static.dir/sc_hash.cc.o" "CMakeFiles/steputils-static.dir/errordesc.cc.o"
-/usr/bin/ranlib ../../lib/libsteputils-static.a

@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libsteplazyfile-static.a "CMakeFiles/steplazyfile-static.dir/lazyDataSectionReader.cc.o" "CMakeFiles/steplazyfile-static.dir/lazyFileReader.cc.o" "CMakeFiles/steplazyfile-static.dir/lazyInstMgr.cc.o" "CMakeFiles/steplazyfile-static.dir/p21HeaderSectionReader.cc.o" "CMakeFiles/steplazyfile-static.dir/sectionReader.cc.o" "CMakeFiles/steplazyfile-static.dir/lazyP21DataSectionReader.cc.o" "CMakeFiles/steplazyfile-static.dir/judy.c.o"
-/usr/bin/ranlib ../../lib/libsteplazyfile-static.a
