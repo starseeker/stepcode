@@ -1,0 +1,93 @@
+(*
+  Comprehensive correctness test for flow-sensitive type narrowing
+  
+  This test validates that the implementation correctly handles:
+  1. Type safety (only refine to SELECT members)
+  2. Proper scoping (refinement only in RHS of AND)
+  3. Nested contexts
+  4. Multiple guards
+  
+  All entities in this schema should parse without errors.
+*)
+
+SCHEMA comprehensive_correctness;
+
+TYPE int_set = SET OF INTEGER;
+END_TYPE;
+
+TYPE str_set = SET OF STRING;
+END_TYPE;
+
+TYPE real_set = SET OF REAL;
+END_TYPE;
+
+TYPE int_str_select = SELECT (int_set, str_set);
+END_TYPE;
+
+(* Test 1: Basic refinement - should work *)
+ENTITY test_basic_refinement;
+  data : int_str_select;
+WHERE
+  wr1: ('int_set' IN TYPEOF(data)) AND (SIZEOF(QUERY(x <* data | x > 0)) >= 0);
+END_ENTITY;
+
+(* Test 2: Nested AND with multiple refinements - should work *)
+ENTITY test_nested_multiple;
+  a : int_str_select;
+  b : int_str_select;
+WHERE
+  wr1: ('int_set' IN TYPEOF(a)) AND
+       (('str_set' IN TYPEOF(b)) AND
+        ((SIZEOF(QUERY(x <* a | x > 0)) >= 0) AND
+         (SIZEOF(QUERY(s <* b | LENGTH(s) > 0)) >= 0)));
+END_ENTITY;
+
+(* Test 3: Schema-qualified name - should work *)
+ENTITY test_qualified_name;
+  data : int_str_select;
+WHERE
+  wr1: ('COMPREHENSIVE_CORRECTNESS.INT_SET' IN TYPEOF(data)) AND
+       (SIZEOF(QUERY(x <* data | x > 0)) >= 0);
+END_ENTITY;
+
+(* Test 4: Multiple guards on same variable - should work (later overrides) *)
+ENTITY test_multiple_guards_same_var;
+  data : int_str_select;
+WHERE
+  (* Both guards for data - str_set guard overrides int_set *)
+  wr1: ('int_set' IN TYPEOF(data)) AND
+       ('str_set' IN TYPEOF(data)) AND
+       (SIZEOF(QUERY(s <* data | LENGTH(s) > 0)) >= 0);
+END_ENTITY;
+
+(* Test 5: Refinement with non-SELECT variable - should be harmless *)
+ENTITY test_refine_non_select;
+  data : INTEGER;
+WHERE
+  (* Guard is meaningless but shouldn't crash *)
+  wr1: ('int_set' IN TYPEOF(data)) AND (data >= 0);
+END_ENTITY;
+
+(* Test 6: Complex nested pattern matching AP242 style *)
+ENTITY test_ap242_style;
+  item : int_str_select;
+WHERE
+  (* Pattern similar to AP242: nested guard with QUERY *)
+  wr1: (('int_set' IN TYPEOF(item)) AND
+        (SIZEOF(QUERY(it <* item | it > 100)) = 0)) OR
+       (('str_set' IN TYPEOF(item)) AND  
+        (SIZEOF(QUERY(s <* item | LENGTH(s) > 10)) = 0));
+END_ENTITY;
+
+(* Test 7: Conjunction of guards before usage *)
+ENTITY test_guard_conjunction;
+  x : int_str_select;
+  y : int_str_select;
+WHERE
+  (* Guards on multiple variables in conjunction *)
+  wr1: (('int_set' IN TYPEOF(x)) AND ('str_set' IN TYPEOF(y))) AND
+       ((SIZEOF(QUERY(i <* x | i > 0)) >= 0) AND
+        (SIZEOF(QUERY(s <* y | LENGTH(s) > 0)) >= 0));
+END_ENTITY;
+
+END_SCHEMA;
