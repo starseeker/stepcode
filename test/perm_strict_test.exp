@@ -1,5 +1,13 @@
 (*
-  Test what happens when QUERY is used without proper refinement
+  Permissive vs Strict Mode Test
+  
+  This schema demonstrates the difference between permissive and strict modes:
+  - Permissive mode (default): Allows QUERY on SELECT with aggregate member
+  - Strict mode (EXPRESS_STRICT): Requires TYPEOF guard or fails
+  
+  Expected behavior:
+  - Permissive mode: PASS (SELECT member is aggregate)
+  - Strict mode: FAIL (SELECT is not an aggregate per EXPRESS standard)
 *)
 
 SCHEMA permissive_strict_test;
