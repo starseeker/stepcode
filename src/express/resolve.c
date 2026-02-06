@@ -199,10 +199,14 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                     Expression arg2 = ( Expression )LISTget_second( expr->u.funcall.list );
                     
                     /* Resolve the first argument (the expression to be treated) */
-                    EXPresolve( arg1, scope, typecheck );
+                    if( arg1 ) {
+                        EXPresolve( arg1, scope, typecheck );
+                    }
                     
                     /* The second argument should be a type identifier */
-                    if( arg2 && arg2->type->u.type->body->type == identifier_ ) {
+                    if( arg2 && arg2->type && arg2->type->u.type && 
+                        arg2->type->u.type->body && 
+                        arg2->type->u.type->body->type == identifier_ ) {
                         Type target_type = ( Type )SCOPEfind( scope, arg2->symbol.name, SCOPE_FIND_TYPE );
                         if( target_type ) {
                             /* Return type is the target type */
@@ -213,9 +217,12 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
                             /* Use Generic type as fallback */
                             expr->return_type = Type_Generic;
                         }
-                    } else {
-                        /* If second arg is not identifier, resolve it anyway */
+                    } else if( arg2 ) {
+                        /* If second arg is not identifier or type chain is incomplete, resolve it anyway */
                         EXPresolve( arg2, scope, Type_Dont_Care );
+                        expr->return_type = Type_Generic;
+                    } else {
+                        /* No second argument - use Generic as fallback */
                         expr->return_type = Type_Generic;
                     }
                     func_args_checked = true;
