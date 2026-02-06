@@ -140,6 +140,14 @@ if(SC_ENABLE_TESTING)
   include(CTest)
 endif(SC_ENABLE_TESTING)
 
+option(SC_EXPRESS_STRICT "Enable strict EXPRESS standard compliance (default: permissive mode for real-world schemas)" OFF)
+if(SC_EXPRESS_STRICT)
+  add_definitions(-DEXPRESS_STRICT)
+  message(STATUS "EXPRESS strict mode enabled - SELECT types are never treated as aggregates")
+else()
+  message(STATUS "EXPRESS permissive mode enabled (default) - allows QUERY on SELECT with all-aggregate members")
+endif(SC_EXPRESS_STRICT)
+
 # SC_ADDEXEC and SC_ADDLIB macros, dllimport/export, etc
 include(SC_Targets)
 

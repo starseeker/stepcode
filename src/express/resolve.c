@@ -396,20 +396,63 @@ static void extract_all_refinements( Expression expr, Scope scope, RefinementCon
 ** Retrieve the aggregate type from the underlying types of the select type t_select
 ** \param t_select the select type to retrieve the aggregate type from
 ** \param t_agg the current aggregate type
-** \return the aggregate type, or 0 if t_select is a SELECT (SELECTs are not aggregates per standard)
+** \return the aggregate type, or 0 if not an aggregate or inconsistent aggregates
 ** 
-** NOTE: Per EXPRESS standard, SELECT types are not aggregate types.
-** Type narrowing via TYPEOF guards should be used to refine SELECT to specific aggregate members
-** before using aggregate operations like QUERY.
+** This function has two modes controlled by the EXPRESS_STRICT compile-time define:
+** 
+** PERMISSIVE MODE (default, EXPRESS_STRICT not defined):
+**   - Allows QUERY on SELECT if ALL members are aggregates with the same base type
+**   - This supports real-world schemas like AP242 that use this pattern
+**   - Not strictly compliant with EXPRESS standard, but useful in practice
+** 
+** STRICT MODE (EXPRESS_STRICT defined):
+**   - SELECT is never treated as an aggregate (per EXPRESS standard)
+**   - Type narrowing with TYPEOF guards must be used to refine SELECT to aggregate members
+**   - Fully standards-compliant behavior
 */
 Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
     if( TYPEis_select( t_select ) ) {
-        /* SELECT is not an aggregate type per EXPRESS standard.
+#ifdef EXPRESS_STRICT
+        /* STRICT MODE: SELECT is not an aggregate type per EXPRESS standard.
          * Return 0 to indicate this is not an aggregate.
          * Use flow-sensitive type narrowing with TYPEOF guards
          * to refine SELECT to a specific aggregate member type.
          */
         return 0;
+#else
+        /* PERMISSIVE MODE: Allow SELECT to be treated as aggregate if all members
+         * are aggregates with the same base type.
+         * This supports real-world schemas like AP242.
+         */
+        
+        /* Parse the underlying types of the SELECT */
+        LISTdo_links( t_select->u.type->body->list, link )
+            /* Get the current underlying type */
+            Type t = ( Type ) link->data;
+            
+            if( TYPEis_select( t ) ) {
+                /* Recursively check nested SELECT */
+                t_agg = TYPE_retrieve_aggregate( t, t_agg );
+                if( !t_agg ) {
+                    /* Nested SELECT has non-aggregate members */
+                    return 0;
+                }
+            } else if( TYPEis_aggregate( t ) ) {
+                /* This member is an aggregate - check consistency */
+                if( t_agg ) {
+                    if( t_agg != t->u.type->body->base ) {
+                        /* Two underlying types do not have the same base */
+                        return 0;
+                    }
+                } else {
+                    t_agg = t->u.type->body->base;
+                }
+            } else {
+                /* Non-aggregate member found - SELECT is not a pure aggregate */
+                return 0;
+            }
+        LISTod;
+#endif /* EXPRESS_STRICT */
     }
 
     return t_agg;

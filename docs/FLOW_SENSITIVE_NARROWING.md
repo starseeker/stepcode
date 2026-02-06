@@ -12,9 +12,37 @@ The implementation enables patterns like:
 where var is a SELECT type and TYPE is an aggregate member, allowing QUERY
 to work based on the type guard.
 
+## Permissive vs Strict Mode
+
+STEPcode supports two modes for handling QUERY on SELECT types:
+
+### PERMISSIVE MODE (Default)
+- **When**: Default behavior (EXPRESS_STRICT not defined)
+- **Behavior**: Allows QUERY on SELECT if ALL members are aggregates with the same base type
+- **Purpose**: Supports real-world schemas like AP242 that use this pattern
+- **Standards**: Not strictly compliant with EXPRESS standard, but practical
+- **Use case**: Production use with ISO schemas like AP242
+
+### STRICT MODE
+- **When**: Set CMake option `-DSC_EXPRESS_STRICT=ON`
+- **Behavior**: SELECT is never treated as an aggregate (per EXPRESS standard)
+- **Purpose**: Enforce standards-compliant behavior
+- **Standards**: Fully compliant with EXPRESS specification
+- **Use case**: Validating new schemas for strict compliance
+
+### Switching Modes
+
+```bash
+# Default (permissive) - allows AP242 to compile
+cmake ..
+
+# Strict mode - enforce standard compliance
+cmake -DSC_EXPRESS_STRICT=ON ..
+```
+
 ## Standards Compliance Status
 
-### ✅ CORRECT BEHAVIOR
+### ✅ CORRECT BEHAVIOR (Both Modes)
 - TYPEOF guards only refine when type is in SELECT members (type safety)
 - Refinement only applies within RHS of AND (proper scoping)
 - No refinement in OR branches - explicitly blocked
@@ -23,12 +51,18 @@ to work based on the type guard.
 - Type name lookup handles multiple formats (SCHEMA.TYPE, lowercase)
 - TYPEOF detection uses function pointer comparison (reliable)
 - String literal detection checks expression kind (not just type)
-- SELECT types are never treated as aggregates per EXPRESS standard
 
-### ⚠️ REMOVED PERMISSIVE BEHAVIOR
-- TYPE_retrieve_aggregate now always returns 0 for SELECT types
-- This aligns with EXPRESS standard: SELECT is not an aggregate type
-- Type narrowing with TYPEOF guards is the only way to use aggregates in SELECT
+### MODE-SPECIFIC BEHAVIOR
+
+**Permissive Mode:**
+- SELECT with all-aggregate members can be used in QUERY
+- Enables AP242 and similar real-world schemas to compile
+- Type narrowing with TYPEOF still works and is recommended
+
+**Strict Mode:**
+- SELECT types are never treated as aggregates per EXPRESS standard
+- Type narrowing with TYPEOF guards is required for QUERY on SELECT
+- Enforces best practices and standards compliance
 
 ## Implementation Details
 
