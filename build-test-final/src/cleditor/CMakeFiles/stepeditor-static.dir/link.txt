@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libstepeditor-static.a "CMakeFiles/stepeditor-static.dir/STEPfile.cc.o" "CMakeFiles/stepeditor-static.dir/STEPfile.inline.cc.o" "CMakeFiles/stepeditor-static.dir/cmdmgr.cc.o" "CMakeFiles/stepeditor-static.dir/SdaiHeaderSchema.cc.o" "CMakeFiles/stepeditor-static.dir/SdaiHeaderSchemaAll.cc.o" "CMakeFiles/stepeditor-static.dir/SdaiHeaderSchemaInit.cc.o" "CMakeFiles/stepeditor-static.dir/SdaiSchemaInit.cc.o"
+/usr/bin/ranlib ../../lib/libstepeditor-static.a

@@ -1,0 +1,7 @@
+
+set(SC_ROOT "/home/runner/work/stepcode/stepcode" CACHE STRING "root dir")
+set(SC_BUILDDIR "/home/runner/work/stepcode/stepcode/build-test-final" CACHE PATH "build dir")
+set(CALLED_FROM "STEPCODE_CMAKELISTS" CACHE STRING "verification")
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "build type")
+set(CMAKE_C_COMPILER "/usr/bin/cc" CACHE STRING "compiler")
+set(CMAKE_CXX_COMPILER "/usr/bin/c++" CACHE STRING "compiler")

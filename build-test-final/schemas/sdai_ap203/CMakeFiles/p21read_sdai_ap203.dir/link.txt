@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/p21read_sdai_ap203.dir/link.d CMakeFiles/p21read_sdai_ap203.dir/__/__/__/src/test/p21read/p21read.cc.o CMakeFiles/p21read_sdai_ap203.dir/__/__/__/src/test/p21read/sc_benchmark.cc.o -o ../../bin/p21read_sdai_ap203  -lsdai_ap203 -lstepdai -lstepcore -lstepeditor -lsteputils
