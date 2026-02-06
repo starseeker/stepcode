@@ -2295,8 +2295,8 @@ unary_expression(A) ::= TOK_TREAT TOK_LEFT_PAREN expression(B) TOK_AS
             TOK_IDENTIFIER(C) TOK_RIGHT_PAREN.
 {
     A = UN_EXPcreate(OP_TREAT, B);
-    A->symbol = *C;
-    SYMBOL_destroy(C);
+    A->symbol = *C.symbol;
+    SYMBOL_destroy(C.symbol);
 }
 
 unique(A) ::= /* look for optional UNIQUE */.

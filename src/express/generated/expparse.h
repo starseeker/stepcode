@@ -119,3 +119,4 @@
 #define TOK_UNTIL                      118
 #define TOK_WHERE                      119
 #define TOK_WHILE                      120
+#define TOK_TREAT                      121
