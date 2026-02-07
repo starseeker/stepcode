@@ -321,12 +321,25 @@ The implementation uses a **stack-based context model** rather than deep copying
 - `test/unitary_schemas/flow_narrowing_test.exp` - AND-based narrowing
 - `test/unitary_schemas/select_aggregate_test.exp` - SELECT of aggregates
 
+**Production schema comparison:**
+- `data/ap242/242_mim_lf.exp` - Original AP242 with flow-sensitive narrowing
+- `data/ap242/242_mim_lf_treat.exp` - TREAT-based standards-compliant version
+- `test/compare_ap242_versions.sh` - Automated comparison script
+
+See `doc/ap242-comparison.md` for detailed analysis of the AP242 schema comparison.
+
 ### AP242 Compatibility
 
-The implementation is validated against the AP242 schema (`data/ap242/242_mim_lf.exp`), ensuring:
+The implementation is validated against the AP242 schema, ensuring:
 - Large-scale schema parsing succeeds
 - Complex type hierarchies handled correctly
 - Production schema compatibility
+
+**AP242 Schema Versions:**
+- `data/ap242/242_mim_lf.exp` - Original schema using flow-sensitive narrowing extension
+- `data/ap242/242_mim_lf_treat.exp` - Standards-compliant version using TREAT expression
+
+Both versions parse successfully and produce identical output. See `doc/ap242-comparison.md` for detailed analysis.
 
 ## Standards Compliance Notes
 
