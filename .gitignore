@@ -9,6 +9,7 @@
 /type/
 /compstructs.cc
 /schema.cc
+/schema.h
 
 # Temporary files
 *~
