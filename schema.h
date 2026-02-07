@@ -38,9 +38,9 @@
 #include <Sdaiclasses.h>
 extern SC_SCHEMA_EXPORT void SchemaInit (Registry &);
 extern SC_SCHEMA_EXPORT void InitSchemasAndEnts (Registry &);
-#include "SdaiAP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LFNames.h"
-#include "SdaiAP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF.h" 
-extern void SdaiAP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LFInit (Registry & r);
+#include "SdaiFLOW_NARROWING_TESTNames.h"
+#include "SdaiFLOW_NARROWING_TEST.h" 
+extern void SdaiFLOW_NARROWING_TESTInit (Registry & r);
 
 #include "clstepcore/complexSupport.h"
 ComplexCollect *gencomplex();

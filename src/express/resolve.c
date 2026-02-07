@@ -290,7 +290,7 @@ Refinement collect_refinements_from_conjunction( Expression expr, Scope scope ) 
         }
         
         /* Normalize to lowercase (EXPRESS identifiers are stored lowercase) */
-        char lookup_name_lower[512];
+        char lookup_name_lower[MAX_TYPE_NAME_LENGTH];
         strncpy( lookup_name_lower, lookup_name, sizeof( lookup_name_lower ) - 1 );
         lookup_name_lower[sizeof( lookup_name_lower ) - 1] = '\0';
         for( char *p = lookup_name_lower; *p; p++ ) {
@@ -311,6 +311,10 @@ Refinement collect_refinements_from_conjunction( Expression expr, Scope scope ) 
         
         /* Create a refinement */
         Refinement ref = ( Refinement ) malloc( sizeof( struct Refinement_ ) );
+        if( !ref ) {
+            /* Memory allocation failed */
+            return NULL;
+        }
         ref->variable = var;
         ref->refined_type = target_type;
         ref->next = NULL;

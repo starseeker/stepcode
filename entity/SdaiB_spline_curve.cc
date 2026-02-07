@@ -235,7 +235,7 @@ void init_SdaiB_spline_curve( Registry& reg ) {
         ArrayTypeDescriptor * t_50 = new ArrayTypeDescriptor;
         t_50->AssignAggrCreator((AggregateCreator) create_EntityAggregate);        // Creator function
         t_50->SetBound1( 0 );
-        t_50->SetBound2( -2022290368 );
+        t_50->SetBound2( -1803445184 );
         t_50->FundamentalType(ARRAY_TYPE);
         t_50->Description("ARRAY [0:upper_index_on_control_points] OF cartesian_point");
         t_50->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);

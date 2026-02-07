@@ -140,21 +140,21 @@ void init_SdaiRational_b_spline_volume( Registry& reg ) {
         ArrayTypeDescriptor * t_56 = new ArrayTypeDescriptor;
         t_56->AssignAggrCreator((AggregateCreator) create_GenericAggregate);        // Creator function
         t_56->SetBound1( 0 );
-        t_56->SetBound2( -2022101720 );
+        t_56->SetBound2( -1803256536 );
         t_56->FundamentalType(ARRAY_TYPE);
         t_56->Description("ARRAY [0:u_upper] OF ARRAY [0:v_upper] OF ARRAY [0:w_upper] OF REAL");
         t_56->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);
         ArrayTypeDescriptor * t_57 = new ArrayTypeDescriptor;
         t_57->AssignAggrCreator((AggregateCreator) create_GenericAggregate);        // Creator function
         t_57->SetBound1( 0 );
-        t_57->SetBound2( -2022101664 );
+        t_57->SetBound2( -1803256480 );
         t_57->FundamentalType(ARRAY_TYPE);
         t_57->Description("ARRAY [0:v_upper] OF ARRAY [0:w_upper] OF REAL");
         t_57->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);
         ArrayTypeDescriptor * t_58 = new ArrayTypeDescriptor;
         t_58->AssignAggrCreator((AggregateCreator) create_RealAggregate);        // Creator function
         t_58->SetBound1( 0 );
-        t_58->SetBound2( -2022101608 );
+        t_58->SetBound2( -1803256424 );
         t_58->FundamentalType(ARRAY_TYPE);
         t_58->Description("ARRAY [0:w_upper] OF REAL");
         t_58->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);

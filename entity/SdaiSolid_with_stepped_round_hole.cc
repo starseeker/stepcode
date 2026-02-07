@@ -164,7 +164,7 @@ void init_SdaiSolid_with_stepped_round_hole( Registry& reg ) {
         ListTypeDescriptor * t_233 = new ListTypeDescriptor;
         t_233->AssignAggrCreator((AggregateCreator) create_RealAggregate);        // Creator function
         t_233->SetBound1( 1 );
-        t_233->SetBound2( -1996723712 );
+        t_233->SetBound2( -1777878528 );
         t_233->FundamentalType(LIST_TYPE);
         t_233->Description("LIST [1:segments] OF positive_length_measure");
         t_233->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);
@@ -177,7 +177,7 @@ void init_SdaiSolid_with_stepped_round_hole( Registry& reg ) {
         ListTypeDescriptor * t_234 = new ListTypeDescriptor;
         t_234->AssignAggrCreator((AggregateCreator) create_RealAggregate);        // Creator function
         t_234->SetBound1( 1 );
-        t_234->SetBound2( -1996723712 );
+        t_234->SetBound2( -1777878528 );
         t_234->FundamentalType(LIST_TYPE);
         t_234->Description("LIST [1:segments] OF positive_length_measure");
         t_234->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);

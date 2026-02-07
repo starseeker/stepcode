@@ -51,6 +51,9 @@ extern SC_EXPRESS_EXPORT int print_objects_while_running;
 /* Refinement structures */
 /*************************/
 
+/* Maximum length for type name lookups */
+#define MAX_TYPE_NAME_LENGTH 512
+
 /** Structure to track type refinements from TYPEOF guards in AND expressions */
 typedef struct Refinement_ {
     Variable variable;       /**< the variable being refined */

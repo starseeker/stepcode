@@ -240,21 +240,21 @@ void init_SdaiB_spline_volume( Registry& reg ) {
         ArrayTypeDescriptor * t_12 = new ArrayTypeDescriptor;
         t_12->AssignAggrCreator((AggregateCreator) create_GenericAggregate);        // Creator function
         t_12->SetBound1( 0 );
-        t_12->SetBound2( -2022101720 );
+        t_12->SetBound2( -1803256536 );
         t_12->FundamentalType(ARRAY_TYPE);
         t_12->Description("ARRAY [0:u_upper] OF ARRAY [0:v_upper] OF ARRAY [0:w_upper] OF cartesian_point");
         t_12->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);
         ArrayTypeDescriptor * t_13 = new ArrayTypeDescriptor;
         t_13->AssignAggrCreator((AggregateCreator) create_GenericAggregate);        // Creator function
         t_13->SetBound1( 0 );
-        t_13->SetBound2( -2022101664 );
+        t_13->SetBound2( -1803256480 );
         t_13->FundamentalType(ARRAY_TYPE);
         t_13->Description("ARRAY [0:v_upper] OF ARRAY [0:w_upper] OF cartesian_point");
         t_13->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);
         ArrayTypeDescriptor * t_14 = new ArrayTypeDescriptor;
         t_14->AssignAggrCreator((AggregateCreator) create_EntityAggregate);        // Creator function
         t_14->SetBound1( 0 );
-        t_14->SetBound2( -2022101608 );
+        t_14->SetBound2( -1803256424 );
         t_14->FundamentalType(ARRAY_TYPE);
         t_14->Description("ARRAY [0:w_upper] OF cartesian_point");
         t_14->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);

@@ -307,14 +307,14 @@ void init_SdaiB_spline_surface( Registry& reg ) {
         ArrayTypeDescriptor * t_185 = new ArrayTypeDescriptor;
         t_185->AssignAggrCreator((AggregateCreator) create_GenericAggregate);        // Creator function
         t_185->SetBound1( 0 );
-        t_185->SetBound2( -2022289248 );
+        t_185->SetBound2( -1803444064 );
         t_185->FundamentalType(ARRAY_TYPE);
         t_185->Description("ARRAY [0:u_upper] OF ARRAY [0:v_upper] OF cartesian_point");
         t_185->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);
         ArrayTypeDescriptor * t_186 = new ArrayTypeDescriptor;
         t_186->AssignAggrCreator((AggregateCreator) create_EntityAggregate);        // Creator function
         t_186->SetBound1( 0 );
-        t_186->SetBound2( -2022289192 );
+        t_186->SetBound2( -1803444008 );
         t_186->FundamentalType(ARRAY_TYPE);
         t_186->Description("ARRAY [0:v_upper] OF cartesian_point");
         t_186->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);

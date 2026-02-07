@@ -128,14 +128,14 @@ void init_SdaiRational_b_spline_surface( Registry& reg ) {
         ArrayTypeDescriptor * t_595 = new ArrayTypeDescriptor;
         t_595->AssignAggrCreator((AggregateCreator) create_GenericAggregate);        // Creator function
         t_595->SetBound1( 0 );
-        t_595->SetBound2( -2022289248 );
+        t_595->SetBound2( -1803444064 );
         t_595->FundamentalType(ARRAY_TYPE);
         t_595->Description("ARRAY [0:u_upper] OF ARRAY [0:v_upper] OF REAL");
         t_595->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);
         ArrayTypeDescriptor * t_596 = new ArrayTypeDescriptor;
         t_596->AssignAggrCreator((AggregateCreator) create_RealAggregate);        // Creator function
         t_596->SetBound1( 0 );
-        t_596->SetBound2( -2022289192 );
+        t_596->SetBound2( -1803444008 );
         t_596->FundamentalType(ARRAY_TYPE);
         t_596->Description("ARRAY [0:v_upper] OF REAL");
         t_596->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);

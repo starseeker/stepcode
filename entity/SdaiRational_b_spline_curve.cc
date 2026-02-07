@@ -116,7 +116,7 @@ void init_SdaiRational_b_spline_curve( Registry& reg ) {
         ArrayTypeDescriptor * t_289 = new ArrayTypeDescriptor;
         t_289->AssignAggrCreator((AggregateCreator) create_RealAggregate);        // Creator function
         t_289->SetBound1( 0 );
-        t_289->SetBound2( -2022290368 );
+        t_289->SetBound2( -1803445184 );
         t_289->FundamentalType(ARRAY_TYPE);
         t_289->Description("ARRAY [0:upper_index_on_control_points] OF REAL");
         t_289->OriginatingSchema(ap242_managed_model_based_3d_engineering_mim_lf::schema);
