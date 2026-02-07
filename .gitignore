@@ -2,6 +2,15 @@
 /build
 /.build
 
+# Generated C++ files from exp2cxx (schema compilation)
+/Sdai*.cc
+/Sdai*.h
+/entity/
+/type/
+/compstructs.cc
+/schema.cc
+/schema.h
+
 # Temporary files
 *~
 \#*\#
