@@ -57,6 +57,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "express/resolve.h"
 #include "express/schema.h"
@@ -132,6 +134,270 @@ Type TYPE_retrieve_aggregate( Type t_select, Type t_agg ) {
     }
 
     return t_agg;
+}
+
+/*********************************/
+/* Flow-sensitive type narrowing */
+/*********************************/
+
+/** Thread-local storage for refinement context during resolution */
+RefinementContext active_refinements = NULL;
+
+/**
+ * Check if a type is a member of a SELECT type (directly or via nested SELECT)
+ * \param select_type the SELECT type to search in
+ * \param member_type the type to look for
+ * \param scope the scope for resolving type names
+ * \return true if member_type is a member of select_type
+ */
+bool is_select_member( Type select_type, Type member_type, Scope scope ) {
+    if( !TYPEis_select( select_type ) || !member_type ) {
+        return false;
+    }
+    
+    LISTdo_links( select_type->u.type->body->list, link )
+    Type t = ( Type ) link->data;
+    
+    /* Direct match */
+    if( t == member_type ) {
+        return true;
+    }
+    
+    /* If member is a named type, compare by name too */
+    if( member_type->symbol.name && t->symbol.name ) {
+        if( strcmp( member_type->symbol.name, t->symbol.name ) == 0 ) {
+            return true;
+        }
+    }
+    
+    /* If the member is itself a SELECT, recurse */
+    if( TYPEis_select( t ) ) {
+        if( is_select_member( t, member_type, scope ) ) {
+            return true;
+        }
+    }
+    LISTod;
+    
+    return false;
+}
+
+/**
+ * Check if an expression matches the pattern: 'TypeName' IN TYPEOF(var)
+ * \param expr the expression to check
+ * \param out_var pointer to store the variable (if pattern matches)
+ * \param out_typename pointer to store the type name string (if pattern matches)
+ * \return true if the pattern matches
+ */
+bool match_typeof_guard( Expression expr, Variable *out_var, const char **out_typename ) {
+    fprintf( stderr, "DEBUG: match_typeof_guard called\n" );
+    
+    /* Pattern: expr is IN operator with two operands */
+    if( !expr || expr->type->u.type->body->type != op_ ) {
+        fprintf( stderr, "  - Not an operator expression\n" );
+        return false;
+    }
+    
+    if( expr->e.op_code != OP_IN ) {
+        fprintf( stderr, "  - Not an IN operator (op_code=%d)\n", expr->e.op_code );
+        return false;
+    }
+    
+    fprintf( stderr, "  - Is IN operator\n" );
+    
+    /* Left operand should be a string literal */
+    Expression lhs = expr->e.op1;
+    if( !lhs || lhs->type->u.type->body->type != string_ ) {
+        fprintf( stderr, "  - LHS is not a string literal (type=%d)\n",
+                lhs ? lhs->type->u.type->body->type : -1 );
+        return false;
+    }
+    
+    fprintf( stderr, "  - LHS is string literal: %s\n", lhs->symbol.name ? lhs->symbol.name : "(null)" );
+    
+    /* Right operand should be a function call to TYPEOF */
+    Expression rhs = expr->e.op2;
+    if( !rhs || rhs->type->u.type->body->type != funcall_ ) {
+        fprintf( stderr, "  - RHS is not a function call (type=%d)\n",
+                rhs ? rhs->type->u.type->body->type : -1 );
+        return false;
+    }
+    
+    fprintf( stderr, "  - RHS is function call: %s\n", rhs->symbol.name ? rhs->symbol.name : "(null)" );
+    
+    /* Check if function is TYPEOF (by name) */
+    if( !rhs->symbol.name || strcmp( rhs->symbol.name, "TYPEOF" ) != 0 ) {
+        fprintf( stderr, "  - RHS function is not TYPEOF\n" );
+        return false;
+    }
+    
+    fprintf( stderr, "  - RHS function is TYPEOF\n" );
+    
+    /* TYPEOF should have exactly one argument which is an identifier */
+    if( !rhs->u.funcall.list || LISTget_length( rhs->u.funcall.list ) != 1 ) {
+        fprintf( stderr, "  - TYPEOF arg count != 1\n" );
+        return false;
+    }
+    
+    Expression arg = ( Expression ) LISTget_first( rhs->u.funcall.list );
+    if( !arg || arg->type->u.type->body->type != identifier_ ) {
+        fprintf( stderr, "  - TYPEOF arg is not an identifier\n" );
+        return false;
+    }
+    
+    fprintf( stderr, "  - TYPEOF arg is identifier\n" );
+    
+    /* The identifier should resolve to a variable */
+    if( !arg->u.variable ) {
+        fprintf( stderr, "  - Identifier does not resolve to a variable\n" );
+        return false;
+    }
+    
+    fprintf( stderr, "  - Pattern matched! var=%s, typename=%s\n",
+            arg->u.variable->name->symbol.name ? arg->u.variable->name->symbol.name : "(unnamed)",
+            lhs->symbol.name ? lhs->symbol.name : "(unnamed)" );
+    
+    /* Extract the results */
+    *out_var = arg->u.variable;
+    *out_typename = lhs->symbol.name;
+    return true;
+}
+
+/**
+ * Collect refinements from a conjunction (AND expression)
+ * \param expr the expression to collect refinements from
+ * \param scope the scope for resolving type names
+ * \return a linked list of refinements (or NULL if none)
+ */
+Refinement collect_refinements_from_conjunction( Expression expr, Scope scope ) {
+    if( !expr ) {
+        return NULL;
+    }
+    
+    fprintf( stderr, "DEBUG: collect_refinements_from_conjunction called\n" );
+    
+    /* If this is an AND node, recurse into both sides */
+    if( expr->type->u.type->body->type == op_ && expr->e.op_code == OP_AND ) {
+        fprintf( stderr, "  - Expression is AND, recursing\n" );
+        Refinement left_refs = collect_refinements_from_conjunction( expr->e.op1, scope );
+        Refinement right_refs = collect_refinements_from_conjunction( expr->e.op2, scope );
+        
+        /* Chain the refinements together */
+        if( !left_refs ) {
+            return right_refs;
+        }
+        
+        Refinement tail = left_refs;
+        while( tail->next ) {
+            tail = tail->next;
+        }
+        tail->next = right_refs;
+        return left_refs;
+    }
+    
+    /* Check if this node matches the TYPEOF guard pattern */
+    Variable var = NULL;
+    const char *typename = NULL;
+    
+    if( match_typeof_guard( expr, &var, &typename ) ) {
+        fprintf( stderr, "  - Matched TYPEOF guard for var %s\n",
+                var->name->symbol.name ? var->name->symbol.name : "(unnamed)" );
+        
+        /* Validate: variable's type should be a SELECT */
+        if( !var->type || !TYPEis_select( var->type ) ) {
+            fprintf( stderr, "  - Variable type is not SELECT\n" );
+            return NULL;
+        }
+        
+        fprintf( stderr, "  - Variable type is SELECT\n" );
+        
+        /* Look up the target type */
+        Type target_type = NULL;
+        
+        /* Convert typename to uppercase for lookup (EXPRESS is case-insensitive) */
+        char typename_upper[512];
+        strncpy( typename_upper, typename, sizeof( typename_upper ) - 1 );
+        typename_upper[sizeof( typename_upper ) - 1] = '\0';
+        for( char *p = typename_upper; *p; p++ ) {
+            *p = toupper( ( unsigned char )*p );
+        }
+        
+        /* Try direct lookup first */
+        target_type = ( Type ) SCOPEfind( scope, typename_upper, SCOPE_FIND_TYPE );
+        
+        fprintf( stderr, "  - Direct lookup of '%s': %p\n", typename_upper, target_type );
+        
+        /* If not found and typename contains '.', try extracting just the type part */
+        if( !target_type && strchr( typename_upper, '.' ) ) {
+            const char *dot = strrchr( typename_upper, '.' );
+            if( dot && *( dot + 1 ) ) {
+                fprintf( stderr, "  - Trying short name: '%s'\n", dot + 1 );
+                target_type = ( Type ) SCOPEfind( scope, dot + 1, SCOPE_FIND_TYPE );
+                fprintf( stderr, "  - Short name lookup: %p\n", target_type );
+            }
+        }
+        
+        if( !target_type || DICT_type != OBJ_TYPE ) {
+            fprintf( stderr, "  - Target type not found or not a TYPE (DICT_type=%d)\n", target_type ? DICT_type : -1 );
+            return NULL;
+        }
+        
+        fprintf( stderr, "  - Target type found: %s\n",
+                target_type->symbol.name ? target_type->symbol.name : "(unnamed)" );
+        
+        /* Validate: target type should be a member of the SELECT */
+        if( !is_select_member( var->type, target_type, scope ) ) {
+            fprintf( stderr, "  - Target type is not a member of SELECT\n" );
+            return NULL;
+        }
+        
+        fprintf( stderr, "  - Target type is a member of SELECT\n" );
+        
+        /* Create a refinement */
+        Refinement ref = ( Refinement ) malloc( sizeof( struct Refinement_ ) );
+        ref->variable = var;
+        ref->refined_type = target_type;
+        ref->next = NULL;
+        
+        fprintf( stderr, "  - Created refinement!\n" );
+        
+        return ref;
+    }
+    
+    /* Not an AND node and not a matching pattern - don't recurse further */
+    fprintf( stderr, "  - No pattern match, returning NULL\n" );
+    return NULL;
+}
+
+/**
+ * Free a list of refinements
+ */
+void free_refinements( Refinement refs ) {
+    while( refs ) {
+        Refinement next = refs->next;
+        free( refs );
+        refs = next;
+    }
+}
+
+/**
+ * Look up a refined type for a variable in the active refinement context
+ * \param var the variable to look up
+ * \return the refined type if found, NULL otherwise
+ */
+static Type lookup_refinement( Variable var ) {
+    if( !active_refinements || !var ) {
+        return NULL;
+    }
+    
+    Refinement ref = active_refinements->refinements;
+    while( ref ) {
+        if( ref->variable == var ) {
+            return ref->refined_type;
+        }
+        ref = ref->next;
+    }
+    
+    return NULL;
 }
 
 /**
@@ -299,6 +565,17 @@ void EXP_resolve( Expression expr, Scope scope, Type typecheck ) {
 #endif
                     /* Geez, don't wipe out original type! */
                     expr->return_type = expr->u.variable->type;
+                    
+                    /* Check if there's a refinement for this variable */
+                    Type refined_type = lookup_refinement( expr->u.variable );
+                    if( refined_type ) {
+                        fprintf( stderr, "DEBUG: Applying refinement for variable %s: %s -> %s\n",
+                                expr->symbol.name,
+                                expr->u.variable->type->symbol.name ? expr->u.variable->type->symbol.name : "(unnamed)",
+                                refined_type->symbol.name ? refined_type->symbol.name : "(unnamed)" );
+                        expr->return_type = refined_type;
+                    }
+                    
                     if( expr->u.variable->flags.attribute ) {
                         found_self = true;
                     }
