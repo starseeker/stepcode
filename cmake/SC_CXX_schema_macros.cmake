@@ -5,6 +5,11 @@ if(NOT DEFINED SC_GENERATE_CXX_ONESHOT)
   set(SC_GENERATE_CXX_ONESHOT FALSE)
 endif(NOT DEFINED SC_GENERATE_CXX_ONESHOT)
 
+# SC_ENABLE_PRECOMPILED_HEADERS - if true (default), use CMake precompiled headers to speed up schema compilation
+if(NOT DEFINED SC_ENABLE_PRECOMPILED_HEADERS)
+  set(SC_ENABLE_PRECOMPILED_HEADERS TRUE)
+endif(NOT DEFINED SC_ENABLE_PRECOMPILED_HEADERS)
+
 # find all part 21 files in schema dir, add a test for each one
 macro(P21_TESTS sfile)
   get_filename_component(SCHEMA_DIR ${sfile} PATH)
@@ -108,6 +113,10 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
     if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
       target_compile_options("${PROJECT_NAME}" PRIVATE "-Wno-ignored-qualifiers")
     endif()
+    # Enable precompiled headers for faster compilation (CMake 3.16+)
+    if(SC_ENABLE_PRECOMPILED_HEADERS AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+      target_precompile_headers(${PROJECT_NAME} PRIVATE "${SC_SOURCE_DIR}/include/schema_pch.h")
+    endif()
   endif()
 
   if(BUILD_STATIC_LIBS)
@@ -116,6 +125,10 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
     target_compile_definitions("${PROJECT_NAME}-static" PRIVATE SC_STATIC)
     if(MSVC)
       target_compile_options("${PROJECT_NAME}-static" PRIVATE "/bigobj")
+    endif()
+    # Enable precompiled headers for faster compilation (CMake 3.16+)
+    if(SC_ENABLE_PRECOMPILED_HEADERS AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+      target_precompile_headers(${PROJECT_NAME}-static PRIVATE "${SC_SOURCE_DIR}/include/schema_pch.h")
     endif()
   endif()
 
