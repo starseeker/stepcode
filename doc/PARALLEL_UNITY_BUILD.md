@@ -241,7 +241,7 @@ Potential enhancements for consideration:
 
 - Unity build concept: https://en.wikipedia.org/wiki/Unity_build
 - CMake parallel builds: https://cmake.org/cmake/help/latest/manual/cmake.1.html#build-tool-mode
-- Original implementation: commit aade826
+- Related documentation: `/doc/PCH_INVESTIGATION_SUMMARY.md`, `/doc/PRECOMPILED_HEADERS.md`
 
 ---
 

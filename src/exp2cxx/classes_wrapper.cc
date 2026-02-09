@@ -326,19 +326,48 @@ void initUnityFiles( const char * schName, FILES * files ) {
     // Get number of chunks from environment variable, default to 4
     const char * chunks_env = getenv("SC_UNITY_CHUNKS");
     int num_chunks = chunks_env ? atoi(chunks_env) : 4;
-    if (num_chunks < 1) num_chunks = 1;
-    if (num_chunks > 16) num_chunks = 16; // reasonable upper limit
+    if (num_chunks < 1) {
+        fprintf(stderr, "Warning: Invalid SC_UNITY_CHUNKS value '%s', using default of 4\n", 
+                chunks_env ? chunks_env : "");
+        num_chunks = 4;
+    }
+    if (num_chunks > 16) {
+        fprintf(stderr, "Warning: SC_UNITY_CHUNKS=%d exceeds maximum of 16, using 16\n", num_chunks);
+        num_chunks = 16; // reasonable upper limit
+    }
     
     files->unity.entity.num_chunks = num_chunks;
     files->unity.type.num_chunks = num_chunks;
-    files->unity.entity.current_entity_chunk = 0;
-    files->unity.type.current_type_chunk = 0;
+    files->unity.entity.current_chunk = 0;
+    files->unity.type.current_chunk = 0;
     
     // Allocate arrays for file pointers
     files->unity.entity.impl = (FILE**)malloc(num_chunks * sizeof(FILE*));
+    if (!files->unity.entity.impl) {
+        fprintf(stderr, "Fatal error: Failed to allocate memory for unity entity impl files\n");
+        exit(EXIT_FAILURE);
+    }
     files->unity.entity.hdr = (FILE**)malloc(num_chunks * sizeof(FILE*));
+    if (!files->unity.entity.hdr) {
+        fprintf(stderr, "Fatal error: Failed to allocate memory for unity entity header files\n");
+        free(files->unity.entity.impl);
+        exit(EXIT_FAILURE);
+    }
     files->unity.type.impl = (FILE**)malloc(num_chunks * sizeof(FILE*));
+    if (!files->unity.type.impl) {
+        fprintf(stderr, "Fatal error: Failed to allocate memory for unity type impl files\n");
+        free(files->unity.entity.impl);
+        free(files->unity.entity.hdr);
+        exit(EXIT_FAILURE);
+    }
     files->unity.type.hdr = (FILE**)malloc(num_chunks * sizeof(FILE*));
+    if (!files->unity.type.hdr) {
+        fprintf(stderr, "Fatal error: Failed to allocate memory for unity type header files\n");
+        free(files->unity.entity.impl);
+        free(files->unity.entity.hdr);
+        free(files->unity.type.impl);
+        exit(EXIT_FAILURE);
+    }
     
     std::string name = schName;
     name.append( "_unity_" );

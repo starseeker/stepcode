@@ -1115,10 +1115,10 @@ void ENTITYPrint( Entity entity, FILES * files, Schema schema, bool externMap ) 
     assert( hdr && impl && "error creating files" );
     
     // Distribute entities across unity chunks in round-robin fashion
-    int chunk_idx = files->unity.entity.current_entity_chunk;
+    int chunk_idx = files->unity.entity.current_chunk;
     fprintf( files->unity.entity.hdr[chunk_idx], "#include \"%s\"\n", names.header ); /* TODO this is not necessary? */
     fprintf( files->unity.entity.impl[chunk_idx], "#include \"%s\"\n", names.impl );
-    files->unity.entity.current_entity_chunk = (chunk_idx + 1) % files->unity.entity.num_chunks;
+    files->unity.entity.current_chunk = (chunk_idx + 1) % files->unity.entity.num_chunks;
 
     ENTITYPrint_h( entity, hdr, remaining, schema );
     ENTITYPrint_cc( entity, files->create, hdr, impl, remaining, schema, externMap );
