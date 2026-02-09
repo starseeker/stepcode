@@ -1,3 +1,0 @@
-/home/runner/work/stepcode/stepcode/build_default/schema_scanner/CMakeFiles/schema_scanner.dir
-/home/runner/work/stepcode/stepcode/build_default/schema_scanner/CMakeFiles/edit_cache.dir
-/home/runner/work/stepcode/stepcode/build_default/schema_scanner/CMakeFiles/rebuild_cache.dir

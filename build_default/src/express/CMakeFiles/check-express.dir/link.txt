@@ -1,1 +1,0 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/check-express.dir/link.d "CMakeFiles/check-express.dir/fedex.c.o" "CMakeFiles/check-express.dir/inithook.c.o" -o ../../bin/check-express  -Wl,-rpath,/home/runner/work/stepcode/stepcode/build_default/lib: ../../lib/libexpress.so.0.9.1

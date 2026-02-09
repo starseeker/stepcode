@@ -1,1 +1,0 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/print_schemas.dir/link.d CMakeFiles/print_schemas.dir/__/fedex.c.o CMakeFiles/print_schemas.dir/print_schemas.c.o -o ../../../bin/print_schemas  -Wl,-rpath,/home/runner/work/stepcode/stepcode/build_test/lib: ../../../lib/libexpress.so.0.9.1
