@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/print_attrs.dir/link.d CMakeFiles/print_attrs.dir/__/fedex.c.o CMakeFiles/print_attrs.dir/print_attrs.c.o -o ../../../bin/print_attrs  -Wl,-rpath,/home/runner/work/stepcode/stepcode/build_test/lib: ../../../lib/libexpress.so.0.9.1

@@ -128,9 +128,25 @@ void dumpComplexInst( STEPcomplex * c ) {
     }
 }
 
+void printUsage( const char * exe ) {
+    std::cerr << "Usage: " << exe << " <STEP_file>" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "lazy_test - read and analyze a STEP Part 21 exchange file using lazy loading." << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "This tool demonstrates lazy loading of STEP files, where instances are" << std::endl;
+    std::cerr << "loaded on-demand rather than all at once. It provides statistics about" << std::endl;
+    std::cerr << "the file including instance counts, references, and dependencies." << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "Arguments:" << std::endl;
+    std::cerr << "  <STEP_file>   Path to the STEP Part 21 file (.stp, .step, or .p21)" << std::endl;
+    std::cerr << std::endl;
+}
+
 int main( int argc, char ** argv ) {
     if( argc != 2 ) {
-        std::cerr << "Expected one argument, given " << argc - 1 << ". Exiting." << std::endl;
+        std::cerr << "Error: Expected one argument, given " << argc - 1 << "." << std::endl;
+        std::cerr << std::endl;
+        printUsage( argv[0] );
         exit( EXIT_FAILURE );
     }
     lazyInstMgr * mgr = new lazyInstMgr;
