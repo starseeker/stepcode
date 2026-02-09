@@ -109,7 +109,7 @@ endif(HAVE_STD_THREAD)
 
 # AP242 styled_item tests - exercise WR3 WHERE rule with styled_item
 # Test with vanilla AP242 schema (uses flow-sensitive narrowing)
-add_schema_dependent_test( "ap242_vanilla_styled_item" "242_mim_lf" "${SC_SOURCE_DIR}/test/p21/test_ap242_styled_item.stp" )
+add_schema_dependent_test( "ap242_vanilla_styled_item" "ap242" "${SC_SOURCE_DIR}/test/p21/test_ap242_styled_item.stp" )
 # Test with AP242 TREAT schema (uses explicit TREAT expression)
 add_schema_dependent_test( "ap242_styled_item" "ap242treat" "${SC_SOURCE_DIR}/test/p21/test_ap242_styled_item.stp" )
 
