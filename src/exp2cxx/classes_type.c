@@ -411,8 +411,12 @@ void TYPEPrint( const Type type, FILES *files, Schema schema ) {
     hdr = FILEcreate( names.header );
     impl = FILEcreate( names.impl );
     assert( hdr && impl && "error creating files" );
-    fprintf( files->unity.type.hdr, "#include \"%s\"\n", names.header );
-    fprintf( files->unity.type.impl, "#include \"%s\"\n", names.impl );
+    
+    // Distribute types across unity chunks in round-robin fashion
+    int chunk_idx = files->unity.type.current_type_chunk;
+    fprintf( files->unity.type.hdr[chunk_idx], "#include \"%s\"\n", names.header );
+    fprintf( files->unity.type.impl[chunk_idx], "#include \"%s\"\n", names.impl );
+    files->unity.type.current_type_chunk = (chunk_idx + 1) % files->unity.type.num_chunks;
 
     TYPEPrint_h( type, hdr );
     TYPEPrint_cc( type, &names, hdr, impl, schema );
