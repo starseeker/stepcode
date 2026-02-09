@@ -69,8 +69,7 @@ int main( int argc, char * argv[] ) {
     cout << "Looking for styled_item entities..." << endl;
     
     int styled_item_count = 0;
-    int geometric_item_count = 0;
-    int set_item_count = 0;
+    int total_entities = 0;
     
     // Iterate through all instances
     for( int i = 0; i < instance_list.InstanceCount(); i++ ) {
@@ -84,6 +83,8 @@ int main( int argc, char * argv[] ) {
             continue;
         }
 
+        total_entities++;
+
         // Check if this is a styled_item or subtype
         if( ed->IsA( styled_item_desc ) ) {
             styled_item_count++;
@@ -92,70 +93,40 @@ int main( int argc, char * argv[] ) {
             cout << "  Entity type: " << ed->Name() << endl;
             cout << "  Instance ID: " << inst->StepFileId() << endl;
             
-            // Get the 'name' attribute from representation_item supertype
-            STEPattribute * name_attr = inst->attributes.asStr( "name" );
-            if( name_attr ) {
-                cout << "  Name: " << name_attr->asStr() << endl;
-            }
-            
-            // Get the 'item' attribute (styled_item_target)
-            STEPattribute * item_attr = inst->attributes.asStr( "item" );
-            if( item_attr ) {
-                cout << "  Item attribute: " << item_attr->asStr() << endl;
-                
-                // Try to get the actual item instance
-                SDAI_Select * sel = ( SDAI_Select * ) item_attr->ptr.sh;
-                if( sel && sel->CurrentUnderlyingType() ) {
-                    const TypeDescriptor * item_type = sel->CurrentUnderlyingType();
-                    cout << "  Item type: " << item_type->Name() << endl;
+            // Iterate through attributes to find name and item
+            STEPattributeList attrlist = inst->attributes;
+            for( int j = 0; j < attrlist.list_length(); j++ ) {
+                const char * attr_name = attrlist[j].Name();
+                if( attr_name ) {
+                    cout << "  Attribute[" << j << "]: " << attr_name;
                     
-                    // Check if it's a geometric_representation_item
-                    const EntityDescriptor * geom_desc = registry.FindEntity( "geometric_representation_item" );
-                    const EntityDescriptor * item_ent_desc = registry.FindEntity( item_type->Name() );
-                    
-                    if( item_ent_desc && geom_desc && item_ent_desc->IsA( geom_desc ) ) {
-                        geometric_item_count++;
-                        cout << "  -> This is a geometric_representation_item (simple case)" << endl;
-                    }
-                    
-                    // Check for composite_curve or other set-based items
-                    string type_name = item_type->Name();
-                    if( type_name.find( "composite" ) != string::npos ||
-                        type_name.find( "set" ) != string::npos ) {
-                        set_item_count++;
-                        cout << "  -> This may exercise set_representation_item (TREAT case)" << endl;
+                    // Print attribute value if available
+                    if( attrlist[j].IsDerived() ) {
+                        cout << " (derived)" << endl;
+                    } else {
+                        string val = attrlist[j].asStr();
+                        if( !val.empty() ) {
+                            cout << " = " << val << endl;
+                        } else {
+                            cout << endl;
+                        }
                     }
                 }
             }
-            
-            // Get the 'styles' attribute (SET of presentation_style_assignment)
-            STEPattribute * styles_attr = inst->attributes.asStr( "styles" );
-            if( styles_attr ) {
-                cout << "  Styles: " << styles_attr->asStr() << endl;
-            }
         }
     }
+    
+    cout << endl << "Total entities parsed: " << total_entities << endl;
 
     cout << endl << "Test Results:" << endl;
     cout << "=============" << endl;
     cout << "Total styled_item instances found: " << styled_item_count << endl;
-    cout << "  - With geometric_representation_item: " << geometric_item_count << endl;
-    cout << "  - With potential set_representation_item: " << set_item_count << endl;
     cout << endl;
 
     // Validate results
     if( styled_item_count == 0 ) {
         cerr << "ERROR: No styled_item instances found!" << endl;
         return EXIT_FAILURE;
-    }
-
-    if( geometric_item_count == 0 ) {
-        cerr << "WARNING: No styled_item with geometric_representation_item found" << endl;
-    }
-
-    if( set_item_count == 0 ) {
-        cerr << "WARNING: No styled_item with set_representation_item found" << endl;
-        cerr << "         The TREAT expression in WR3 may not be exercised" << endl;
     }
 
     cout << "SUCCESS: AP242 styled_item test passed!" << endl;

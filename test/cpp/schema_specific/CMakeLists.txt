@@ -107,7 +107,7 @@ if(HAVE_STD_THREAD)
 endif(HAVE_STD_THREAD)
 
 # AP242 styled_item test - exercises TREAT expression in WR3 WHERE rule
-add_schema_dependent_test( "ap242_styled_item" "242_mim_lf_treat" "${SC_SOURCE_DIR}/test/p21/test_ap242_styled_item.stp" )
+add_schema_dependent_test( "ap242_styled_item" "ap242treat" "${SC_SOURCE_DIR}/test/p21/test_ap242_styled_item.stp" )
 
 # Local Variables:
 # tab-width: 8
