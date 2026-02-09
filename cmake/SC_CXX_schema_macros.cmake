@@ -88,6 +88,7 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
   add_custom_command(OUTPUT ${sourceFiles}
     COMMAND ${CMAKE_COMMAND} -DEXE=\"$<TARGET_FILE:exp2cxx>\"  -DEXP=\"${expFile}\"
     -DONESHOT=\"${SC_GENERATE_CXX_ONESHOT}\" -DSDIR=\"${CMAKE_CURRENT_LIST_DIR}\"
+    -DSC_UNITY_CHUNKS=\"${SC_UNITY_CHUNKS}\"
     -P ${SC_CMAKE_DIR}/SC_Run_exp2cxx.cmake
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     COMMENT "[exp2cxx] Generating ${${PROJECT_NAME}_file_count} C++ files for ${PROJECT_NAME}."
