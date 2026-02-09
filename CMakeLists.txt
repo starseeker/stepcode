@@ -167,6 +167,24 @@ if(NOT "${SC_BUILD_EXPRESS_ONLY}" AND NOT DEFINED SC_BUILD_SCHEMAS)
 endif()
 
 if(NOT SC_IS_SUBBUILD)
+  # Add message about precompiled headers
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+    if(NOT DEFINED SC_ENABLE_PRECOMPILED_HEADERS)
+      set(SC_ENABLE_PRECOMPILED_HEADERS TRUE CACHE BOOL "Enable precompiled headers for schema compilation")
+    endif()
+    if(SC_ENABLE_PRECOMPILED_HEADERS)
+      list(APPEND CONFIG_END_MESSAGES
+        ".. Precompiled headers are ENABLED for schema compilation (can significantly reduce build times)."
+        "   To disable, set SC_ENABLE_PRECOMPILED_HEADERS=OFF")
+    else()
+      list(APPEND CONFIG_END_MESSAGES
+        ".. Precompiled headers are DISABLED for schema compilation."
+        "   To enable, set SC_ENABLE_PRECOMPILED_HEADERS=ON")
+    endif()
+  else()
+    list(APPEND CONFIG_END_MESSAGES
+      ".. Precompiled headers require CMake 3.16+. Current version: ${CMAKE_VERSION}")
+  endif()
   list(APPEND CONFIG_END_MESSAGES
     ".. Don't worry about any messages above about missing headers or failed tests, as long as"
     "    you see 'Configuring done' below. Headers and features vary by compiler."

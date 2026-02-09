@@ -69,8 +69,10 @@ typedef  struct file_holder  {
     FILE * names;               /**< MAP Nov 2011 - header with namespace for entity and attr descriptors */
     struct {
         struct {
-            FILE * impl;
-            FILE * hdr;
+            FILE ** impl;      /**< array of unity impl files for parallel compilation */
+            FILE ** hdr;       /**< array of unity header files */
+            int num_chunks;    /**< number of chunks for parallel unity build */
+            int current_chunk;  /**< current chunk index for round-robin distribution */
         } entity, type;
     } unity;
 }  File_holder, FILES;

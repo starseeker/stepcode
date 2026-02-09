@@ -315,45 +315,111 @@ void SCOPEPrint( Scope scope, FILES * files, Schema schema, ComplexCollect * col
     LISTfree( list );
 }
 
-/** open/init unity files which allow faster compilation with fewer translation units */
+/** open/init unity files which allow faster compilation with fewer translation units
+ * Creates multiple unity files for parallel compilation based on SC_UNITY_CHUNKS env var
+ */
 void initUnityFiles( const char * schName, FILES * files ) {
     const char * unity = "\n/** this file is for unity builds, which allow faster compilation\n"
     " * with fewer translation units. not compatible with all compilers!\n */\n\n"
     "#include \"schema.h\"\n";
+    
+    // Get number of chunks from environment variable, default to 4
+    const char * chunks_env = getenv("SC_UNITY_CHUNKS");
+    int num_chunks = chunks_env ? atoi(chunks_env) : 4;
+    if (num_chunks < 1) {
+        fprintf(stderr, "Warning: Invalid SC_UNITY_CHUNKS value '%s', using default of 4\n", 
+                chunks_env ? chunks_env : "");
+        num_chunks = 4;
+    }
+    if (num_chunks > 16) {
+        fprintf(stderr, "Warning: SC_UNITY_CHUNKS=%d exceeds maximum of 16, using 16\n", num_chunks);
+        num_chunks = 16; // reasonable upper limit
+    }
+    
+    files->unity.entity.num_chunks = num_chunks;
+    files->unity.type.num_chunks = num_chunks;
+    files->unity.entity.current_chunk = 0;
+    files->unity.type.current_chunk = 0;
+    
+    // Allocate arrays for file pointers
+    files->unity.entity.impl = (FILE**)malloc(num_chunks * sizeof(FILE*));
+    if (!files->unity.entity.impl) {
+        fprintf(stderr, "Fatal error: Failed to allocate memory for unity entity impl files\n");
+        exit(EXIT_FAILURE);
+    }
+    files->unity.entity.hdr = (FILE**)malloc(num_chunks * sizeof(FILE*));
+    if (!files->unity.entity.hdr) {
+        fprintf(stderr, "Fatal error: Failed to allocate memory for unity entity header files\n");
+        free(files->unity.entity.impl);
+        exit(EXIT_FAILURE);
+    }
+    files->unity.type.impl = (FILE**)malloc(num_chunks * sizeof(FILE*));
+    if (!files->unity.type.impl) {
+        fprintf(stderr, "Fatal error: Failed to allocate memory for unity type impl files\n");
+        free(files->unity.entity.impl);
+        free(files->unity.entity.hdr);
+        exit(EXIT_FAILURE);
+    }
+    files->unity.type.hdr = (FILE**)malloc(num_chunks * sizeof(FILE*));
+    if (!files->unity.type.hdr) {
+        fprintf(stderr, "Fatal error: Failed to allocate memory for unity type header files\n");
+        free(files->unity.entity.impl);
+        free(files->unity.entity.hdr);
+        free(files->unity.type.impl);
+        exit(EXIT_FAILURE);
+    }
+    
     std::string name = schName;
     name.append( "_unity_" );
     size_t prefixLen = name.length();
-
-    name.append( "entities.cc" );
-    files->unity.entity.impl = FILEcreate( name.c_str() );
-
-    name.resize( name.length() - 2 );
-    name.append( "h" );
-    fprintf( files->unity.entity.impl, "%s#include \"%s\"\n", unity, name.c_str() );
-
-    files->unity.entity.hdr = FILEcreate( name.c_str() );
-    fprintf( files->unity.entity.hdr, "%s\n", unity );
-
-    name.resize( prefixLen );
-    name.append( "types.cc" );
-    files->unity.type.impl = FILEcreate( name.c_str() );
-
-    name.resize( name.length() - 2 );
-    name.append( "h" );
-    fprintf( files->unity.type.impl, "%s#include \"%s\"\n", unity, name.c_str() );
-
-    files->unity.type.hdr = FILEcreate( name.c_str() );
-    fprintf( files->unity.type.hdr, "%s\n", unity );
+    
+    // Create entity unity files
+    for (int i = 0; i < num_chunks; i++) {
+        char chunk_suffix[32];
+        snprintf(chunk_suffix, sizeof(chunk_suffix), "entities_%d.cc", i);
+        std::string impl_name = name.substr(0, prefixLen) + chunk_suffix;
+        files->unity.entity.impl[i] = FILEcreate( impl_name.c_str() );
+        
+        snprintf(chunk_suffix, sizeof(chunk_suffix), "entities_%d.h", i);
+        std::string hdr_name = name.substr(0, prefixLen) + chunk_suffix;
+        fprintf( files->unity.entity.impl[i], "%s#include \"%s\"\n", unity, hdr_name.c_str() );
+        
+        files->unity.entity.hdr[i] = FILEcreate( hdr_name.c_str() );
+        fprintf( files->unity.entity.hdr[i], "%s\n", unity );
+    }
+    
+    // Create type unity files
+    for (int i = 0; i < num_chunks; i++) {
+        char chunk_suffix[32];
+        snprintf(chunk_suffix, sizeof(chunk_suffix), "types_%d.cc", i);
+        std::string impl_name = name.substr(0, prefixLen) + chunk_suffix;
+        files->unity.type.impl[i] = FILEcreate( impl_name.c_str() );
+        
+        snprintf(chunk_suffix, sizeof(chunk_suffix), "types_%d.h", i);
+        std::string hdr_name = name.substr(0, prefixLen) + chunk_suffix;
+        fprintf( files->unity.type.impl[i], "%s#include \"%s\"\n", unity, hdr_name.c_str() );
+        
+        files->unity.type.hdr[i] = FILEcreate( hdr_name.c_str() );
+        fprintf( files->unity.type.hdr[i], "%s\n", unity );
+    }
 }
 
 /** close unity files
  * \sa initUnityFiles()
  */
 void closeUnityFiles( FILES * files ) {
-    FILEclose( files->unity.type.hdr );
-    FILEclose( files->unity.type.impl );
-    FILEclose( files->unity.entity.hdr );
-    FILEclose( files->unity.entity.impl );
+    for (int i = 0; i < files->unity.type.num_chunks; i++) {
+        FILEclose( files->unity.type.hdr[i] );
+        FILEclose( files->unity.type.impl[i] );
+    }
+    for (int i = 0; i < files->unity.entity.num_chunks; i++) {
+        FILEclose( files->unity.entity.hdr[i] );
+        FILEclose( files->unity.entity.impl[i] );
+    }
+    free(files->unity.type.hdr);
+    free(files->unity.type.impl);
+    free(files->unity.entity.hdr);
+    free(files->unity.entity.impl);
 }
 
 ///write tail of initfile, close it

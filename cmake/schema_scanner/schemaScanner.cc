@@ -226,8 +226,14 @@ void writeLists( const char * schemaName, stringstream & eh, stringstream & ei, 
     cmLists << "# of translation units that must be compiled" << endl;
     cmLists << "if(SC_UNITY_BUILD)" << endl << "  # turns off include statements within type and entity .cc's - the unity T.U.'s include a unity header" << endl;
     cmLists << "  add_definitions( -DSC_SDAI_UNITY_BUILD)" << endl;
-    cmLists << "  set(" << shortName << "_entity_impls Sdai" << schema_upper << "_unity_entities.cc)" << endl;
-    cmLists << "  set(" << shortName << "_type_impls Sdai" << schema_upper << "_unity_types.cc)" << endl;
+    cmLists << "  # Generate multiple unity files for parallel compilation" << endl;
+    cmLists << "  set(" << shortName << "_entity_impls)" << endl;
+    cmLists << "  set(" << shortName << "_type_impls)" << endl;
+    cmLists << "  math(EXPR _chunk_max \"${SC_UNITY_CHUNKS} - 1\")" << endl;
+    cmLists << "  foreach(chunk_id RANGE ${_chunk_max})" << endl;
+    cmLists << "    list(APPEND " << shortName << "_entity_impls Sdai" << schema_upper << "_unity_entities_${chunk_id}.cc)" << endl;
+    cmLists << "    list(APPEND " << shortName << "_type_impls Sdai" << schema_upper << "_unity_types_${chunk_id}.cc)" << endl;
+    cmLists << "  endforeach()" << endl;
     cmLists << "else(SC_UNITY_BUILD)" << endl;
     cmLists << "  set(" << shortName << "_entity_impls" << endl;
     cmLists << ei.str();

@@ -18,6 +18,16 @@ else(NOT DEFINED SC_UNITY_BUILD)
   message( STATUS "Respecting user-defined SC_UNITY_BUILD value of ${SC_UNITY_BUILD}.")
 endif(NOT DEFINED SC_UNITY_BUILD)
 
+# SC_UNITY_CHUNKS - number of unity files to create for better parallelism
+# Higher values allow better use of multiple cores but increase overhead
+# Default: 4 (good balance for most systems)
+if(NOT DEFINED SC_UNITY_CHUNKS)
+  set(SC_UNITY_CHUNKS 4 CACHE STRING "Number of unity build chunks for parallel compilation")
+endif(NOT DEFINED SC_UNITY_CHUNKS)
+if(SC_UNITY_BUILD)
+  message( STATUS "Unity build will use ${SC_UNITY_CHUNKS} chunks for parallel compilation.")
+endif()
+
 
 # --- variables ---
 # SC_ROOT: SC root dir
@@ -40,6 +50,7 @@ set(CALLED_FROM \"STEPCODE_CMAKELISTS\" CACHE STRING \"verification\")
 set(CMAKE_BUILD_TYPE \"Debug\" CACHE STRING \"build type\")
 set(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\" CACHE STRING \"compiler\")
 set(CMAKE_CXX_COMPILER \"${CMAKE_CXX_COMPILER}\" CACHE STRING \"compiler\")
+set(SC_UNITY_CHUNKS \"${SC_UNITY_CHUNKS}\" CACHE STRING \"unity chunks\")
 ")
 
 message( STATUS "Compiling schema scanner...")

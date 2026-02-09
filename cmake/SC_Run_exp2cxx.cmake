@@ -4,6 +4,10 @@ if(ONESHOT AND EXISTS "${SDIR}/schema.cc")
   message("WARNING: SC_GENERATE_CXX_ONESHOT is enabled. If generated code has been modified, it will NOT be rewritten!")
   message("This is ONLY for debugging STEPcode internals!")
 else()
+  # Set SC_UNITY_CHUNKS environment variable for exp2cxx
+  if(DEFINED SC_UNITY_CHUNKS)
+    set(ENV{SC_UNITY_CHUNKS} "${SC_UNITY_CHUNKS}")
+  endif()
   execute_process(COMMAND ${EXE} ${EXP}
     WORKING_DIRECTORY ${SDIR}
     RESULT_VARIABLE _res
