@@ -97,11 +97,16 @@ macro(SCHEMA_CMLIST SCHEMA_FILE)
   string(STRIP "${_ss_out}" _ss_stripped)
   string(REGEX REPLACE "\\\n" ";" _list ${_ss_stripped})
   foreach(_dir ${_list})
-    get_property(_already_added GLOBAL PROPERTY _SC_SCHEMA_DIRS)
-    list(FIND _already_added "${_dir}" _idx)
-    if(${_idx} EQUAL -1)
-       set_property(GLOBAL APPEND PROPERTY _SC_SCHEMA_DIRS "${_dir}")
-       add_subdirectory(${_dir} ${_dir}) #specify source and binary dirs as the same
+    # Extract schema name from directory path to check if already added
+    get_filename_component(_schema_name ${_dir} NAME)
+    # Track which schema directories have been added to prevent duplicate add_subdirectory calls
+    # (prevents conflicts when schema is in both SC_BUILD_SCHEMAS and explicitly called in tests)
+    get_property(_already_added GLOBAL PROPERTY SC_SCHEMA_${_schema_name}_ADDED)
+    if(NOT _already_added)
+      add_subdirectory(${_dir} ${_dir}) #specify source and binary dirs as the same
+      set_property(GLOBAL PROPERTY SC_SCHEMA_${_schema_name}_ADDED TRUE)
+    else()
+      message(STATUS "Schema ${_schema_name} already configured, skipping duplicate add_subdirectory")
     endif()
   endforeach(_dir ${_ss_out})
   # configure_file forces cmake to run again if the schema has been modified
