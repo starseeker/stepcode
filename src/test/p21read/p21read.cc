@@ -153,13 +153,25 @@ void printVersion( const char * exe ) {
 }
 
 void printUse( const char * exe ) {
-    std::cout << "p21read - read a STEP Part 21 exchange file using SCL, and write the data to another file." << std::endl;
-    std::cout << "Syntax:  " << exe << " [-i] [-s] infile [outfile]" << std::endl;
-    std::cout << "Use '-i' to ignore a schema name mismatch." << std::endl;
-    std::cout << "Use '-t' to turn off statistics tracking." << std::endl;
-    std::cout << "Use '-s' for strict interpretation (attributes that are \"missing and required\" will cause errors)." << std::endl;
-    std::cout << "Use '-v' to print the version info below and exit." << std::endl;
-    std::cout << "Use '--' as the last argument if a file name starts with a dash." << std::endl;
+    std::cout << "p21read - read a STEP Part 21 exchange file and write it to another file." << std::endl;
+    std::cout << std::endl;
+    std::cout << "This tool reads Part 21 files using STEPcode libraries (SCL) generated from" << std::endl;
+    std::cout << "an EXPRESS schema, validates the data, and can write it back out. It serves" << std::endl;
+    std::cout << "as both a validation tool and a demonstration of the schema libraries." << std::endl;
+    std::cout << std::endl;
+    std::cout << "Syntax:  " << exe << " [-i] [-s] [-t] [-v] infile [outfile]" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Arguments:" << std::endl;
+    std::cout << "  infile        Input STEP Part 21 file (.stp, .step, or .p21)" << std::endl;
+    std::cout << "  outfile       Optional output file (defaults to 'file.out')" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  -i            Ignore schema name mismatch between file and library" << std::endl;
+    std::cout << "  -s            Strict mode - attributes that are \"missing and required\" cause errors" << std::endl;
+    std::cout << "  -t            Turn off statistics tracking" << std::endl;
+    std::cout << "  -v            Print version information and exit" << std::endl;
+    std::cout << "  --            Treat remaining arguments as file names (use if name starts with -)" << std::endl;
+    std::cout << std::endl;
     printVersion( exe );
     exit( 1 );
 }
