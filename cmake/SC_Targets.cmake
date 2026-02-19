@@ -75,9 +75,10 @@ macro(SC_ADDLIB _addlib_target)
 
   if(NOT ${_arg_prefix}_NO_INSTALL AND NOT ${_arg_prefix}_TESTABLE)
     install(TARGETS ${_addlib_target}
+      EXPORT stepcode-targets
       RUNTIME DESTINATION ${BIN_DIR}
       LIBRARY DESTINATION ${LIB_DIR}
-      ARCHIVE DESTINATION ${LIB_DIR}	
+      ARCHIVE DESTINATION ${LIB_DIR}
     )
   endif()
 endmacro()
