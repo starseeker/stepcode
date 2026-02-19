@@ -42,9 +42,6 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(SC)
-if (POLICY CMP0077)
-  cmake_policy(SET CMP0077 OLD)
-endif (POLICY CMP0077)
 
 # SC version
 set(SC_VERSION_MAJOR 0)
@@ -166,12 +163,10 @@ if(NOT "${SC_BUILD_EXPRESS_ONLY}" AND NOT DEFINED SC_BUILD_SCHEMAS)
   set(SC_BUILD_SCHEMAS "ALL" CACHE STRING "Semicolon-separated list of paths to EXPRESS schemas to be built")
 endif()
 
-if(NOT SC_IS_SUBBUILD)
-  list(APPEND CONFIG_END_MESSAGES
+list(APPEND CONFIG_END_MESSAGES
     ".. Don't worry about any messages above about missing headers or failed tests, as long as"
     "    you see 'Configuring done' below. Headers and features vary by compiler."
     ".. Generating step can take a while if you are building several schemas.")
-endif(NOT SC_IS_SUBBUILD)
 
 ################
 
@@ -206,42 +201,38 @@ add_subdirectory(doc)
 
 #-----------------------------------------------------------------------------
 # CMake package config files for find_package(STEPCODE) support
-if(NOT SC_IS_SUBBUILD)
-  include(CMakePackageConfigHelpers)
-  configure_package_config_file(
-    "${SC_CMAKE_DIR}/STEPCODEConfig.cmake.in"
-    "${SC_BINARY_DIR}/cmake/STEPCODEConfig.cmake"
-    INSTALL_DESTINATION "${LIB_DIR}/cmake/STEPCODE"
-  )
-  write_basic_package_version_file(
-    "${SC_BINARY_DIR}/cmake/STEPCODEConfigVersion.cmake"
-    VERSION ${SC_VERSION}
-    COMPATIBILITY SameMajorVersion
-  )
-  install(FILES
-    "${SC_BINARY_DIR}/cmake/STEPCODEConfig.cmake"
-    "${SC_BINARY_DIR}/cmake/STEPCODEConfigVersion.cmake"
-    DESTINATION "${LIB_DIR}/cmake/STEPCODE"
-  )
-  install(EXPORT stepcode-targets
-    FILE STEPCODETargets.cmake
-    NAMESPACE STEPCODE::
-    DESTINATION "${LIB_DIR}/cmake/STEPCODE"
-  )
-endif(NOT SC_IS_SUBBUILD)
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  "${SC_CMAKE_DIR}/STEPCODEConfig.cmake.in"
+  "${SC_BINARY_DIR}/cmake/STEPCODEConfig.cmake"
+  INSTALL_DESTINATION "${LIB_DIR}/cmake/STEPCODE"
+)
+write_basic_package_version_file(
+  "${SC_BINARY_DIR}/cmake/STEPCODEConfigVersion.cmake"
+  VERSION ${SC_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+install(FILES
+  "${SC_BINARY_DIR}/cmake/STEPCODEConfig.cmake"
+  "${SC_BINARY_DIR}/cmake/STEPCODEConfigVersion.cmake"
+  DESTINATION "${LIB_DIR}/cmake/STEPCODE"
+)
+install(EXPORT stepcode-targets
+  FILE STEPCODETargets.cmake
+  NAMESPACE STEPCODE::
+  DESTINATION "${LIB_DIR}/cmake/STEPCODE"
+)
 
-if(NOT SC_IS_SUBBUILD)
-    #-----------------------------------------------------------------------------
-  # SC Packaging
-  # $make package
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "STEPcode")
-  set(CPACK_SET_DESTDIR "ON")
-  set(CPACK_PACKAGE_VERSION_MAJOR ${SC_VERSION_MAJOR})
-  set(CPACK_PACKAGE_VERSION_MINOR ${SC_VERSION_MINOR})
-  set(CPACK_PACKAGE_NAME SC)
-  set(CPACK_PACKAGE_CONTACT "SC Developers <scl-dev@googlegroups.com>")
-  include(CPack)
-endif(NOT SC_IS_SUBBUILD)
+#-----------------------------------------------------------------------------
+# SC Packaging
+# $make package
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "STEPcode")
+set(CPACK_SET_DESTDIR "ON")
+set(CPACK_PACKAGE_VERSION_MAJOR ${SC_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${SC_VERSION_MINOR})
+set(CPACK_PACKAGE_NAME SC)
+set(CPACK_PACKAGE_CONTACT "SC Developers <scl-dev@googlegroups.com>")
+include(CPack)
 
 
 # CONFIG_END_MESSAGES - list of messages to be printed after everything else is done.

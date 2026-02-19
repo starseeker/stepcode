@@ -7,6 +7,9 @@
 #   target_link_libraries(myapp PRIVATE STEPCODE::stepcore STEPCODE::stepeditor
 #                                       STEPCODE::stepdai STEPCODE::steputils)
 #
+# Schema libraries built at install time are also exported, e.g.:
+#   target_link_libraries(myapp PRIVATE STEPCODE::sdai_ap203)
+#
 # For static libraries, use targets with the -static suffix, e.g.:
 #   target_link_libraries(myapp PRIVATE STEPCODE::stepcore-static)
 #
