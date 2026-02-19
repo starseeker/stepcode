@@ -110,11 +110,13 @@ macro(SCHEMA_CMLIST SCHEMA_FILE)
     # (prevents conflicts when schema is in both SC_BUILD_SCHEMAS and explicitly called in tests)
     get_property(_already_added GLOBAL PROPERTY SC_SCHEMA_${_schema_name}_ADDED)
     if(NOT _already_added)
-      # Compute relative path from the current binary dir (where the schema was output).
-      # Since _dir is under ${CMAKE_CURRENT_BINARY_DIR}/schemas/, this path never
-      # contains '..', giving CMake enough context to use relative paths in make rules.
-      file(RELATIVE_PATH _rel_dir "${CMAKE_CURRENT_BINARY_DIR}" "${_dir}")
-      add_subdirectory(${_dir} ${_rel_dir}) #specify source and binary dirs
+      # Pass the absolute path as both source and binary dir. The schema scanner
+      # places source and generated files in the same directory, so they are the same.
+      # Note: CMake 3.13+ Makefile generator emits absolute paths in the 'rule:'
+      # recursive $(MAKE) call for any add_subdirectory with absolute source paths,
+      # while 'all:' entries always use relative paths. SCHEMA_TESTS works around
+      # this inconsistency for the Unix Makefiles generator.
+      add_subdirectory(${_dir} ${_dir}) #source and binary dir are the same absolute path
       set_property(GLOBAL PROPERTY SC_SCHEMA_${_schema_name}_ADDED TRUE)
     else()
       message(STATUS "Schema ${_schema_name} already configured, skipping duplicate add_subdirectory")
