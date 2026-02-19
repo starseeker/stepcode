@@ -3,7 +3,7 @@
 # uses SC_GENERATE_CXX_ONESHOT - if true, files will only be generated once. this is useful when debugging and modifying code, not otherwise. TODO: print a warning when set
 if(NOT DEFINED SC_GENERATE_CXX_ONESHOT)
   set(SC_GENERATE_CXX_ONESHOT FALSE)
-endif(NOT DEFINED SC_GENERATE_CXX_ONESHOT)
+endif()
 
 # find all part 21 files in schema dir, add a test for each one
 macro(P21_TESTS sfile)
@@ -20,9 +20,9 @@ macro(P21_TESTS sfile)
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMAND lazy_${PROJECT_NAME} ${TEST_FILE})
       set_tests_properties(read_lazy_cpp_${PROJECT_NAME}_${FNAME} PROPERTIES DEPENDS build_lazy_cpp_${PROJECT_NAME} LABELS cpp_schema_rw)
-    endif(NOT WIN32)
+    endif()
   endforeach()
-endmacro(P21_TESTS sfile)
+endmacro()
 
 # create p21read_sdai_*, lazy_sdai_*, any exes listed in SC_SDAI_ADDITIONAL_EXES_SRCS
 macro(SCHEMA_EXES)
@@ -37,7 +37,7 @@ macro(SCHEMA_EXES)
   SC_ADDEXEC(p21read_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/test/p21read/p21read.cc;${RELATIVE_PATH_COMPONENT}/src/test/p21read/sc_benchmark.cc" LINK_LIBRARIES ${_schema_step_libs} TESTABLE)
   if(NOT WIN32)
     SC_ADDEXEC(lazy_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/lazy_test.cc;${RELATIVE_PATH_COMPONENT}/src/cllazyfile/sc_benchmark.cc" LINK_LIBRARIES ${_schema_lazy_libs} TESTABLE)
-  endif(NOT WIN32)
+  endif()
 
   #add user-defined executables
   foreach(src ${SC_SDAI_ADDITIONAL_EXES_SRCS})
@@ -45,8 +45,8 @@ macro(SCHEMA_EXES)
     get_filename_component(path ${src} ABSOLUTE)
     SC_ADDEXEC(${name}_${PROJECT_NAME} SOURCES ${src} LINK_LIBRARIES ${_schema_step_libs} TESTABLE)
     #set_target_properties(${name}_${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "${${PROJECT_NAME}_COMPILE_FLAGS} -I${path}")
-  endforeach(src ${SC_SDAI_ADDITIONAL_EXES_SRCS})
-ENDMACRO(SCHEMA_EXES)
+  endforeach()
+ENDMACRO()
 
 
 # label the tests and set dependencies
@@ -91,8 +91,8 @@ macro(SCHEMA_TESTS)
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       COMMAND ${_sc_build_gen} ${_lazy_tgt})
     set_tests_properties(build_lazy_cpp_${PROJECT_NAME} PROPERTIES DEPENDS build_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
-  endif(NOT WIN32)
-endmacro(SCHEMA_TESTS)
+  endif()
+endmacro()
 
 # SCHEMA_TARGETS macro -
 # expFile: path to express file
@@ -159,13 +159,17 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
     endif()
   endif()
 
+  # Record this schema's base library name for use in the installed CMake config file.
+  # PROJECT_NAME is set by the generated schema CMakeLists.txt to the short schema name
+  # (e.g. 'sdai_ap203'), which is also the base name of the schema library target.
+  set_property(GLOBAL APPEND PROPERTY SC_SCHEMA_LIB_TARGETS ${PROJECT_NAME})
 
   SCHEMA_EXES()
   SCHEMA_TESTS()
   P21_TESTS(${expFile})
   # TODO add test to verify that schema scanner output matches fedex_plus output
 
-endmacro(SCHEMA_TARGETS expFile schemaName sourceFiles)
+endmacro()
 
 # Local Variables:
 # tab-width: 8
