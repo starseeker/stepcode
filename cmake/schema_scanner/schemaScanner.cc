@@ -215,9 +215,9 @@ void writeLists( const char * schemaName, stringstream & eh, stringstream & ei, 
     cmLists << "  get_filename_component(curr_name ${header_file} NAME)" << endl;
     cmLists << "  if (curr_dir)" << endl;
     cmLists << "    install( FILES ${header_file} DESTINATION \"include/schemas/" << shortName << "/${curr_dir}\" )" << endl;
-    cmLists << "  else (curr_dir)" << endl;
+    cmLists << "  else()" << endl;
     cmLists << "    install( FILES ${header_file} DESTINATION \"include/schemas/" << shortName << "\" )" << endl;
-    cmLists << "  endif (curr_dir)" << endl;
+    cmLists << "  endif()" << endl;
     cmLists << "endforeach()" << endl;
 
     cmLists << "# implementation files - 3 lists" << endl << endl;
@@ -228,7 +228,7 @@ void writeLists( const char * schemaName, stringstream & eh, stringstream & ei, 
     cmLists << "  add_definitions( -DSC_SDAI_UNITY_BUILD)" << endl;
     cmLists << "  set(" << shortName << "_entity_impls Sdai" << schema_upper << "_unity_entities.cc)" << endl;
     cmLists << "  set(" << shortName << "_type_impls Sdai" << schema_upper << "_unity_types.cc)" << endl;
-    cmLists << "else(SC_UNITY_BUILD)" << endl;
+    cmLists << "else()" << endl;
     cmLists << "  set(" << shortName << "_entity_impls" << endl;
     cmLists << ei.str();
     cmLists << "   )" << endl << endl;
@@ -236,7 +236,7 @@ void writeLists( const char * schemaName, stringstream & eh, stringstream & ei, 
     cmLists << "  set(" << shortName << "_type_impls" << endl;
     cmLists << ti.str();
     cmLists << "   )" << endl;
-    cmLists << "endif(SC_UNITY_BUILD)" << endl << endl;
+    cmLists << "endif()" << endl << endl;
 
     cmLists << "set( " << shortName << "_misc_impls" << endl;
     cmLists << "     SdaiAll.cc    compstructs.cc    schema.cc" << endl;

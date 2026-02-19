@@ -14,9 +14,9 @@ if(NOT DEFINED SC_UNITY_BUILD)
   message( STATUS "Assuming compiler is capable of unity build. (SC_UNITY_BUILD=TRUE)")
   set(SC_UNITY_BUILD TRUE)
   message( STATUS "Override by setting SC_UNITY_BUILD; TRUE will result in faster build times but *huge* translation units and higher memory use in compilation.")
-else(NOT DEFINED SC_UNITY_BUILD)
+else()
   message( STATUS "Respecting user-defined SC_UNITY_BUILD value of ${SC_UNITY_BUILD}.")
-endif(NOT DEFINED SC_UNITY_BUILD)
+endif()
 
 
 # --- variables ---
@@ -55,7 +55,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} -C ${initial_scanner_cache} ${SCANNER_S
                )
 if(NOT ${_ss_config_stat} STREQUAL "0")
   message(FATAL_ERROR "Scanner config status: ${_ss_config_stat}. stdout:\n${_ss_config_out}\nstderr:\n${_ss_config_err}")
-endif(NOT ${_ss_config_stat} STREQUAL "0")
+endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build ${SCANNER_BUILD_DIR} --config Debug --clean-first
                  WORKING_DIRECTORY ${SCANNER_BUILD_DIR}
                  TIMEOUT 120 # should take far less than 2m
@@ -65,16 +65,16 @@ execute_process(COMMAND ${CMAKE_COMMAND} --build ${SCANNER_BUILD_DIR} --config D
               )
 if(NOT ${_ss_build_stat} STREQUAL "0")
   message(FATAL_ERROR "Scanner build status: ${_ss_build_stat}. stdout:\n${_ss_build_out}\nstderr:\n${_ss_build_err}")
-endif(NOT ${_ss_build_stat} STREQUAL "0")
+endif()
 
 message( STATUS "Schema scanner built. Running it...")
 
 # not sure if it makes sense to install this or not...
 if(WIN32)
 	install(PROGRAMS ${SCANNER_OUT_DIR}/schema_scanner.exe DESTINATION ${BIN_DIR})
-else(WIN32)
+else()
 	install(PROGRAMS ${SCANNER_OUT_DIR}/schema_scanner DESTINATION ${BIN_DIR})
-endif(WIN32)
+endif()
 
 # macro SCHEMA_CMLIST
 # runs the schema scanner on one express file, creating a CMakeLists.txt file for each schema found. Those files are added via add_subdirectory().
@@ -98,7 +98,7 @@ macro(SCHEMA_CMLIST SCHEMA_FILE)
   if(NOT "${_ss_stat}" STREQUAL "0")
     #check size of output, put in file if large?
     message(FATAL_ERROR "Schema scan for '${SCHEMA_FILE}'\nexited with error code '${_ss_stat}'\nstdout:\n${_ss_out}\nstderr:\n${_ss_err}\n")
-  endif(NOT "${_ss_stat}" STREQUAL "0")
+  endif()
   # scanner output format: each line contains an absolute path. each path is a dir containing a CMakeLists for one schema
   # there will usually be a single line of output, but it is not illegal for multiple schemas to exist in one .exp file
   string(STRIP "${_ss_out}" _ss_stripped)
@@ -121,9 +121,9 @@ macro(SCHEMA_CMLIST SCHEMA_FILE)
     else()
       message(STATUS "Schema ${_schema_name} already configured, skipping duplicate add_subdirectory")
     endif()
-  endforeach(_dir ${_ss_out})
+  endforeach()
   # configure_file forces cmake to run again if the schema has been modified
   #if multiple schemas in one file, _schema is the last one printed.
   # 2e6ee669 removed _schema, does this still work?
   configure_file(${SCHEMA_FILE} ${SCANNER_BUILD_DIR}/${_schema})
-endmacro(SCHEMA_CMLIST SCHEMA_FILE)
+endmacro()

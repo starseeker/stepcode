@@ -18,7 +18,7 @@ function(add_stepcore_test name libs)
     COMMAND $<TARGET_FILE:tst_${name}>)
   set_tests_properties(build_cpp_${name} PROPERTIES LABELS cpp_unit_stepcore DEPENDS stepcore)
   set_tests_properties(test_${name} PROPERTIES LABELS cpp_unit_stepcore DEPENDS build_cpp_${name})
-endfunction(add_stepcore_test name libs)
+endfunction()
 
 if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
   set(_stepcore_test_libs "stepcore;steputils;stepeditor;stepdai")

@@ -46,7 +46,7 @@ endif()
 
 if(SC_ENABLE_TESTING)
   add_subdirectory(test)
-endif(SC_ENABLE_TESTING)
+endif()
 
 # Local Variables:
 # tab-width: 8
