@@ -27,7 +27,7 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 if(BUILD_STATIC_LIBS)
-  SC_ADDLIB(stepdai-static STATIC SOURCES ${DAI_SRCS} LINK_LIBRARIES $<JOIN:${_libdeps},-static >-static)
+  SC_ADDLIB(stepdai-static STATIC SOURCES ${DAI_SRCS} LINK_LIBRARIES steputils-static)
 endif()
 
 # Local Variables:
