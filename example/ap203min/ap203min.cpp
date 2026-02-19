@@ -709,11 +709,13 @@ int main( void ) {
         sfile->Error().PrintContents( cout );
     }
 
-    header_instances->DeleteInstances();
+    // delete sfile first: its destructor cleans up _headerInstances (header_instances)
+    delete sfile;
+    // With default _ownsInstances=0, DeleteInstances() must be called explicitly
+    // to free the SDAI_Application_instance objects held by instance_list.
     instance_list->DeleteInstances();
     delete registry;
     delete instance_list;
-    delete sfile;
 
     printf( "Done!\n" );
 }

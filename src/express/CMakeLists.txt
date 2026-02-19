@@ -102,6 +102,7 @@ if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
     set_property(TARGET express APPEND PROPERTY LINK_FLAGS "-flat_namespace -undefined suppress")
   endif(APPLE)
   install(TARGETS express
+    EXPORT stepcode-targets
     RUNTIME DESTINATION ${BIN_DIR}
     LIBRARY DESTINATION ${LIB_DIR}
     ARCHIVE DESTINATION ${LIB_DIR})
@@ -115,6 +116,7 @@ endif()
 if(BUILD_STATIC_LIBS)
   add_library(express-static STATIC ${EXPRESS_OBJS})
   install(TARGETS express-static
+    EXPORT stepcode-targets
     RUNTIME DESTINATION ${BIN_DIR}
     LIBRARY DESTINATION ${LIB_DIR}
     ARCHIVE DESTINATION ${LIB_DIR})

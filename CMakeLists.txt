@@ -204,6 +204,32 @@ if(SC_ENABLE_TESTING)
 endif(SC_ENABLE_TESTING)
 add_subdirectory(doc)
 
+#-----------------------------------------------------------------------------
+# CMake package config files for find_package(STEPCODE) support
+if(NOT SC_IS_SUBBUILD)
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(
+    "${SC_CMAKE_DIR}/STEPCODEConfig.cmake.in"
+    "${SC_BINARY_DIR}/cmake/STEPCODEConfig.cmake"
+    INSTALL_DESTINATION "${LIB_DIR}/cmake/STEPCODE"
+  )
+  write_basic_package_version_file(
+    "${SC_BINARY_DIR}/cmake/STEPCODEConfigVersion.cmake"
+    VERSION ${SC_VERSION}
+    COMPATIBILITY SameMajorVersion
+  )
+  install(FILES
+    "${SC_BINARY_DIR}/cmake/STEPCODEConfig.cmake"
+    "${SC_BINARY_DIR}/cmake/STEPCODEConfigVersion.cmake"
+    DESTINATION "${LIB_DIR}/cmake/STEPCODE"
+  )
+  install(EXPORT stepcode-targets
+    FILE STEPCODETargets.cmake
+    NAMESPACE STEPCODE::
+    DESTINATION "${LIB_DIR}/cmake/STEPCODE"
+  )
+endif(NOT SC_IS_SUBBUILD)
+
 if(NOT SC_IS_SUBBUILD)
     #-----------------------------------------------------------------------------
   # SC Packaging

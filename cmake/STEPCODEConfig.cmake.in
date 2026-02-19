@@ -1,0 +1,38 @@
+# STEPCODEConfig.cmake
+# This file allows find_package(STEPCODE) to work with a CMake config-file package.
+# It provides imported targets in the STEPCODE:: namespace.
+#
+# Usage:
+#   find_package(STEPCODE REQUIRED)
+#   target_link_libraries(myapp PRIVATE STEPCODE::stepcore STEPCODE::stepeditor
+#                                       STEPCODE::stepdai STEPCODE::steputils)
+#
+# For static libraries, use targets with the -static suffix, e.g.:
+#   target_link_libraries(myapp PRIVATE STEPCODE::stepcore-static)
+#
+# Convenience targets (link to shared if available, otherwise static):
+#   STEPCODE::steputils
+#   STEPCODE::stepdai
+#   STEPCODE::stepcore
+#   STEPCODE::stepeditor
+#   STEPCODE::steplazyfile
+#   STEPCODE::express
+#   STEPCODE::libexppp
+
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/STEPCODETargets.cmake")
+
+# Provide convenience aliases: when only static libs are installed, create an alias
+# without the -static suffix so consumers can use STEPCODE::stepcore regardless.
+set(_stepcode_libs steputils stepdai stepcore stepeditor steplazyfile express libexppp)
+foreach(_lib ${_stepcode_libs})
+  if(NOT TARGET STEPCODE::${_lib} AND TARGET STEPCODE::${_lib}-static)
+    # Only static available - create a convenience alias without the -static suffix
+    add_library(STEPCODE::${_lib} ALIAS STEPCODE::${_lib}-static)
+  endif()
+endforeach()
+unset(_stepcode_libs)
+unset(_lib)
+
+check_required_components(STEPCODE)

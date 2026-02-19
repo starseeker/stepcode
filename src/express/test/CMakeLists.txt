@@ -88,8 +88,13 @@ set_tests_properties( test_ap242_pe056_baseline PROPERTIES
   LABELS "parser;ap242;baseline"
   )
 
-sc_addexec(print_schemas SOURCES ../fedex.c print_schemas.c LINK_LIBRARIES express)
-sc_addexec(print_attrs SOURCES ../fedex.c print_attrs.c LINK_LIBRARIES express)
+if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
+  set(_express_lib express)
+else()
+  set(_express_lib express-static)
+endif()
+sc_addexec(print_schemas SOURCES ../fedex.c print_schemas.c LINK_LIBRARIES ${_express_lib})
+sc_addexec(print_attrs SOURCES ../fedex.c print_attrs.c LINK_LIBRARIES ${_express_lib})
 
 # Local Variables:
 # tab-width: 8

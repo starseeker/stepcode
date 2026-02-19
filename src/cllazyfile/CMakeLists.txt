@@ -27,8 +27,15 @@ if(BUILD_STATIC_LIBS)
   SC_ADDLIB(steplazyfile-static STATIC SOURCES ${LAZY_SRCS} LINK_LIBRARIES ${_libdeps})
 endif()
 
-SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile stepeditor NO_INSTALL)
-target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
+# Prefer shared libs when both are enabled; fall back to static when shared is off
+if(BUILD_SHARED_LIBS)
+  SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile stepeditor TESTABLE)
+elseif(BUILD_STATIC_LIBS)
+  SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile-static stepeditor-static TESTABLE)
+endif()
+if(TARGET lazy_test)
+  target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
+endif()
 
 # Local Variables:
 # tab-width: 8
