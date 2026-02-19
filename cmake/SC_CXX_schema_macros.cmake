@@ -44,24 +44,34 @@ ENDMACRO(SCHEMA_EXES)
 
 # label the tests and set dependencies
 macro(SCHEMA_TESTS)
+  # Work around a CMake 3.31 regression in the Unix Makefile generator where
+  # "rule:" targets call sub-make with the absolute build-directory-prefixed
+  # path for the "all:" target, but "all:" targets in Makefile2 are defined
+  # with relative paths, causing "No rule to make target" errors.
+  # Ninja and other generators are not affected.
+  if(CMAKE_GENERATOR MATCHES "Makefiles")
+    set(_sc_build_cmd ${CMAKE_MAKE_PROGRAM} -f CMakeFiles/Makefile2)
+    set(_sc_generate_tgt schemas/${PROJECT_NAME}/CMakeFiles/generate_cpp_${PROJECT_NAME}.dir/all)
+    set(_sc_p21read_tgt  schemas/${PROJECT_NAME}/CMakeFiles/p21read_${PROJECT_NAME}.dir/all)
+    set(_sc_lazy_tgt     schemas/${PROJECT_NAME}/CMakeFiles/lazy_${PROJECT_NAME}.dir/all)
+  else()
+    set(_sc_build_cmd ${CMAKE_COMMAND} --build . --config $<CONFIGURATION>)
+    set(_sc_generate_tgt --target generate_cpp_${PROJECT_NAME})
+    set(_sc_p21read_tgt  --target p21read_${PROJECT_NAME})
+    set(_sc_lazy_tgt     --target lazy_${PROJECT_NAME})
+  endif()
   add_test(NAME generate_cpp_${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} --build .
-    --target generate_cpp_${PROJECT_NAME}
-    --config $<CONFIGURATION>)
+    COMMAND ${_sc_build_cmd} ${_sc_generate_tgt})
   set_tests_properties(generate_cpp_${PROJECT_NAME} PROPERTIES LABELS cpp_schema_gen)
   add_test(NAME build_cpp_${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} --build .
-    --target p21read_${PROJECT_NAME}
-    --config $<CONFIGURATION>)
+    COMMAND ${_sc_build_cmd} ${_sc_p21read_tgt})
   set_tests_properties(build_cpp_${PROJECT_NAME} PROPERTIES DEPENDS generate_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
   if(NOT WIN32)
     add_test(NAME build_lazy_cpp_${PROJECT_NAME}
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      COMMAND ${CMAKE_COMMAND} --build .
-      --target lazy_${PROJECT_NAME}
-      --config $<CONFIGURATION>)
+      COMMAND ${_sc_build_cmd} ${_sc_lazy_tgt})
     set_tests_properties(build_lazy_cpp_${PROJECT_NAME} PROPERTIES DEPENDS build_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
   endif(NOT WIN32)
 endmacro(SCHEMA_TESTS)
