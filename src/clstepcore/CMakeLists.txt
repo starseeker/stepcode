@@ -76,7 +76,7 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 if(BUILD_STATIC_LIBS)
-  SC_ADDLIB(stepcore-static STATIC SOURCES ${CORE_SRCS} LINK_LIBRARIES $<JOIN:${_libdeps},-static>-static)
+  SC_ADDLIB(stepcore-static STATIC SOURCES ${CORE_SRCS} LINK_LIBRARIES steputils-static stepdai-static)
 endif()
 
 if(SC_ENABLE_TESTING)
