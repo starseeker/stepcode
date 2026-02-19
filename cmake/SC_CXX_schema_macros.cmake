@@ -51,24 +51,45 @@ ENDMACRO(SCHEMA_EXES)
 
 # label the tests and set dependencies
 macro(SCHEMA_TESTS)
+  # Compute the schema's binary dir relative to the top-level build dir.
+  # This relative form matches what CMake's Makefile generator writes in the
+  # 'all:' target definitions inside CMakeFiles/Makefile2.
+  file(RELATIVE_PATH _schema_bindir_rel "${CMAKE_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+
+  # CMake 3.13+ Makefile generator writes schema targets' 'all:' entries with
+  # relative paths, but the 'rule:' entries invoke them via absolute paths in
+  # the recursive $(MAKE) call. The two forms don't match, so
+  # 'cmake --build --target <schema-target>' fails with "No rule to make target".
+  # Work-around for the Makefile generator: call make directly on the relative
+  # 'all' target path in CMakeFiles/Makefile2, bypassing the broken rule: chain.
+  # For all other generators (Ninja, MSVC) the standard cmake --build --target
+  # form works correctly since they don't have this split.
+  if(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
+    set(_sc_build_gen
+      ${CMAKE_MAKE_PROGRAM} -f CMakeFiles/Makefile2)
+    set(_gen_tgt  "${_schema_bindir_rel}/CMakeFiles/generate_cpp_${PROJECT_NAME}.dir/all")
+    set(_p21_tgt  "${_schema_bindir_rel}/CMakeFiles/p21read_${PROJECT_NAME}.dir/all")
+    set(_lazy_tgt "${_schema_bindir_rel}/CMakeFiles/lazy_${PROJECT_NAME}.dir/all")
+  else()
+    set(_sc_build_gen
+      ${CMAKE_COMMAND} --build . --config $<CONFIGURATION> --target)
+    set(_gen_tgt  generate_cpp_${PROJECT_NAME})
+    set(_p21_tgt  p21read_${PROJECT_NAME})
+    set(_lazy_tgt lazy_${PROJECT_NAME})
+  endif()
+
   add_test(NAME generate_cpp_${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} --build .
-    --target generate_cpp_${PROJECT_NAME}
-    --config $<CONFIGURATION>)
+    COMMAND ${_sc_build_gen} ${_gen_tgt})
   set_tests_properties(generate_cpp_${PROJECT_NAME} PROPERTIES LABELS cpp_schema_gen)
   add_test(NAME build_cpp_${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} --build .
-    --target p21read_${PROJECT_NAME}
-    --config $<CONFIGURATION>)
+    COMMAND ${_sc_build_gen} ${_p21_tgt})
   set_tests_properties(build_cpp_${PROJECT_NAME} PROPERTIES DEPENDS generate_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
   if(NOT WIN32)
     add_test(NAME build_lazy_cpp_${PROJECT_NAME}
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      COMMAND ${CMAKE_COMMAND} --build .
-      --target lazy_${PROJECT_NAME}
-      --config $<CONFIGURATION>)
+      COMMAND ${_sc_build_gen} ${_lazy_tgt})
     set_tests_properties(build_lazy_cpp_${PROJECT_NAME} PROPERTIES DEPENDS build_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
   endif(NOT WIN32)
 endmacro(SCHEMA_TESTS)
@@ -103,6 +124,12 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
   if(BUILD_SHARED_LIBS)
     SC_ADDLIB(${PROJECT_NAME} SHARED SOURCES ${sourceFiles} LINK_LIBRARIES stepdai stepcore stepeditor steputils)
     add_dependencies(${PROJECT_NAME} generate_cpp_${PROJECT_NAME})
+    # Expose schema-specific headers to consumers
+    target_include_directories(${PROJECT_NAME}
+      PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include/schemas/${PROJECT_NAME}>
+    )
     if(WIN32)
       target_compile_definitions("${PROJECT_NAME}" PRIVATE SC_SCHEMA_DLL_EXPORTS)
       if(MSVC)
@@ -121,6 +148,12 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
     SC_ADDLIB(${PROJECT_NAME}-static STATIC SOURCES ${sourceFiles} LINK_LIBRARIES stepdai-static stepcore-static stepeditor-static steputils-static)
     add_dependencies(${PROJECT_NAME}-static generate_cpp_${PROJECT_NAME})
     target_compile_definitions("${PROJECT_NAME}-static" PRIVATE SC_STATIC)
+    # Expose schema-specific headers to consumers
+    target_include_directories(${PROJECT_NAME}-static
+      PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include/schemas/${PROJECT_NAME}>
+    )
     if(MSVC)
       target_compile_options("${PROJECT_NAME}-static" PRIVATE "/bigobj")
     endif()

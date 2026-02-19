@@ -7,6 +7,9 @@
 #   target_link_libraries(myapp PRIVATE STEPCODE::stepcore STEPCODE::stepeditor
 #                                       STEPCODE::stepdai STEPCODE::steputils)
 #
+# Schema libraries built at install time are also exported, e.g.:
+#   target_link_libraries(myapp PRIVATE STEPCODE::sdai_ap203)
+#
 # For static libraries, use targets with the -static suffix, e.g.:
 #   target_link_libraries(myapp PRIVATE STEPCODE::stepcore-static)
 #
@@ -34,5 +37,24 @@ foreach(_lib ${_stepcode_libs})
 endforeach()
 unset(_stepcode_libs)
 unset(_lib)
+
+# Create convenience aliases for schema libraries exported as -static only.
+# Parse the targets file to discover all exported targets (avoids hard-coding
+# schema names which are not known at template-generation time).
+file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/STEPCODETargets.cmake" _sc_target_lines
+     REGEX "^# Create imported target STEPCODE::")
+foreach(_sc_line ${_sc_target_lines})
+  string(REGEX REPLACE "^# Create imported target " "" _sc_target "${_sc_line}")
+  if(_sc_target MATCHES "^STEPCODE::(.+)-static$")
+    set(_sc_base "${CMAKE_MATCH_1}")
+    if(NOT TARGET STEPCODE::${_sc_base})
+      add_library(STEPCODE::${_sc_base} ALIAS STEPCODE::${_sc_base}-static)
+    endif()
+  endif()
+endforeach()
+unset(_sc_target_lines)
+unset(_sc_line)
+unset(_sc_target)
+unset(_sc_base)
 
 check_required_components(STEPCODE)
