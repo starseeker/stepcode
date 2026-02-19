@@ -51,23 +51,28 @@ ENDMACRO(SCHEMA_EXES)
 
 # label the tests and set dependencies
 macro(SCHEMA_TESTS)
+  # cmake --build --target <schema-target> is unreliable with the Unix Makefiles
+  # generator: Makefile2 defines schema targets' 'all' rules using relative paths
+  # but invokes them with absolute paths in the 'rule' entries, causing make to
+  # report "No rule to make target".  Use --target all which goes through the
+  # top-level Makefile and avoids this inconsistency.
   add_test(NAME generate_cpp_${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} --build .
-    --target generate_cpp_${PROJECT_NAME}
+    --target all
     --config $<CONFIGURATION>)
   set_tests_properties(generate_cpp_${PROJECT_NAME} PROPERTIES LABELS cpp_schema_gen)
   add_test(NAME build_cpp_${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} --build .
-    --target p21read_${PROJECT_NAME}
+    --target all
     --config $<CONFIGURATION>)
   set_tests_properties(build_cpp_${PROJECT_NAME} PROPERTIES DEPENDS generate_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
   if(NOT WIN32)
     add_test(NAME build_lazy_cpp_${PROJECT_NAME}
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       COMMAND ${CMAKE_COMMAND} --build .
-      --target lazy_${PROJECT_NAME}
+      --target all
       --config $<CONFIGURATION>)
     set_tests_properties(build_lazy_cpp_${PROJECT_NAME} PROPERTIES DEPENDS build_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
   endif(NOT WIN32)
@@ -103,6 +108,12 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
   if(BUILD_SHARED_LIBS)
     SC_ADDLIB(${PROJECT_NAME} SHARED SOURCES ${sourceFiles} LINK_LIBRARIES stepdai stepcore stepeditor steputils)
     add_dependencies(${PROJECT_NAME} generate_cpp_${PROJECT_NAME})
+    # Expose schema-specific headers to consumers
+    target_include_directories(${PROJECT_NAME}
+      PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include/schemas/${PROJECT_NAME}>
+    )
     if(WIN32)
       target_compile_definitions("${PROJECT_NAME}" PRIVATE SC_SCHEMA_DLL_EXPORTS)
       if(MSVC)
@@ -121,6 +132,12 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
     SC_ADDLIB(${PROJECT_NAME}-static STATIC SOURCES ${sourceFiles} LINK_LIBRARIES stepdai-static stepcore-static stepeditor-static steputils-static)
     add_dependencies(${PROJECT_NAME}-static generate_cpp_${PROJECT_NAME})
     target_compile_definitions("${PROJECT_NAME}-static" PRIVATE SC_STATIC)
+    # Expose schema-specific headers to consumers
+    target_include_directories(${PROJECT_NAME}-static
+      PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include/schemas/${PROJECT_NAME}>
+    )
     if(MSVC)
       target_compile_options("${PROJECT_NAME}-static" PRIVATE "/bigobj")
     endif()

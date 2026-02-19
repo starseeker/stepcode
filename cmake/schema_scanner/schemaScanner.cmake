@@ -82,8 +82,15 @@ endif(WIN32)
 # SCHEMA_FILE - path to the schema
 # TODO should we have a result variable to return schema name(s) found?
 macro(SCHEMA_CMLIST SCHEMA_FILE)
+  # Run the scanner in a schemas/ subdirectory under the CURRENT binary dir.
+  # This ensures the schema binary dir is a direct descendant of the calling
+  # CMakeLists.txt's binary dir (no '..' in the path), which is required for
+  # CMake's Makefile generator to produce consistent relative target paths in
+  # Makefile2 (rule: vs all: entries) when using cmake --build --target.
+  set(_schema_out_dir "${CMAKE_CURRENT_BINARY_DIR}/schemas")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${_schema_out_dir})
   execute_process(COMMAND ${SCANNER_OUT_DIR}/schema_scanner ${SCHEMA_FILE}
-                   WORKING_DIRECTORY ${SC_BINARY_DIR}/schemas
+                   WORKING_DIRECTORY ${_schema_out_dir}
                    RESULT_VARIABLE _ss_stat
                    OUTPUT_VARIABLE _ss_out
                    ERROR_VARIABLE _ss_err
@@ -103,7 +110,11 @@ macro(SCHEMA_CMLIST SCHEMA_FILE)
     # (prevents conflicts when schema is in both SC_BUILD_SCHEMAS and explicitly called in tests)
     get_property(_already_added GLOBAL PROPERTY SC_SCHEMA_${_schema_name}_ADDED)
     if(NOT _already_added)
-      add_subdirectory(${_dir} ${_dir}) #specify source and binary dirs as the same
+      # Compute relative path from the current binary dir (where the schema was output).
+      # Since _dir is under ${CMAKE_CURRENT_BINARY_DIR}/schemas/, this path never
+      # contains '..', giving CMake enough context to use relative paths in make rules.
+      file(RELATIVE_PATH _rel_dir "${CMAKE_CURRENT_BINARY_DIR}" "${_dir}")
+      add_subdirectory(${_dir} ${_rel_dir}) #specify source and binary dirs
       set_property(GLOBAL PROPERTY SC_SCHEMA_${_schema_name}_ADDED TRUE)
     else()
       message(STATUS "Schema ${_schema_name} already configured, skipping duplicate add_subdirectory")
