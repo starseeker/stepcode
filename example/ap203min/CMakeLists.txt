@@ -5,8 +5,18 @@
 # freely copied in part or in full for any purpose.  No acknowledgment is required
 # for the use of this file.
 #
-project(AP203Minimum)
 cmake_minimum_required(VERSION 3.12)
+project(AP203Minimum)
+
+# Try an installed STEPcode package first
+find_package(STEPCODE CONFIG QUIET)
+if(STEPCODE_FOUND)
+
+  add_executable(${PROJECT_NAME} ap203min.cpp)
+  target_link_libraries(${PROJECT_NAME} PRIVATE
+    STEPCODE::stepeditor STEPCODE::stepcore STEPCODE::stepdai STEPCODE::steputils sdai_ap203)
+
+else()
 
 # Set STEPCODE_ROOT_DIR to point to the root of the STEPcode source tree.
 if(NOT DEFINED STEPCODE_ROOT_DIR)
@@ -79,6 +89,8 @@ set(HDRS )
 add_executable(${PROJECT_NAME} ${SRCS} ${HDRS})
 
 target_link_libraries(${PROJECT_NAME} ${STEPCODE_LIBRARIES})
+
+endif(STEPCODE_FOUND)
 
 # Local Variables:
 # tab-width: 8

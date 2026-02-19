@@ -38,10 +38,10 @@
 # This file contains the top level CMakeLists.txt logic for the
 # STEPcode software package.
 
-project(SC)
-
 # Minimum required version of CMake
 cmake_minimum_required(VERSION 3.12)
+
+project(SC)
 if (POLICY CMP0077)
   cmake_policy(SET CMP0077 OLD)
 endif (POLICY CMP0077)
