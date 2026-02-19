@@ -12,20 +12,16 @@ macro(SC_ADDEXEC execname)
 
   if(DEFINED "${_arg_prefix}_LINK_LIBRARIES")
     foreach(_lib ${${_arg_prefix}_LINK_LIBRARIES})
-        if($CACHE{SC_STATIC_UTILS})
-            if(NOT $<TARGET_PROPERTY:${_lib},TYPE> STREQUAL "STATIC_LIBRARY")
-                message(SEND_ERROR "SC_ADDEXEC usage error - expected STATIC LINK_LIBRARIES targets (${_lib})")
-            endif()
-        endif()
         target_link_libraries(${execname} ${_lib})
     endforeach()
   endif()
 
   if(NOT ${_arg_prefix}_NO_INSTALL AND NOT ${_arg_prefix}_TESTABLE)
     install(TARGETS ${execname}
+      EXPORT SCTargets
       RUNTIME DESTINATION ${BIN_DIR}
       LIBRARY DESTINATION ${LIB_DIR}
-      ARCHIVE DESTINATION ${LIB_DIR}	
+      ARCHIVE DESTINATION ${LIB_DIR}
      )
   endif()
 
@@ -75,9 +71,10 @@ macro(SC_ADDLIB _addlib_target)
 
   if(NOT ${_arg_prefix}_NO_INSTALL AND NOT ${_arg_prefix}_TESTABLE)
     install(TARGETS ${_addlib_target}
+      EXPORT SCTargets
       RUNTIME DESTINATION ${BIN_DIR}
       LIBRARY DESTINATION ${LIB_DIR}
-      ARCHIVE DESTINATION ${LIB_DIR}	
+      ARCHIVE DESTINATION ${LIB_DIR}
     )
   endif()
 endmacro()

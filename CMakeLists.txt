@@ -38,13 +38,13 @@
 # This file contains the top level CMakeLists.txt logic for the
 # STEPcode software package.
 
-project(SC)
-
 # Minimum required version of CMake
 cmake_minimum_required(VERSION 3.12)
-if (POLICY CMP0077)
+if(POLICY CMP0077)
   cmake_policy(SET CMP0077 OLD)
-endif (POLICY CMP0077)
+endif()
+
+project(SC)
 
 # SC version
 set(SC_VERSION_MAJOR 0)
@@ -205,7 +205,32 @@ endif(SC_ENABLE_TESTING)
 add_subdirectory(doc)
 
 if(NOT SC_IS_SUBBUILD)
-    #-----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
+  # CMake package config files - allow downstream projects to use
+  # find_package(SC CONFIG) to locate installed STEPcode and its targets.
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(
+    "${SC_SOURCE_DIR}/cmake/SCConfig.cmake.in"
+    "${SC_BINARY_DIR}/SCConfig.cmake"
+    INSTALL_DESTINATION "${LIB_DIR}/cmake/SC"
+    PATH_VARS INCLUDE_DIR LIB_DIR
+  )
+  write_basic_package_version_file(
+    "${SC_BINARY_DIR}/SCConfigVersion.cmake"
+    VERSION "${SC_VERSION}"
+    COMPATIBILITY AnyNewerVersion
+  )
+  install(FILES
+    "${SC_BINARY_DIR}/SCConfig.cmake"
+    "${SC_BINARY_DIR}/SCConfigVersion.cmake"
+    DESTINATION "${LIB_DIR}/cmake/SC"
+  )
+  install(EXPORT SCTargets
+    NAMESPACE SC::
+    DESTINATION "${LIB_DIR}/cmake/SC"
+  )
+
+  #-----------------------------------------------------------------------------
   # SC Packaging
   # $make package
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "STEPcode")

@@ -1,72 +1,73 @@
 #
-# CMakeLists.txt for AP203 Minimum
+# CMakeLists.txt for AP203 Minimum (ExternalProject build)
+#
+# This variant builds STEPcode via CMake's ExternalProject mechanism,
+# installs it to a local prefix, and then links against the installed
+# static libraries.  It is useful when you need to pin a specific version
+# of STEPcode or keep it completely isolated from your project's build tree.
 #
 #  This file is released to the public domain.  Any part of this file may be
 # freely copied in part or in full for any purpose.  No acknowledgment is required
 # for the use of this file.
 #
-project(AP203Minimum)
 cmake_minimum_required(VERSION 3.12)
+project(AP203Minimum)
 
-INCLUDE( ExternalProject )
+include(ExternalProject)
 
-set(CMAKE_MODULE_PATH ${AP203Minimum_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${AP203Minimum_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-INCLUDE( External_STEPCode )
+include(External_STEPCode)
 
-#####
-# Variables ideally set by FindSTEPCode.cmake
+message(STATUS "STEPCODE_INSTALL_DIR: ${STEPCODE_INSTALL_DIR}")
 
-IF(NOT WIN32)
-	set( STEPCODE_LIBRARIES
-	${STEPCODE_INSTALL_DIR}/lib/libstepcore.a
-	${STEPCODE_INSTALL_DIR}/lib/libstepeditor.a
-	${STEPCODE_INSTALL_DIR}/lib/libstepdai.a
-	${STEPCODE_INSTALL_DIR}/lib/libsteputils.a
-	${STEPCODE_INSTALL_DIR}/lib/libsdai_ap203.a
-	)
-ELSE()
-	set( STEPCODE_LIBRARIES
-	${STEPCODE_INSTALL_DIR}/lib/libstepcore.lib
-	${STEPCODE_INSTALL_DIR}/lib/libstepeditor.lib
-	${STEPCODE_INSTALL_DIR}/lib/libstepdai.lib
-	${STEPCODE_INSTALL_DIR}/lib/libsteputils.lib
-	${STEPCODE_INSTALL_DIR}/lib/libsdai_ap203.lib
-	${STEPCODE_INSTALL_DIR}/lib/libexpress.lib
-	${STEPCODE_INSTALL_DIR}/lib/libexppp.lib
-	shlwapi.lib
-	)
-ENDIF()
+# Create IMPORTED targets for the installed STEPcode static libraries so
+# that downstream targets can use modern target-based linking.
+set(_sc_libs steputils stepdai stepcore stepeditor sdai_ap203)
+foreach(_lib ${_sc_libs})
+  add_library(SC::${_lib} STATIC IMPORTED)
+  if(WIN32)
+    set_target_properties(SC::${_lib} PROPERTIES
+      IMPORTED_LOCATION "${STEPCODE_INSTALL_DIR}/lib/lib${_lib}.lib")
+  else()
+    set_target_properties(SC::${_lib} PROPERTIES
+      IMPORTED_LOCATION "${STEPCODE_INSTALL_DIR}/lib/lib${_lib}.a")
+  endif()
+  add_dependencies(SC::${_lib} STEPCODE)
+endforeach()
 
-MESSAGE( STATUS "STEPCODE_INSTALL_DIR: " ${STEPCODE_INSTALL_DIR} )
+# On Windows, the express and exppp static libs are also required.
+if(WIN32)
+  foreach(_lib express exppp)
+    add_library(SC::${_lib} STATIC IMPORTED)
+    set_target_properties(SC::${_lib} PROPERTIES
+      IMPORTED_LOCATION "${STEPCODE_INSTALL_DIR}/lib/lib${_lib}.lib")
+    add_dependencies(SC::${_lib} STEPCODE)
+  endforeach()
+  target_link_libraries(SC::steputils INTERFACE shlwapi)
+endif()
 
-set( STEPCODE_INCLUDE_DIR
-${STEPCODE_INSTALL_DIR}/include/stepcode
-${STEPCODE_INSTALL_DIR}/include/stepcode/clstepcore
-${STEPCODE_INSTALL_DIR}/include/stepcode/cldai
-${STEPCODE_INSTALL_DIR}/include/stepcode/clutils
-${STEPCODE_INSTALL_DIR}/include/stepcode/cleditor
-${STEPCODE_INSTALL_DIR}/include/schemas/sdai_ap203
+set(STEPCODE_INCLUDE_DIRS
+  "${STEPCODE_INSTALL_DIR}/include/stepcode"
+  "${STEPCODE_INSTALL_DIR}/include/stepcode/clstepcore"
+  "${STEPCODE_INSTALL_DIR}/include/stepcode/cldai"
+  "${STEPCODE_INSTALL_DIR}/include/stepcode/clutils"
+  "${STEPCODE_INSTALL_DIR}/include/stepcode/cleditor"
+  "${STEPCODE_INSTALL_DIR}/include/schemas/sdai_ap203"
 )
 
-# End of variables ideally set by FindSTEPCode.cmake
-######
+add_executable(${PROJECT_NAME} ../ap203min.cpp)
 
+add_dependencies(${PROJECT_NAME} STEPCODE)
 
-include_directories(
-    ${STEPCODE_INCLUDE_DIR}
-)
+target_include_directories(${PROJECT_NAME} PRIVATE ${STEPCODE_INCLUDE_DIRS})
 
-set(SRCS ../ap203min.cpp)
-
-set(HDRS )
-
-add_executable( ${PROJECT_NAME} ${SRCS} ${HDRS})
-
-add_dependencies( ${PROJECT_NAME} STEPCODE )
-
-target_link_libraries( ${PROJECT_NAME} 
-    ${STEPCODE_LIBRARIES}
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  SC::stepeditor
+  SC::stepcore
+  SC::stepdai
+  SC::steputils
+  SC::sdai_ap203
 )
 
 # Local Variables:
@@ -75,3 +76,4 @@ target_link_libraries( ${PROJECT_NAME}
 # indent-tabs-mode: t
 # End:
 # ex: shiftwidth=2 tabstop=8
+

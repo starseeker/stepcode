@@ -102,6 +102,7 @@ if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
     set_property(TARGET express APPEND PROPERTY LINK_FLAGS "-flat_namespace -undefined suppress")
   endif(APPLE)
   install(TARGETS express
+    EXPORT SCTargets
     RUNTIME DESTINATION ${BIN_DIR}
     LIBRARY DESTINATION ${LIB_DIR}
     ARCHIVE DESTINATION ${LIB_DIR})
@@ -115,6 +116,7 @@ endif()
 if(BUILD_STATIC_LIBS)
   add_library(express-static STATIC ${EXPRESS_OBJS})
   install(TARGETS express-static
+    EXPORT SCTargets
     RUNTIME DESTINATION ${BIN_DIR}
     LIBRARY DESTINATION ${LIB_DIR}
     ARCHIVE DESTINATION ${LIB_DIR})
@@ -141,6 +143,7 @@ else()
   target_link_libraries(check-express express-static)
 endif()
 install(TARGETS check-express
+  EXPORT SCTargets
   RUNTIME DESTINATION ${BIN_DIR}
   LIBRARY DESTINATION ${LIB_DIR}
   ARCHIVE DESTINATION ${LIB_DIR})

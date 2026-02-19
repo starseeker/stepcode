@@ -21,6 +21,18 @@ macro(P21_TESTS sfile)
         COMMAND lazy_${PROJECT_NAME} ${TEST_FILE})
       set_tests_properties(read_lazy_cpp_${PROJECT_NAME}_${FNAME} PROPERTIES DEPENDS build_lazy_cpp_${PROJECT_NAME} LABELS cpp_schema_rw)
     endif(NOT WIN32)
+    # When both library types are built, run the statically linked binary with the
+    # SC shared-library directories removed from the dynamic linker search path.
+    # Success confirms the static binary requires no SC shared libraries at runtime.
+    if(BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS AND NOT WIN32)
+      add_test(NAME read_static_no_shared_${PROJECT_NAME}_${FNAME}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMAND p21read_${PROJECT_NAME}-static ${TEST_FILE})
+      set_tests_properties(read_static_no_shared_${PROJECT_NAME}_${FNAME} PROPERTIES
+        DEPENDS build_cpp_static_${PROJECT_NAME}
+        ENVIRONMENT "LD_LIBRARY_PATH=;DYLD_LIBRARY_PATH="
+        LABELS cpp_schema_static)
+    endif()
   endforeach()
 endmacro(P21_TESTS sfile)
 
@@ -31,6 +43,15 @@ macro(SCHEMA_EXES)
   if(NOT WIN32)
     SC_ADDEXEC(lazy_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/lazy_test.cc;${RELATIVE_PATH_COMPONENT}/src/cllazyfile/sc_benchmark.cc" LINK_LIBRARIES ${PROJECT_NAME} steplazyfile stepdai stepcore stepeditor steputils TESTABLE)
   endif(NOT WIN32)
+
+  # When both shared and static libs are built, add a statically linked test
+  # executable to verify static libs function independently of shared libs.
+  if(BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
+    SC_ADDEXEC(p21read_${PROJECT_NAME}-static
+      SOURCES "${RELATIVE_PATH_COMPONENT}/src/test/p21read/p21read.cc;${RELATIVE_PATH_COMPONENT}/src/test/p21read/sc_benchmark.cc"
+      LINK_LIBRARIES ${PROJECT_NAME}-static stepdai-static stepcore-static stepeditor-static steputils-static
+      TESTABLE)
+  endif()
 
   #add user-defined executables
   foreach(src ${SC_SDAI_ADDITIONAL_EXES_SRCS})
@@ -64,6 +85,18 @@ macro(SCHEMA_TESTS)
       --config $<CONFIGURATION>)
     set_tests_properties(build_lazy_cpp_${PROJECT_NAME} PROPERTIES DEPENDS build_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
   endif(NOT WIN32)
+
+  # When both shared and static libs are built, verify the static-linked binary
+  # compiles successfully (confirms all symbols resolve from static libs alone).
+  if(BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
+    add_test(NAME build_cpp_static_${PROJECT_NAME}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMAND ${CMAKE_COMMAND} --build .
+      --target p21read_${PROJECT_NAME}-static
+      --config $<CONFIGURATION>)
+    set_tests_properties(build_cpp_static_${PROJECT_NAME} PROPERTIES
+      DEPENDS generate_cpp_${PROJECT_NAME} LABELS cpp_schema_static_build)
+  endif()
 endmacro(SCHEMA_TESTS)
 
 # SCHEMA_TARGETS macro -

@@ -1,0 +1,36 @@
+# SCConfig.cmake - CMake package configuration file for STEPcode.
+#
+# This file is automatically installed by STEPcode's build system.
+# Downstream projects locate STEPcode using CMake's config-mode find_package:
+#
+#   find_package(SC CONFIG REQUIRED)
+#
+# Once found, link targets are available with the SC:: namespace:
+#
+#   target_link_libraries(myapp PRIVATE
+#     SC::stepeditor SC::stepcore SC::stepdai SC::steputils)
+#
+# For executables that use generated schema code, also link the schema library:
+#
+#   target_link_libraries(myapp PRIVATE SC::stepcore sdai_myschema)
+#
+# Build STEPcode with a schema and install it, then configure your project
+# by pointing CMAKE_PREFIX_PATH at the STEPcode install prefix:
+#
+#   cmake -DCMAKE_PREFIX_PATH=/path/to/stepcode/install ..
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Include the exported library/executable targets
+include("${CMAKE_CURRENT_LIST_DIR}/SCTargets.cmake")
+
+# Provide paths so callers can find STEPcode headers and libraries
+set_and_check(SC_INCLUDE_DIR "@PACKAGE_INCLUDE_DIR@/stepcode")
+set_and_check(SC_LIB_DIR "@PACKAGE_LIB_DIR@")
+
+# Directory containing this file - useful for accessing STEPcode CMake helpers
+set(SC_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+
+check_required_components(SC)
