@@ -12,11 +12,6 @@ macro(SC_ADDEXEC execname)
 
   if(DEFINED "${_arg_prefix}_LINK_LIBRARIES")
     foreach(_lib ${${_arg_prefix}_LINK_LIBRARIES})
-        if($CACHE{SC_STATIC_UTILS})
-            if(NOT $<TARGET_PROPERTY:${_lib},TYPE> STREQUAL "STATIC_LIBRARY")
-                message(SEND_ERROR "SC_ADDEXEC usage error - expected STATIC LINK_LIBRARIES targets (${_lib})")
-            endif()
-        endif()
         target_link_libraries(${execname} ${_lib})
     endforeach()
   endif()
@@ -60,6 +55,14 @@ macro(SC_ADDLIB _addlib_target)
   else()
     message(SEND_ERROR "SC_ADDLIB usage error!")
   endif()
+
+  # Propagate include directories to consumers (build tree and install tree).
+  target_include_directories(${_addlib_target}
+    PUBLIC
+      $<BUILD_INTERFACE:${SC_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${SC_BINARY_DIR}/include>
+      $<INSTALL_INTERFACE:${INCLUDE_DIR}/stepcode>
+  )
 
   if(DEFINED ${_arg_prefix}_LINK_LIBRARIES)
     foreach(_lib ${${_arg_prefix}_LINK_LIBRARIES})
