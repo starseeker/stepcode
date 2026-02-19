@@ -18,13 +18,21 @@
 #   STEPCODE::steplazyfile
 #   STEPCODE::express
 #   STEPCODE::libexppp
+#
+# Schema libraries (if built and installed) are also available.
+# Schema library names follow the pattern STEPCODE::sdai_<shortname>, e.g.:
+#   STEPCODE::sdai_ap203
+#   STEPCODE::sdai_ap214e3
+# Use the -static suffix for static variants:
+#   STEPCODE::sdai_ap203-static
 
 @PACKAGE_INIT@
 
 include("${CMAKE_CURRENT_LIST_DIR}/STEPCODETargets.cmake")
 
-# Provide convenience aliases: when only static libs are installed, create an alias
-# without the -static suffix so consumers can use STEPCODE::stepcore regardless.
+# Provide convenience aliases for core libraries: when only static libs are
+# installed, create an alias without the -static suffix so consumers can use
+# STEPCODE::stepcore regardless.
 set(_stepcode_libs steputils stepdai stepcore stepeditor steplazyfile express libexppp)
 foreach(_lib ${_stepcode_libs})
   if(NOT TARGET STEPCODE::${_lib} AND TARGET STEPCODE::${_lib}-static)
@@ -33,6 +41,17 @@ foreach(_lib ${_stepcode_libs})
   endif()
 endforeach()
 unset(_stepcode_libs)
+unset(_lib)
+
+# Provide convenience aliases for schema libraries (if any were installed).
+# The list of schema names is embedded at install time.
+set(_stepcode_schema_libs @SC_SCHEMA_TARGETS@)
+foreach(_lib ${_stepcode_schema_libs})
+  if(NOT TARGET STEPCODE::${_lib} AND TARGET STEPCODE::${_lib}-static)
+    add_library(STEPCODE::${_lib} ALIAS STEPCODE::${_lib}-static)
+  endif()
+endforeach()
+unset(_stepcode_schema_libs)
 unset(_lib)
 
 check_required_components(STEPCODE)

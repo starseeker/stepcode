@@ -208,6 +208,8 @@ add_subdirectory(doc)
 # CMake package config files for find_package(STEPCODE) support
 if(NOT SC_IS_SUBBUILD)
   include(CMakePackageConfigHelpers)
+  # Collect schema library names recorded during subdirectory processing
+  get_property(SC_SCHEMA_TARGETS GLOBAL PROPERTY SC_SCHEMA_LIB_TARGETS)
   configure_package_config_file(
     "${SC_CMAKE_DIR}/STEPCODEConfig.cmake.in"
     "${SC_BINARY_DIR}/cmake/STEPCODEConfig.cmake"
