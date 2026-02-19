@@ -56,14 +56,11 @@ macro(SCHEMA_TESTS)
   # 'all:' target definitions inside CMakeFiles/Makefile2.
   file(RELATIVE_PATH _schema_bindir_rel "${CMAKE_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
 
-  # CMake 3.13+ Makefile generator writes schema targets' 'all:' entries with
-  # relative paths, but the 'rule:' entries invoke them via absolute paths in
-  # the recursive $(MAKE) call. The two forms don't match, so
-  # 'cmake --build --target <schema-target>' fails with "No rule to make target".
-  # Work-around for the Makefile generator: call make directly on the relative
-  # 'all' target path in CMakeFiles/Makefile2, bypassing the broken rule: chain.
-  # For all other generators (Ninja, MSVC) the standard cmake --build --target
-  # form works correctly since they don't have this split.
+  # Work around a CMake 3.31 regression in the Unix Makefile generator where
+  # "rule:" targets call sub-make with the absolute build-directory-prefixed
+  # path for the "all:" target, but "all:" targets in Makefile2 are defined
+  # with relative paths, causing "No rule to make target" errors.
+  # Ninja and other generators are not affected.
   if(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
     set(_sc_build_gen
       ${CMAKE_MAKE_PROGRAM} -f CMakeFiles/Makefile2)

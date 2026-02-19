@@ -15,14 +15,14 @@ set(_valid_gen_states AUTO ON OFF)
 set(_verbosity "QUIET")
 
 set(SC_GENERATE_LEXER_PARSER "AUTO" CACHE
-    STRING "Use Perplex, RE2C and Lemon to generate C source code.")
+    STRING "Use RE2C and Lemon to generate C source code.")
 set_property(CACHE SC_GENERATE_LEXER_PARSER PROPERTY STRINGS ${_valid_gen_states})
 string(TOUPPER "${SC_GENERATE_LEXER_PARSER}" SC_GENERATE_LEXER_PARSER)
 
 if(NOT "${SC_GENERATE_LEXER_PARSER}" IN_LIST _valid_gen_states)
   message(WARNING "Unknown value ${SC_GENERATE_LEXER_PARSER} supplied for SC_GENERATE_LEXER_PARSER - defaulting to AUTO")
   message(WARNING "Valid options are AUTO, ON and OFF")
-  set(SC_GENERATE_LEXER_PARSER "AUTO" CACHE STRING "Use Perplex, RE2C and Lemon to generate C source code.")
+  set(SC_GENERATE_LEXER_PARSER "AUTO" CACHE STRING "Use RE2C and Lemon to generate C source code.")
 endif()
 
 # If the generators have not been turned off, we need to check for them
@@ -30,7 +30,6 @@ if(NOT "${SC_GENERATE_LEXER_PARSER}" STREQUAL "OFF")
   # NOTE: lemon doesn't have a stable versioning system (it's always 1)
   find_package(LEMON ${_verbosity})
   find_package(RE2C ${_verbosity})
-  find_package(PERPLEX ${_verbosity})
 
   if(LEMON_FOUND AND RE2C_FOUND)
     set(SC_GENERATE_LP_SOURCES 1)

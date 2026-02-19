@@ -10,15 +10,17 @@ if(SC_GENERATE_LP_SOURCES)
     COMPILE_FLAGS "-p -c"
     DEFINES_FILE "expparse.h"
     )
-  PERPLEX_TARGET(ExpScanner expscan.l)
-  ADD_PERPLEX_LEMON_DEPENDENCY(ExpScanner ExpParser)
+  RE2C_TARGET(ExpScanner expscan.re expscan.c
+    COMPILE_FLAGS "--no-debug-info --no-generation-date -c -Wno-condition-order"
+    )
+  ADD_RE2C_LEMON_DEPENDENCY(ExpScanner ExpParser)
 
-  add_library(objlib_expscan_c OBJECT ${PERPLEX_ExpScanner_SRC})
+  add_library(objlib_expscan_c OBJECT ${RE2C_ExpScanner_OUTPUTS})
   set_property(TARGET objlib_expscan_c PROPERTY POSITION_INDEPENDENT_CODE ON)
 
   add_library(objlib_expparse_c OBJECT ${LEMON_ExpParser_OUTPUTS})
   set_property(TARGET objlib_expparse_c PROPERTY POSITION_INDEPENDENT_CODE ON)
-  set_source_files_properties(${LEMON_ExpParser_OUTPUTS} PROPERTIES OBJECT_DEPENDS "${PERPLEX_ExpScanner_HDR}")
+  set_source_files_properties(${LEMON_ExpParser_OUTPUTS} PROPERTIES OBJECT_DEPENDS "${RE2C_ExpScanner_OUTPUT_HEADER}")
 
 else(SC_GENERATE_LP_SOURCES)
   add_subdirectory(generated)
@@ -83,12 +85,12 @@ list(APPEND EXPRESS_OBJS $<TARGET_OBJECTS:objlib_expparse_c>)
 
 
 if(SC_GENERATE_LP_SOURCES)
-  set_property(TARGET objlib_expparse_c objlib_express_c objlib_lexact_c 
-    APPEND PROPERTY INCLUDE_DIRECTORIES "${PERPLEX_ExpScanner_INCLUDE_DIR}")
+  set_property(TARGET objlib_expparse_c objlib_express_c objlib_lexact_c
+    APPEND PROPERTY INCLUDE_DIRECTORIES "${RE2C_ExpScanner_INCLUDE_DIR}")
   set_property(TARGET objlib_expscan_c objlib_express_c objlib_lexact_c
     APPEND PROPERTY INCLUDE_DIRECTORIES "${LEMON_ExpParser_INCLUDE_DIR}")
   # OBJECT libraries are not targets, and so an explicit dependency is required
-  set_source_files_properties(express.c lexact.c PROPERTIES OBJECT_DEPENDS "${PERPLEX_ExpScanner_HDR};${LEMON_ExpParser_HDR}")
+  set_source_files_properties(express.c lexact.c PROPERTIES OBJECT_DEPENDS "${LEMON_ExpParser_HDR}")
 endif()
 
 if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
