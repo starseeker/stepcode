@@ -18,7 +18,7 @@ extern "C" {
      * virtual and physical memory use in kb,
      * user and system cpu time in ms
      *
-     * not yet implemented for OSX or Windows.
+     * not yet implemented for OSX.
      */
     benchVals getMemAndTime( );
 

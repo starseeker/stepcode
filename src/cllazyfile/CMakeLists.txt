@@ -18,6 +18,9 @@ SC_ADDLIB(steplazyfile SOURCES ${LAZY_SRCS} LINK_LIBRARIES stepcore stepdai step
 SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile${SC_LIB_SUFFIX} stepeditor${SC_LIB_SUFFIX} TESTABLE)
 if(TARGET lazy_test)
   target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
+  if(WIN32)
+    target_link_libraries(lazy_test psapi)
+  endif()
 endif()
 
 # Local Variables:
