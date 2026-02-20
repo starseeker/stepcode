@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 #necessary macros won't already be defined if SC_BUILD_SCHEMAS is set to ""
 if(NOT COMMAND SCHEMA_CMLIST)
   include(${SC_CMAKE_DIR}/schema_scanner/schemaScanner.cmake)
-endif(NOT COMMAND SCHEMA_CMLIST)
+endif()
 
 #used to create a number of small files at test-time. you probably don't want to modify.
 set(P21_FILE_HEAD "
@@ -36,7 +36,7 @@ macro(INSTANCE_TEST sname test_mode instance)
     set(_fail "TRUE")
   else()
     message(FATAL_ERROR "** Invalid test_mode passed to INSTANCE_TEST macro: ${test_mode} **")
-  endif(${test_mode} STREQUAL "PASS")
+  endif()
   math(EXPR SI_TEST_COUNTER "${SI_TEST_COUNTER}+1")
   set(test_file "${CMAKE_CURRENT_BINARY_DIR}/${sname}_${SI_TEST_COUNTER}.stp")
   file(WRITE ${test_file} "${P21_FILE_HEAD}${sname}${P21_FILE_MID}
@@ -44,7 +44,7 @@ macro(INSTANCE_TEST sname test_mode instance)
   ${P21_FILE_TAIL}")
   add_test(test_${sname}_${SI_TEST_COUNTER} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/p21read_sdai_${sname} ${test_file})
   set_tests_properties(test_${sname}_${SI_TEST_COUNTER} PROPERTIES DEPENDS build_cpp_sdai_${sname} LABELS exchange_file WILL_FAIL ${_fail})
-endmacro(INSTANCE_TEST sname test_mode instance)
+endmacro()
 
 
 # test schema names

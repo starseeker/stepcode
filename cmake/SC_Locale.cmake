@@ -5,13 +5,13 @@ set(_orig_lc_messages $ENV{LC_MESSAGES})
 set(_orig_lang        $ENV{LANG})
 if(_orig_lc_all)
   set(ENV{LC_ALL}      C)
-endif(_orig_lc_all)
+endif()
 if(_orig_lc_messages)
   set(ENV{LC_MESSAGES} C)
-endif(_orig_lc_messages)
+endif()
 if(_orig_lang)
   set(ENV{LANG}        C)
-endif(_orig_lang)
+endif()
 
 # Local Variables:
 # tab-width: 8

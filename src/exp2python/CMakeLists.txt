@@ -34,7 +34,7 @@ if(SC_PYTHON_GENERATOR)
    SC_ADDEXEC(exp2python SOURCES ${exp2python_SOURCES} LINK_LIBRARIES express-static)
  endif()
 
-endif(SC_PYTHON_GENERATOR)
+endif()
 
 # Local Variables:
 # tab-width: 8

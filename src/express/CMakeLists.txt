@@ -20,17 +20,17 @@ if(SC_GENERATE_LP_SOURCES)
   set_property(TARGET objlib_expparse_c PROPERTY POSITION_INDEPENDENT_CODE ON)
   set_source_files_properties(${LEMON_ExpParser_OUTPUTS} PROPERTIES OBJECT_DEPENDS "${PERPLEX_ExpScanner_HDR}")
 
-else(SC_GENERATE_LP_SOURCES)
+else()
   add_subdirectory(generated)
   include_directories(generated)
-endif(SC_GENERATE_LP_SOURCES)
+endif()
 
 if(MSVC)
   set_property(TARGET objlib_expscan_c APPEND PROPERTY COMPILE_DEFINITIONS "SC_EXPRESS_DLL_EXPORTS")
   set_property(TARGET objlib_expscan_c APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "SC_EXPRESS_DLL_IMPORTS")
   set_property(TARGET objlib_expparse_c APPEND PROPERTY COMPILE_DEFINITIONS "SC_EXPRESS_DLL_EXPORTS")
   set_property(TARGET objlib_expparse_c APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "SC_EXPRESS_DLL_IMPORTS")
-endif(MSVC)
+endif()
 
 set(EXPRESS_SOURCES
   symbol.c
@@ -68,11 +68,11 @@ foreach(_src ${EXPRESS_SOURCES})
   add_dependencies(${_objlib} objlib_expparse_c)
   if(TARGET ExpScanner)
     add_dependencies(${_objlib} ExpScanner)
-  endif(TARGET ExpScanner)
+  endif()
   if(MSVC)
     set_property(TARGET ${_objlib} APPEND PROPERTY COMPILE_DEFINITIONS "SC_EXPRESS_DLL_EXPORTS")
     set_property(TARGET ${_objlib} APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "SC_EXPRESS_DLL_IMPORTS")
-  endif(MSVC)
+  endif()
   # TODO: probably PIC should be used everywhere...
   set_property(TARGET ${_objlib} PROPERTY POSITION_INDEPENDENT_CODE ON)
   list(APPEND EXPRESS_OBJS $<TARGET_OBJECTS:${_objlib}>)
@@ -95,12 +95,12 @@ if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
   add_library(express SHARED ${EXPRESS_OBJS})
   if(OPENBSD)
     set_target_properties(express PROPERTIES VERSION ${SC_VERSION_MAJOR}.${SC_VERSION_MINOR})
-  else(OPENBSD)
+  else()
     set_target_properties(express PROPERTIES VERSION ${SC_VERSION} SOVERSION ${SC_VERSION_MAJOR})
-  endif(OPENBSD)
+  endif()
   if(APPLE)
     set_property(TARGET express APPEND PROPERTY LINK_FLAGS "-flat_namespace -undefined suppress")
-  endif(APPLE)
+  endif()
   install(TARGETS express
     EXPORT stepcode-targets
     RUNTIME DESTINATION ${BIN_DIR}
@@ -110,7 +110,7 @@ if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
   if(MSVC)
     set_property(TARGET express APPEND PROPERTY COMPILE_DEFINITIONS "SC_EXPRESS_DLL_EXPORTS")
     set_property(TARGET express APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "SC_EXPRESS_DLL_IMPORTS")
-  endif(MSVC)
+  endif()
 endif()
 
 if(BUILD_STATIC_LIBS)
@@ -149,7 +149,7 @@ install(TARGETS check-express
 
 if(SC_ENABLE_TESTING)
   add_subdirectory(test)
-endif(SC_ENABLE_TESTING)
+endif()
 
 # Local Variables:
 # tab-width: 8

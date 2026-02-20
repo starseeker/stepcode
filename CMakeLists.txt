@@ -66,7 +66,7 @@ list(APPEND CMAKE_MODULE_PATH "${SC_CMAKE_DIR}")
 # the OS name so we can test for it succinctly.
 if ("${CMAKE_SYSTEM}" MATCHES ".*OpenBSD.*")
   set(OPENBSD ON)
-endif ("${CMAKE_SYSTEM}" MATCHES ".*OpenBSD.*")
+endif()
 
 #---------------------------------------------------------------------
 # Set up various relative path variables and build output directories
@@ -95,7 +95,7 @@ if (NOT APPLE)
   if(NOT DEFINED CMAKE_INSTALL_RPATH)
     set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:\$ORIGIN/../lib")
   endif()
-endif(NOT APPLE)
+endif()
 # On OSX, we need to set INSTALL_NAME_DIR instead of RPATH
 # http://www.cmake.org/cmake/help/cmake-2-8-docs.html#variable:CMAKE_INSTALL_NAME_DIR
 if(NOT DEFINED CMAKE_INSTALL_NAME_DIR)
@@ -135,7 +135,7 @@ if(SC_ENABLE_TESTING)
     set(SC_BUILD_SCHEMAS "ALL") #test all schemas, unless otherwise specified
   endif()
   include(CTest)
-endif(SC_ENABLE_TESTING)
+endif()
 
 # SC_ADDEXEC and SC_ADDLIB macros, dllimport/export, etc
 include(SC_Targets)
@@ -154,7 +154,7 @@ include(SC_Config_Headers)
 
 if(NOT DEFINED SC_SDAI_ADDITIONAL_EXES_SRCS)
   set(SC_SDAI_ADDITIONAL_EXES_SRCS "" CACHE STRING "Source files for additional executables to be linked with SDAI libs")
-endif(NOT DEFINED SC_SDAI_ADDITIONAL_EXES_SRCS)
+endif()
 
 if(NOT "${SC_BUILD_EXPRESS_ONLY}" AND NOT DEFINED SC_BUILD_SCHEMAS)
   list(APPEND CONFIG_END_MESSAGES
@@ -196,7 +196,7 @@ add_subdirectory(include)
 add_subdirectory(data)
 if(SC_ENABLE_TESTING)
   add_subdirectory(test)
-endif(SC_ENABLE_TESTING)
+endif()
 add_subdirectory(doc)
 
 #-----------------------------------------------------------------------------
@@ -239,7 +239,7 @@ include(CPack)
 # THIS MUST BE LAST to ensure that they are visible to the user without scrolling.
 foreach(_msg ${CONFIG_END_MESSAGES})
   message(STATUS "${_msg}")
-endforeach(_msg ${CONFIG_END_MESSAGES})
+endforeach()
 
 # Local Variables:
 # tab-width: 8

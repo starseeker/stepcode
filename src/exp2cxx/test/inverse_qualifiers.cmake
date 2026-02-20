@@ -7,7 +7,7 @@ execute_process( COMMAND ${EXE} ${INFILE}
   RESULT_VARIABLE CMD_RESULT )
 if( NOT ${CMD_RESULT} EQUAL 0 )
   message(FATAL_ERROR "Error running ${EXE} on ${INFILE}")
-endif( NOT ${CMD_RESULT} EQUAL 0 )
+endif()
 
 file( READ ${ofile} cxx LIMIT 10240 ) #9051 bytes now
 
@@ -16,7 +16,7 @@ string( REGEX MATCH "new *Inverse_attribute *\\\( *\\\" *product_occurrence *\\.
 
 if( match_result STREQUAL "" )
   message( FATAL_ERROR "exp2cxx output does not match input schema." )
-endif( match_result STREQUAL "" )
+endif()
 
 # Local Variables:
 # tab-width: 8
