@@ -10,7 +10,7 @@ set(EDITOR_SRCS
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/include/stepcode
+  ${PROJECT_SOURCE_DIR}/include/stepcode
   )
 
 if(BUILD_SHARED_LIBS)

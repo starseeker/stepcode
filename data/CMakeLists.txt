@@ -10,18 +10,18 @@
 # .exp file inside, which it uses. otherwise, ${path} is assumed to
 # be an express file.
 
-if(NOT "${SC_BUILD_EXPRESS_ONLY}" AND NOT "${SC_BUILD_SCHEMAS}" STREQUAL "")
-  include(${SC_CMAKE_DIR}/schema_scanner/schemaScanner.cmake)
+if(NOT SC_BUILD_EXPRESS_ONLY AND NOT "${SC_BUILD_SCHEMAS}" STREQUAL "")
+  include(${PROJECT_SOURCE_DIR}/cmake/schema_scanner/schemaScanner.cmake)
   foreach(src ${SC_SDAI_ADDITIONAL_EXES_SRCS})
     get_filename_component(name ${src} NAME_WE)
     message(STATUS "Additional SDAI executable: ${name}")
   endforeach()
 
   if(SC_BUILD_SCHEMAS STREQUAL "ALL")
-    file(GLOB_RECURSE SC_BUILD_SCHEMAS ${SC_SOURCE_DIR}/data/*.exp)
+    file(GLOB_RECURSE SC_BUILD_SCHEMAS ${PROJECT_SOURCE_DIR}/data/*.exp)
   endif()
   foreach(FILE ${SC_BUILD_SCHEMAS})
-    # figure out an absolute path to the file
+    # Figure out an absolute path to the file
     LOCATE_SCHEMA(${FILE} abspath)
     SCHEMA_CMLIST(${abspath})
   endforeach()

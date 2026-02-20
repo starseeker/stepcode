@@ -24,9 +24,9 @@ SET(EXPPP_SOURCES
  )
 
 include_directories(
-  ${SC_SOURCE_DIR}/include
-  ${SC_SOURCE_DIR}/include/exppp
-  ${SC_SOURCE_DIR}/src/express
+  ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/include/exppp
+  ${PROJECT_SOURCE_DIR}/src/express
  )
 
 if(BUILD_SHARED_LIBS)
