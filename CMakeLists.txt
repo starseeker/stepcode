@@ -41,9 +41,7 @@
 # Minimum required version of CMake
 cmake_minimum_required(VERSION 3.12)
 
-project(SC)
-
-# Modern CMake policies
+# Set policies before project() so they take effect from the start
 cmake_policy(SET CMP0077 NEW)  # option() honors normal variables
 
 project(SC
@@ -51,8 +49,6 @@ project(SC
   LANGUAGES C CXX
   DESCRIPTION "STEPcode - STEP file tools and libraries"
 )
-
-# Version information is defined in project() command above
 
 # Set language standards
 set(CMAKE_C_EXTENSIONS OFF)

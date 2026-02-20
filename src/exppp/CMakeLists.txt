@@ -27,36 +27,19 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/include/exppp
   ${PROJECT_SOURCE_DIR}/src/express
-)
+ )
 
 if(BUILD_SHARED_LIBS)
-  add_library(libexppp SHARED ${LIBEXPPP_SOURCES})
-  set_target_properties(libexppp PROPERTIES
-    PREFIX ""
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-  )
-  target_link_libraries(libexppp express)
+  SC_ADDLIB(libexppp SHARED SOURCES ${LIBEXPPP_SOURCES} LINK_LIBRARIES express)
+  set_target_properties(libexppp PROPERTIES PREFIX "")
   if(WIN32)
     target_compile_definitions(libexppp PRIVATE SC_EXPPP_DLL_EXPORTS)
   endif()
-  install(TARGETS libexppp
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  )
 endif()
 
 if(BUILD_STATIC_LIBS)
-  add_library(libexppp-static STATIC ${LIBEXPPP_SOURCES})
+  SC_ADDLIB(libexppp-static STATIC SOURCES ${LIBEXPPP_SOURCES} LINK_LIBRARIES express-static)
   set_target_properties(libexppp-static PROPERTIES PREFIX "")
-  target_compile_definitions(libexppp-static PRIVATE SC_STATIC)
-  target_link_libraries(libexppp-static express-static)
-  install(TARGETS libexppp-static
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  )
 endif()
 
 if(BUILD_SHARED_LIBS)
