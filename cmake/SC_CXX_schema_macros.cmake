@@ -20,12 +20,10 @@ macro(P21_TESTS sfile)
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       COMMAND p21read_${PROJECT_NAME} ${TEST_FILE})
     set_tests_properties(read_write_cpp_${PROJECT_NAME}_${FNAME} PROPERTIES DEPENDS build_cpp_${PROJECT_NAME} LABELS cpp_schema_rw)
-    if(NOT WIN32)
-      add_test(NAME read_lazy_cpp_${PROJECT_NAME}_${FNAME}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMAND lazy_${PROJECT_NAME} ${TEST_FILE})
-      set_tests_properties(read_lazy_cpp_${PROJECT_NAME}_${FNAME} PROPERTIES DEPENDS build_lazy_cpp_${PROJECT_NAME} LABELS cpp_schema_rw)
-    endif()
+    add_test(NAME read_lazy_cpp_${PROJECT_NAME}_${FNAME}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMAND lazy_${PROJECT_NAME} ${TEST_FILE})
+    set_tests_properties(read_lazy_cpp_${PROJECT_NAME}_${FNAME} PROPERTIES DEPENDS build_lazy_cpp_${PROJECT_NAME} LABELS cpp_schema_rw)
   endforeach()
 endmacro()
 
@@ -47,8 +45,12 @@ macro(SCHEMA_EXES)
     stepeditor${SC_LIB_SUFFIX}
     steputils${SC_LIB_SUFFIX})
   SC_ADDEXEC(p21read_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/test/p21read/p21read.cc;${RELATIVE_PATH_COMPONENT}/src/test/p21read/sc_benchmark.cc" LINK_LIBRARIES ${_schema_step_libs} TESTABLE)
-  if(NOT WIN32)
-    SC_ADDEXEC(lazy_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/lazy_test.cc;${RELATIVE_PATH_COMPONENT}/src/cllazyfile/sc_benchmark.cc" LINK_LIBRARIES ${_schema_lazy_libs} TESTABLE)
+  if(WIN32 AND TARGET p21read_${PROJECT_NAME})
+    target_link_libraries(p21read_${PROJECT_NAME} psapi)
+  endif()
+  SC_ADDEXEC(lazy_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/lazy_test.cc;${RELATIVE_PATH_COMPONENT}/src/cllazyfile/sc_benchmark.cc" LINK_LIBRARIES ${_schema_lazy_libs} TESTABLE)
+  if(WIN32 AND TARGET lazy_${PROJECT_NAME})
+    target_link_libraries(lazy_${PROJECT_NAME} psapi)
   endif()
 
   # Add user-defined executables
@@ -96,12 +98,10 @@ macro(SCHEMA_TESTS)
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMAND ${_sc_build_gen} ${_p21_tgt})
   set_tests_properties(build_cpp_${PROJECT_NAME} PROPERTIES DEPENDS generate_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
-  if(NOT WIN32)
-    add_test(NAME build_lazy_cpp_${PROJECT_NAME}
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      COMMAND ${_sc_build_gen} ${_lazy_tgt})
-    set_tests_properties(build_lazy_cpp_${PROJECT_NAME} PROPERTIES DEPENDS build_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
-  endif()
+  add_test(NAME build_lazy_cpp_${PROJECT_NAME}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMAND ${_sc_build_gen} ${_lazy_tgt})
+  set_tests_properties(build_lazy_cpp_${PROJECT_NAME} PROPERTIES DEPENDS build_cpp_${PROJECT_NAME} LABELS cpp_schema_build)
 endmacro()
 
 # SCHEMA_TARGETS macro -
