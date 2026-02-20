@@ -9,7 +9,7 @@ set(UTILS_SRCS
   )
 
 include_directories(
-  ${SC_BINARY_DIR}/include
+  ${PROJECT_BINARY_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}
   )
 

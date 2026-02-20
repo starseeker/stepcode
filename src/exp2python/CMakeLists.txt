@@ -1,11 +1,11 @@
 if(SC_PYTHON_GENERATOR)
 
   include_directories(
-    ${SC_SOURCE_DIR}/include
-    ${SC_SOURCE_DIR}/include/express
-   )
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/include/express
+  )
 
-  add_definitions(-DHAVE_CONFIG_H)
+  add_compile_definitions(HAVE_CONFIG_H)
 
   set(exp2python_SOURCES
     src/classes_misc_python.c
@@ -33,7 +33,6 @@ if(SC_PYTHON_GENERATOR)
  else()
    SC_ADDEXEC(exp2python SOURCES ${exp2python_SOURCES} LINK_LIBRARIES express-static)
  endif()
-
 endif()
 
 # Local Variables:

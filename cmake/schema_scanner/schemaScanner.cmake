@@ -26,25 +26,26 @@ endif()
 # SCANNER_OUT_DIR: location of binary, same dir as SC uses
 # SCANNER_BUILD_DIR: location scanner is built
 
-set(SCANNER_SRC_DIR ${SC_CMAKE_DIR}/schema_scanner)
-set(SCANNER_BUILD_DIR ${SC_BINARY_DIR}/schema_scanner CACHE INTERNAL "location for scanner build, config files (copied schemas)")
-set(SCANNER_OUT_DIR ${SC_BINARY_DIR}/bin CACHE INTERNAL "location for schema_scanner executable")
+set(SCANNER_SRC_DIR ${PROJECT_SOURCE_DIR}/cmake/schema_scanner)
+set(SCANNER_BUILD_DIR ${PROJECT_BINARY_DIR}/schema_scanner CACHE INTERNAL "location for scanner build, config files (copied schemas)")
+set(SCANNER_OUT_DIR ${PROJECT_BINARY_DIR}/bin CACHE INTERNAL "location for schema_scanner executable")
 
-#write a cmake file for the cache. the alternative is a very long
+# Write a cmake file for the cache. The alternative is a very long
 # command line - and the command line can't have newlines in it
 set(initial_scanner_cache ${SCANNER_BUILD_DIR}/initial_scanner_cache.cmake)
 file(WRITE ${initial_scanner_cache} "
-set(SC_ROOT \"${SC_SOURCE_DIR}\" CACHE STRING \"root dir\")
-set(SC_BUILDDIR \"${SC_BINARY_DIR}\" CACHE PATH \"build dir\")
+set(SC_ROOT \"${PROJECT_SOURCE_DIR}\" CACHE STRING \"root dir\")
+set(SC_BUILDDIR \"${PROJECT_BINARY_DIR}\" CACHE PATH \"build dir\")
+set(SC_CMAKE_DIR \"${PROJECT_SOURCE_DIR}/cmake\" CACHE PATH \"cmake dir\")
 set(CALLED_FROM \"STEPCODE_CMAKELISTS\" CACHE STRING \"verification\")
 set(CMAKE_BUILD_TYPE \"Debug\" CACHE STRING \"build type\")
 set(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\" CACHE STRING \"compiler\")
 set(CMAKE_CXX_COMPILER \"${CMAKE_CXX_COMPILER}\" CACHE STRING \"compiler\")
 ")
 
-message( STATUS "Compiling schema scanner...")
+message(STATUS "Compiling schema scanner...")
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${SC_BINARY_DIR}/schemas)
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/schemas)
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${SCANNER_BUILD_DIR})
 execute_process(COMMAND ${CMAKE_COMMAND} -C ${initial_scanner_cache} ${SCANNER_SRC_DIR} -G ${CMAKE_GENERATOR}
                  WORKING_DIRECTORY ${SCANNER_BUILD_DIR}
