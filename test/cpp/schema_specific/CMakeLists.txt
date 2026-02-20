@@ -81,11 +81,7 @@ SCHEMA_CMLIST(${SC_SOURCE_DIR}/test/unitary_schemas/array_bounds_expr.exp)
 SCHEMA_CMLIST(${SC_SOURCE_DIR}/test/unitary_schemas/inverse_attr.exp)
 
 # Pick the correct SC library suffix for the active build type
-if(BUILD_SHARED_LIBS)
-  set(_sc_lib_suffix "")
-else()
-  set(_sc_lib_suffix "-static")
-endif()
+set(_sc_lib_suffix "${SC_LIB_SUFFIX}")
 
 add_schema_dependent_test("aggregate_bound_runtime" "array_bounds_expr"
   "${SC_SOURCE_DIR}/test/p21/test_array_bounds.p21" "" "" "stepcore${_sc_lib_suffix}")

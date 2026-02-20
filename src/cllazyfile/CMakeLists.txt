@@ -13,29 +13,10 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include/stepcode
   )
 
-set(_libdeps stepcore stepdai steputils stepeditor)
+SC_ADDLIB(steplazyfile SOURCES ${LAZY_SRCS} LINK_LIBRARIES stepcore stepdai steputils stepeditor DLL_EXPORTS SC_LAZYFILE_DLL_EXPORTS)
 
-if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(steplazyfile SHARED SOURCES ${LAZY_SRCS} LINK_LIBRARIES ${_libdeps})
-  if(WIN32)
-    target_compile_definitions(steplazyfile PRIVATE SC_LAZYFILE_DLL_EXPORTS)
-  endif()
-endif()
-
-if(BUILD_STATIC_LIBS)
-  set(_libdeps stepcore-static stepdai-static steputils-static stepeditor-static)
-  SC_ADDLIB(steplazyfile-static STATIC SOURCES ${LAZY_SRCS} LINK_LIBRARIES ${_libdeps})
-endif()
-
-# Prefer shared libs when both are enabled; fall back to static when shared is off
-if(BUILD_SHARED_LIBS)
-  SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile stepeditor TESTABLE)
-elseif(BUILD_STATIC_LIBS)
-  SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile-static stepeditor-static TESTABLE)
-endif()
-if(TARGET lazy_test)
-  target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
-endif()
+SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile${SC_LIB_SUFFIX} stepeditor${SC_LIB_SUFFIX} TESTABLE)
+target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
 
 # Local Variables:
 # tab-width: 8
