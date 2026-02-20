@@ -1,0 +1,35 @@
+# .github/copilot-setup-steps.yml
+
+# Specifies the Windows environment for the agent
+runs-on: windows-latest
+
+steps:
+  - name: Install Build Tools
+    # Note: Copilot agents use GitHub-hosted runners, which pre-install
+    # many tools, but explicit setup ensures environment consistency.
+    run: |
+      choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+      choco install ninja -y
+
+  - name: Setup MSVC Environment
+    # The agent needs the MSVC compiler (cl.exe) in its session path.
+    # We use the shell to initialize the developer command prompt variables.
+    run: |
+      Import-Module "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+      Enter-VsDevShell -VsInstallPath "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" -SkipAutomaticLocation -DevCmdArguments "-arch=x64"
+
+      # Add workspace to path as per your original workflow
+      $env:GITHUB_WORKSPACE | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
+  - name: Configure and Build
+    # Combines your configuration and build logic for the agent to follow
+    run: |
+      cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" -DSC_ENABLE_TESTING=ON
+      powershell Write-VolumeCache C
+      cmake --build build --parallel 1 --verbose
+
+  - name: Test
+    # Tells the agent how to verify its own code changes
+    run: |
+      cd build
+      ctest -j 1 --output-on-failure
