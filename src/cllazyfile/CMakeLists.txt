@@ -15,29 +15,50 @@ include_directories(
 
 if(BUILD_SHARED_LIBS)
   add_library(steplazyfile SHARED ${LAZY_SRCS})
-  set_target_properties(steplazyfile PROPERTIES
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
+  if(OPENBSD)
+    set_target_properties(steplazyfile PROPERTIES
+      VERSION ${SC_VERSION_MAJOR}.${SC_VERSION_MINOR})
+  else()
+    set_target_properties(steplazyfile PROPERTIES
+      VERSION ${SC_VERSION} SOVERSION ${SC_VERSION_MAJOR})
+  endif()
+  if(APPLE)
+    set_target_properties(steplazyfile PROPERTIES
+      LINK_FLAGS "-flat_namespace -undefined suppress")
+  endif()
+  target_include_directories(steplazyfile
+    PUBLIC
+      $<BUILD_INTERFACE:${SC_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${SC_BINARY_DIR}/include>
+      $<INSTALL_INTERFACE:${INCLUDE_DIR}/stepcode>
   )
   target_link_libraries(steplazyfile stepcore stepdai steputils stepeditor)
   if(WIN32)
     target_compile_definitions(steplazyfile PRIVATE SC_LAZYFILE_DLL_EXPORTS)
   endif()
   install(TARGETS steplazyfile
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    EXPORT stepcode-targets
+    RUNTIME DESTINATION ${BIN_DIR}
+    LIBRARY DESTINATION ${LIB_DIR}
+    ARCHIVE DESTINATION ${LIB_DIR}
   )
 endif()
 
 if(BUILD_STATIC_LIBS)
   add_library(steplazyfile-static STATIC ${LAZY_SRCS})
   target_compile_definitions(steplazyfile-static PRIVATE SC_STATIC)
+  target_include_directories(steplazyfile-static
+    PUBLIC
+      $<BUILD_INTERFACE:${SC_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${SC_BINARY_DIR}/include>
+      $<INSTALL_INTERFACE:${INCLUDE_DIR}/stepcode>
+  )
   target_link_libraries(steplazyfile-static stepcore-static stepdai-static steputils-static stepeditor-static)
   install(TARGETS steplazyfile-static
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    EXPORT stepcode-targets
+    RUNTIME DESTINATION ${BIN_DIR}
+    LIBRARY DESTINATION ${LIB_DIR}
+    ARCHIVE DESTINATION ${LIB_DIR}
   )
 endif()
 

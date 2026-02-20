@@ -68,18 +68,32 @@ include_directories(
 
 if(BUILD_SHARED_LIBS)
   add_library(stepcore SHARED ${CORE_SRCS})
-  set_target_properties(stepcore PROPERTIES
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
+  if(OPENBSD)
+    set_target_properties(stepcore PROPERTIES
+      VERSION ${SC_VERSION_MAJOR}.${SC_VERSION_MINOR})
+  else()
+    set_target_properties(stepcore PROPERTIES
+      VERSION ${SC_VERSION} SOVERSION ${SC_VERSION_MAJOR})
+  endif()
+  if(APPLE)
+    set_target_properties(stepcore PROPERTIES
+      LINK_FLAGS "-flat_namespace -undefined suppress")
+  endif()
+  target_include_directories(stepcore
+    PUBLIC
+      $<BUILD_INTERFACE:${SC_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${SC_BINARY_DIR}/include>
+      $<INSTALL_INTERFACE:${INCLUDE_DIR}/stepcode>
   )
   target_link_libraries(stepcore steputils stepdai)
   if(WIN32)
     target_compile_definitions(stepcore PRIVATE SC_CORE_DLL_EXPORTS)
   endif()
   install(TARGETS stepcore
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    EXPORT stepcode-targets
+    RUNTIME DESTINATION ${BIN_DIR}
+    LIBRARY DESTINATION ${LIB_DIR}
+    ARCHIVE DESTINATION ${LIB_DIR}
   )
 endif()
 

@@ -145,11 +145,6 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
       target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-ignored-qualifiers")
     endif()
-    install(TARGETS ${PROJECT_NAME}
-      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
   endif()
 
   if(BUILD_STATIC_LIBS)
@@ -165,11 +160,6 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
     if(MSVC)
       target_compile_options(${PROJECT_NAME}-static PRIVATE "/bigobj")
     endif()
-    install(TARGETS ${PROJECT_NAME}-static
-      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
   endif()
 
   # Record this schema's base library name for use in the installed CMake config file.
