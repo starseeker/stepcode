@@ -8,7 +8,7 @@ execute_process( COMMAND ${EXPPP} -o ${ofile} ${INFILE}
   RESULT_VARIABLE CMD_RESULT )
 if( NOT ${CMD_RESULT} EQUAL 0 )
   message(FATAL_ERROR "Error running ${EXPPP} on ${INFILE}")
-endif( NOT ${CMD_RESULT} EQUAL 0 )
+endif()
 
 # file( READ ${INFILE} pretty_in LIMIT 1024 )
 file( READ ${ofile} pretty_out LIMIT 1024 )
@@ -17,7 +17,7 @@ file( READ ${ofile} pretty_out LIMIT 1024 )
 string(FIND "${pretty_out}" "path ) ) )" match_result )
 if( match_result LESS 1 )
   message( FATAL_ERROR "Pretty printer output does not match input." )
-endif( match_result LESS 1 )
+endif()
 
 # Local Variables:
 # tab-width: 8

@@ -6,17 +6,9 @@
 #include "clstepcore/Registry.h"
 #include "clutils/errordesc.h"
 #include <algorithm>
+#include <chrono>
 #include <string>
-
-#ifdef HAVE_STD_THREAD
-# include <thread>
-#else
-# error Need std::thread for this test!
-#endif
-
-#ifdef HAVE_STD_CHRONO
-# include <chrono>
-#endif
+#include <thread>
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -24,21 +16,9 @@
 
 #include "SdaiAUTOMOTIVE_DESIGN.h"
 
-//macro for N ms sleep
-//currently used for 5ms sleep (could be more for a larger file, may need reduced for a fast processor)
-//TODO: rework this test to not be timing-sensitive
-#ifdef HAVE_STD_CHRONO
-# define DELAY(t) std::this_thread::sleep_for(std::chrono::milliseconds(t));
-#else
-# ifndef _WIN32
-#  define DELAY(t) usleep( t * 100 )
-# else
-#  include <WinBase.h>
-#  define DELAY(t) Sleep( t )
-# endif
-#endif
+#define DELAY(t) std::this_thread::sleep_for(std::chrono::milliseconds(t))
 
-// NOTE this test requires std::thread, part of C++11. It will fail to compile otherwise.
+// NOTE this test requires std::thread (C++11, always available in this project).
 
 void readProgressParallel( STEPfile & f, float & maxProgress ) {
     while( 1 ) {

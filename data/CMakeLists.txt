@@ -15,7 +15,7 @@ if(NOT "${SC_BUILD_EXPRESS_ONLY}" AND NOT "${SC_BUILD_SCHEMAS}" STREQUAL "")
   foreach(src ${SC_SDAI_ADDITIONAL_EXES_SRCS})
     get_filename_component(name ${src} NAME_WE)
     message(STATUS "Additional SDAI executable: ${name}")
-  endforeach(src ${SC_SDAI_ADDITIONAL_EXES_SRCS})
+  endforeach()
 
   if(SC_BUILD_SCHEMAS STREQUAL "ALL")
     file(GLOB_RECURSE SC_BUILD_SCHEMAS ${SC_SOURCE_DIR}/data/*.exp)

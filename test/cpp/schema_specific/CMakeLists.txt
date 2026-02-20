@@ -21,25 +21,25 @@ function(get_sdai_incl_dir out_path_var sdai_lib)
   if(NOT "${sdai_${sdai_lib}_SOURCE_DIR}" STREQUAL "")
     set(${out_path_var} "${sdai_${sdai_lib}_SOURCE_DIR}" PARENT_SCOPE)
     return()
-  endif(NOT "${sdai_${sdai_lib}_SOURCE_DIR}" STREQUAL "")
+  endif()
   get_target_property(sdai_srcs ${_sdai_target} SOURCES)
   foreach(src ${sdai_srcs})
     if(${src} MATCHES "schema.cc$")
       get_filename_component(incl_path ${src} PATH)
       break()
-    endif(${src} MATCHES "schema.cc$")
+    endif()
     get_filename_component(src_dir ${src} PATH)
     if(${src_dir} MATCHES "(type|entity)$")
       get_filename_component(incl_path ${src_dir} PATH)
       break()
-    endif(${src_dir} MATCHES "(type|entity)$")
-  endforeach(src ${sdai_srcs})
+    endif()
+  endforeach()
   if(NOT ${incl_path} EQUAL "")
     set(${out_path_var} ${incl_path} PARENT_SCOPE)
   else()
     message(WARNING "failed to locate incl dir for ${sdai_lib}, given ${sdai_srcs}")
-  endif(NOT ${incl_path} EQUAL "")
-endfunction(get_sdai_incl_dir out_path_var sdai_target)
+  endif()
+endfunction()
 
 # ${name} is used for the C++ file name (${name}.cc), and as the suffix for the target and test names
 # ${sdai_lib} is the name of the schema lib that is used
@@ -50,17 +50,10 @@ function(add_schema_dependent_test name sdai_lib exe_args )
   message(STATUS "include dir for ${sdai_lib}: ${sdai_src_path}")
   add_executable(tst_${name} "${name}.cc")
   set_target_properties(tst_${name} PROPERTIES EXCLUDE_FROM_ALL ON)
-  if(${CMAKE_VERSION} VERSION_GREATER 2.8.7)
-    # INCLUDE_DIRECTORIES property added in cmake 2.8.8
-    set_property(TARGET tst_${name} APPEND PROPERTY INCLUDE_DIRECTORIES ${sdai_src_path} ${ARGV3})
-  else()
-    foreach(ipath ${sdai_src_path} ${ARGV3})
-      set_property(TARGET tst_${name} APPEND_STRING PROPERTY COMPILE_FLAGS " -I${ipath} ")
-    endforeach(ipath ${sdai_src_path} ${ARGV3})
-  endif(${CMAKE_VERSION} VERSION_GREATER 2.8.7)
+  set_property(TARGET tst_${name} APPEND PROPERTY INCLUDE_DIRECTORIES ${sdai_src_path} ${ARGV3})
   if(NOT ${ARGV4} STREQUAL "")
     set_property(TARGET tst_${name} APPEND_STRING PROPERTY COMPILE_FLAGS ${ARGV4} )
-  endif(NOT ${ARGV4} STREQUAL "")
+  endif()
   # Link against the correct schema target: prefer shared, fall back to static
   if(TARGET sdai_${sdai_lib})
     target_link_libraries(tst_${name} sdai_${sdai_lib} ${ARGV5})
@@ -79,7 +72,7 @@ function(add_schema_dependent_test name sdai_lib exe_args )
     COMMAND $<TARGET_FILE:tst_${name}> ${exe_args} )
   set_tests_properties( test_${name} PROPERTIES DEPENDS build_cpp_${name}
     LABELS cpp_schema_specific )
-endfunction(add_schema_dependent_test name sdai_lib exe_args )
+endfunction()
 
 #if you need a schema that won't be built automatically (i.e. not in sc/data), put it in here
 # Note: SCHEMA_CMLIST is now idempotent, so these schemas can be built even if they're
@@ -114,15 +107,14 @@ add_schema_dependent_test( "inverse_attr3" "inverse_attr" "${SC_SOURCE_DIR}/test
                             "${SC_SOURCE_DIR}/src/cllazyfile;${SC_SOURCE_DIR}/src/cllazyfile/judy/src" "" "steplazyfile${_sc_lib_suffix}" )
 add_schema_dependent_test( "attribute" "inverse_attr" "${SC_SOURCE_DIR}/test/p21/test_inverse_attr.p21" )
 
-if(HAVE_STD_THREAD)
-  if(UNIX)
-    set(thread_flags "-pthread -std=c++11" )
-    set(thread_libs "pthread")
-  endif(UNIX)
-  # for best results, use a large file. as1-oc-214.stp is currently the largest file in the repo that sc works with.
-  add_schema_dependent_test( "stepfile_rw_progress" "ap214e3" "${SC_SOURCE_DIR}/data/ap214e3/as1-oc-214.stp"
-                            "" "${thread_flags}" "${thread_libs}")
-endif(HAVE_STD_THREAD)
+# This test exercises the STEPfile read/write progress API using std::thread.
+# std::thread is guaranteed available since the project requires C++11.
+if(UNIX)
+  set(_thread_libs "pthread")
+endif()
+# for best results, use a large file. as1-oc-214.stp is currently the largest file in the repo that sc works with.
+add_schema_dependent_test( "stepfile_rw_progress" "ap214e3" "${SC_SOURCE_DIR}/data/ap214e3/as1-oc-214.stp"
+                          "" "" "${_thread_libs}")
 
 # AP242 styled_item tests - exercise WR3 WHERE rule with styled_item
 # Test with vanilla AP242 schema (uses flow-sensitive narrowing)
