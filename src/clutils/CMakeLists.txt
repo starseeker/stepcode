@@ -13,17 +13,12 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
-if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(steputils SHARED SOURCES ${UTILS_SRCS})
-  if(WIN32)
-    target_compile_definitions(steputils PRIVATE SC_UTILS_DLL_EXPORTS)
+SC_ADDLIB(steputils SOURCES ${UTILS_SRCS} DLL_EXPORTS SC_UTILS_DLL_EXPORTS)
+if(WIN32)
+  if(TARGET steputils)
     target_link_libraries(steputils shlwapi)
   endif()
-endif()
-
-if(BUILD_STATIC_LIBS)
-  SC_ADDLIB(steputils-static STATIC SOURCES ${UTILS_SRCS})
-  if(WIN32)
+  if(TARGET steputils-static)
     target_link_libraries(steputils-static shlwapi)
   endif()
 endif()

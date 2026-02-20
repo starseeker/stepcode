@@ -66,18 +66,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include/stepcode
   )
 
-set(_libdeps steputils stepdai)
-
-if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(stepcore SHARED SOURCES ${CORE_SRCS} LINK_LIBRARIES ${_libdeps})
-  if(WIN32)
-    target_compile_definitions(stepcore PRIVATE SC_CORE_DLL_EXPORTS)
-  endif()
-endif()
-
-if(BUILD_STATIC_LIBS)
-  SC_ADDLIB(stepcore-static STATIC SOURCES ${CORE_SRCS} LINK_LIBRARIES steputils-static stepdai-static)
-endif()
+SC_ADDLIB(stepcore SOURCES ${CORE_SRCS} LINK_LIBRARIES steputils stepdai DLL_EXPORTS SC_CORE_DLL_EXPORTS)
 
 if(SC_ENABLE_TESTING)
   add_subdirectory(test)

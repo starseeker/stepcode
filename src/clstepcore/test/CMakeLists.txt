@@ -20,11 +20,7 @@ function(add_stepcore_test name libs)
   set_tests_properties(test_${name} PROPERTIES LABELS cpp_unit_stepcore DEPENDS build_cpp_${name})
 endfunction()
 
-if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
-  set(_stepcore_test_libs "stepcore;steputils;stepeditor;stepdai")
-else()
-  set(_stepcore_test_libs "stepcore-static;steputils-static;stepeditor-static;stepdai-static")
-endif()
+set(_stepcore_test_libs "stepcore${SC_LIB_SUFFIX};steputils${SC_LIB_SUFFIX};stepeditor${SC_LIB_SUFFIX};stepdai${SC_LIB_SUFFIX}")
 add_stepcore_test("SupertypesIterator" "${_stepcore_test_libs}") #all these libs are necessary?
 add_stepcore_test("operators_STEPattribute" "${_stepcore_test_libs}")
 add_stepcore_test("operators_SDAI_Select" "${_stepcore_test_libs}")

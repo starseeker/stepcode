@@ -33,13 +33,19 @@ endmacro()
 # Requires SC_ROOT to be set to the top-level STEPcode source directory
 macro(SCHEMA_EXES)
   RELATIVE_PATH_TO_TOPLEVEL(${CMAKE_CURRENT_SOURCE_DIR} RELATIVE_PATH_COMPONENT)
-  if(BUILD_SHARED_LIBS)
-    set(_schema_step_libs ${PROJECT_NAME} stepdai stepcore stepeditor steputils)
-    set(_schema_lazy_libs ${PROJECT_NAME} steplazyfile stepdai stepcore stepeditor steputils)
-  else()
-    set(_schema_step_libs ${PROJECT_NAME}-static stepdai-static stepcore-static stepeditor-static steputils-static)
-    set(_schema_lazy_libs ${PROJECT_NAME}-static steplazyfile-static stepdai-static stepcore-static stepeditor-static steputils-static)
-  endif()
+  set(_schema_step_libs
+    ${PROJECT_NAME}${SC_LIB_SUFFIX}
+    stepdai${SC_LIB_SUFFIX}
+    stepcore${SC_LIB_SUFFIX}
+    stepeditor${SC_LIB_SUFFIX}
+    steputils${SC_LIB_SUFFIX})
+  set(_schema_lazy_libs
+    ${PROJECT_NAME}${SC_LIB_SUFFIX}
+    steplazyfile${SC_LIB_SUFFIX}
+    stepdai${SC_LIB_SUFFIX}
+    stepcore${SC_LIB_SUFFIX}
+    stepeditor${SC_LIB_SUFFIX}
+    steputils${SC_LIB_SUFFIX})
   SC_ADDEXEC(p21read_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/test/p21read/p21read.cc;${RELATIVE_PATH_COMPONENT}/src/test/p21read/sc_benchmark.cc" LINK_LIBRARIES ${_schema_step_libs} TESTABLE)
   if(NOT WIN32)
     SC_ADDEXEC(lazy_${PROJECT_NAME} SOURCES "${RELATIVE_PATH_COMPONENT}/src/cllazyfile/lazy_test.cc;${RELATIVE_PATH_COMPONENT}/src/cllazyfile/sc_benchmark.cc" LINK_LIBRARIES ${_schema_lazy_libs} TESTABLE)
@@ -126,8 +132,10 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
     "${SC_ROOT}/src/cllazyfile/judy/src"
   )
   # Schema libraries should be installed by default
-  if(BUILD_SHARED_LIBS)
-    SC_ADDLIB(${PROJECT_NAME} SHARED SOURCES ${sourceFiles} LINK_LIBRARIES stepdai stepcore stepeditor steputils)
+  SC_ADDLIB(${PROJECT_NAME} SOURCES ${sourceFiles}
+    LINK_LIBRARIES stepdai stepcore stepeditor steputils
+    DLL_EXPORTS SC_SCHEMA_DLL_EXPORTS)
+  if(TARGET ${PROJECT_NAME})
     add_dependencies(${PROJECT_NAME} generate_cpp_${PROJECT_NAME})
     # Expose schema-specific headers to consumers
     target_include_directories(${PROJECT_NAME}
@@ -135,11 +143,8 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include/schemas/${PROJECT_NAME}>
     )
-    if(WIN32)
-      target_compile_definitions(${PROJECT_NAME} PRIVATE SC_SCHEMA_DLL_EXPORTS)
-      if(MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE "/bigobj")
-      endif()
+    if(MSVC)
+      target_compile_options(${PROJECT_NAME} PRIVATE "/bigobj")
     endif()
     # TODO - ideally we would avoid generating code that triggers this warning, but figuring out
     # how to do so is a non-trivial exercise.  In the meantime, suppress the (very verbose) warnings
@@ -148,11 +153,8 @@ macro(SCHEMA_TARGETS expFile schemaName sourceFiles)
       target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-ignored-qualifiers")
     endif()
   endif()
-
-  if(BUILD_STATIC_LIBS)
-    SC_ADDLIB(${PROJECT_NAME}-static STATIC SOURCES ${sourceFiles} LINK_LIBRARIES stepdai-static stepcore-static stepeditor-static steputils-static)
+  if(TARGET ${PROJECT_NAME}-static)
     add_dependencies(${PROJECT_NAME}-static generate_cpp_${PROJECT_NAME})
-    target_compile_definitions("${PROJECT_NAME}-static" PRIVATE SC_STATIC)
     # Expose schema-specific headers to consumers
     target_include_directories(${PROJECT_NAME}-static
       PUBLIC
