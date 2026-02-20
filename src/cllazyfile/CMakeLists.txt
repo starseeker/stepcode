@@ -16,7 +16,9 @@ include_directories(
 SC_ADDLIB(steplazyfile SOURCES ${LAZY_SRCS} LINK_LIBRARIES stepcore stepdai steputils stepeditor DLL_EXPORTS SC_LAZYFILE_DLL_EXPORTS)
 
 SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile${SC_LIB_SUFFIX} stepeditor${SC_LIB_SUFFIX} TESTABLE)
-target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
+if(TARGET lazy_test)
+  target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
+endif()
 
 # Local Variables:
 # tab-width: 8
