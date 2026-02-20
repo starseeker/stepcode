@@ -10,21 +10,35 @@ set(LAZY_SRCS
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/include/stepcode
-  )
-
-set(_libdeps stepcore stepdai steputils stepeditor)
+  ${PROJECT_SOURCE_DIR}/include/stepcode
+)
 
 if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(steplazyfile SHARED SOURCES ${LAZY_SRCS} LINK_LIBRARIES ${_libdeps})
+  add_library(steplazyfile SHARED ${LAZY_SRCS})
+  set_target_properties(steplazyfile PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+  )
+  target_link_libraries(steplazyfile stepcore stepdai steputils stepeditor)
   if(WIN32)
     target_compile_definitions(steplazyfile PRIVATE SC_LAZYFILE_DLL_EXPORTS)
   endif()
+  install(TARGETS steplazyfile
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
 endif()
 
 if(BUILD_STATIC_LIBS)
-  set(_libdeps stepcore-static stepdai-static steputils-static stepeditor-static)
-  SC_ADDLIB(steplazyfile-static STATIC SOURCES ${LAZY_SRCS} LINK_LIBRARIES ${_libdeps})
+  add_library(steplazyfile-static STATIC ${LAZY_SRCS})
+  target_compile_definitions(steplazyfile-static PRIVATE SC_STATIC)
+  target_link_libraries(steplazyfile-static stepcore-static stepdai-static steputils-static stepeditor-static)
+  install(TARGETS steplazyfile-static
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
 endif()
 
 # Prefer shared libs when both are enabled; fall back to static when shared is off

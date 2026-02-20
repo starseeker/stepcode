@@ -29,9 +29,14 @@ macro(GET_COMMON_ROOT_PATH dir1 dir2 common_subpath)
       get_filename_component(piece2 "${dir2_rev}" NAME)
       get_filename_component(dir2_rev "${dir2_rev}" PATH)
       if("${piece1}" STREQUAL "${piece2}")
-	set(${common_subpath} "${${common_subpath}}/${piece1}")
+        # Check if both pieces are empty (paths fully consumed) to prevent infinite loop
+        if("${piece1}" STREQUAL "" AND "${piece2}" STREQUAL "")
+          set(component_same 0)
+        else()
+          set(${common_subpath} "${${common_subpath}}/${piece1}")
+        endif()
       else()
-	set(component_same 0)
+        set(component_same 0)
       endif()
     endwhile()
     if(drive_name_1)
@@ -44,9 +49,9 @@ endmacro()
 
 macro(RELATIVE_PATH_TO_TOPLEVEL current_dir rel_path)
   set(common_root_path)
-  GET_COMMON_ROOT_PATH("${SC_SOURCE_DIR}" "${current_dir}" common_root_path)
+  GET_COMMON_ROOT_PATH("${PROJECT_SOURCE_DIR}" "${current_dir}" common_root_path)
   string(REPLACE "${common_root_path}" "" subpath "${current_dir}")
-  string(REPLACE "${common_root_path}" "" needed_src_path "${SC_SOURCE_DIR}")
+  string(REPLACE "${common_root_path}" "" needed_src_path "${PROJECT_SOURCE_DIR}")
   string(REGEX REPLACE "^/" "" subpath "${subpath}")
   string(REGEX REPLACE "^/" "" needed_src_path "${needed_src_path}")
   string(LENGTH "${subpath}" PATH_LENGTH)
@@ -65,17 +70,21 @@ macro(RELATIVE_PATH_TO_TOPLEVEL current_dir rel_path)
 endmacro()
 
 macro(LOCATE_SCHEMA SCHEMA_FILE _res_var)
-  if(EXISTS "${CMAKE_BINARY_DIR}/${SCHEMA_FILE}")  #is it a path relative to build dir?
+  if(EXISTS "${CMAKE_BINARY_DIR}/${SCHEMA_FILE}")
+    # Path relative to build dir
     set(${_res_var} "${CMAKE_BINARY_DIR}/${SCHEMA_FILE}")
-  elseif(EXISTS "${SC_SOURCE_DIR}/data/${SCHEMA_FILE}")  # path relative to STEPcode/data?
-    set(${_res_var} "${SC_SOURCE_DIR}/data/${SCHEMA_FILE}")
-  elseif(EXISTS ${SCHEMA_FILE}) # already an absolute path
+  elseif(EXISTS "${PROJECT_SOURCE_DIR}/data/${SCHEMA_FILE}")
+    # Path relative to STEPcode/data
+    set(${_res_var} "${PROJECT_SOURCE_DIR}/data/${SCHEMA_FILE}")
+  elseif(EXISTS ${SCHEMA_FILE})
+    # Already an absolute path
     set(${_res_var} ${SCHEMA_FILE})
   else()
-    message(FATAL_ERROR "Cannot find ${CMAKE_BINARY_DIR}/${SCHEMA_FILE} or ${SC_SOURCE_DIR}/data/${SCHEMA_FILE}/*.exp or ${SCHEMA_FILE}")
+    message(FATAL_ERROR "Cannot find schema file: ${SCHEMA_FILE}")
   endif()
 
-  if(IS_DIRECTORY ${${_res_var}}) #if it is a dir, look for one .exp file inside
+  # If it is a dir, look for one .exp file inside
+  if(IS_DIRECTORY ${${_res_var}})
     file(GLOB ${_res_var} ${${_res_var}}/*.exp)
   endif()
 
