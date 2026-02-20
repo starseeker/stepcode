@@ -104,6 +104,15 @@ add_schema_dependent_test( "inverse_attr3" "inverse_attr" "${SC_SOURCE_DIR}/test
                             "${SC_SOURCE_DIR}/src/cllazyfile;${SC_SOURCE_DIR}/src/cllazyfile/judy/src" "" "steplazyfile${_sc_lib_suffix}" )
 add_schema_dependent_test( "attribute" "inverse_attr" "${SC_SOURCE_DIR}/test/p21/test_inverse_attr.p21" )
 
+# This test exercises the STEPfile read/write progress API using std::thread.
+# std::thread is guaranteed available since the project requires C++11.
+if(UNIX)
+  set(_thread_libs "pthread")
+endif()
+# for best results, use a large file. as1-oc-214.stp is currently the largest file in the repo that sc works with.
+add_schema_dependent_test( "stepfile_rw_progress" "ap214e3" "${SC_SOURCE_DIR}/data/ap214e3/as1-oc-214.stp"
+                          "" "" "${_thread_libs}")
+
 # Local Variables:
 # tab-width: 8
 # mode: cmake
