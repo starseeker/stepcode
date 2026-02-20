@@ -137,11 +137,7 @@ set(CHECK_EXPRESS_SOURCES
   )
 
 add_executable(check-express ${CHECK_EXPRESS_SOURCES})
-if(BUILD_SHARED_LIBS OR NOT BUILD_STATIC_LIBS)
-  target_link_libraries(check-express express)
-else()
-  target_link_libraries(check-express express-static)
-endif()
+target_link_libraries(check-express express${SC_LIB_SUFFIX})
 install(TARGETS check-express
   RUNTIME DESTINATION ${BIN_DIR}
   LIBRARY DESTINATION ${LIB_DIR}

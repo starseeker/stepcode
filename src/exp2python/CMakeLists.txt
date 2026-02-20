@@ -28,11 +28,7 @@ if(SC_PYTHON_GENERATOR)
     ../exp2cxx/write.cc
     ../exp2cxx/print.cc
    )
- if(BUILD_SHARED_LIBS)
-   SC_ADDEXEC(exp2python SOURCES ${exp2python_SOURCES} LINK_LIBRARIES express)
- else()
-   SC_ADDEXEC(exp2python SOURCES ${exp2python_SOURCES} LINK_LIBRARIES express-static)
- endif()
+   SC_ADDEXEC(exp2python SOURCES ${exp2python_SOURCES} LINK_LIBRARIES express${SC_LIB_SUFFIX})
 endif()
 
 # Local Variables:
