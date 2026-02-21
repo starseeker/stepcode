@@ -110,10 +110,12 @@ const char * sectionReader::getDelimitedKeyword( const char * delimiters ) {
             break;
         }
     }
+    // Skip whitespace (including \r from Windows CRLF line endings) between keyword and delimiter
+    skipWS();
     c = _file.peek();
     if( !strchr( delimiters, c ) ) {
         std::cerr << SC_CURRENT_FUNCTION << ": missing delimiter. Found " << c << ", expected one of " << delimiters << " at end of keyword " << str << ". File offset: " << _file.tellg() << std::endl;
-        abort();
+        _file.setstate( std::ios::failbit );
     }
     return str.c_str();
 }
