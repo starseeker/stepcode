@@ -1,5 +1,5 @@
 #include <assert.h>
-
+#include <cstdlib>
 
 #include "cllazyfile/lazyFileReader.h"
 #include "cllazyfile/lazyDataSectionReader.h"
@@ -65,7 +65,7 @@ lazyFileReader::lazyFileReader( std::string fname, lazyInstMgr * i, fileID fid )
             //break;
         default:
             std::cerr << "Reached default case, " << __FILE__ << ":" << __LINE__ << std::endl;
-            abort();
+            std::exit( EXIT_FAILURE );
     }
 }
 
