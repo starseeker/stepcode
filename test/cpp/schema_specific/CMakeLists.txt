@@ -98,6 +98,8 @@ add_schema_dependent_test( "inverse_attr1" "inverse_attr" "${SC_SOURCE_DIR}/test
 add_schema_dependent_test( "inverse_attr2" "inverse_attr" "${SC_SOURCE_DIR}/test/p21/test_inverse_attr.p21" )
 add_schema_dependent_test( "inverse_attr3" "inverse_attr" "${SC_SOURCE_DIR}/test/p21/test_inverse_attr.p21"
                             "${SC_SOURCE_DIR}/src/cllazyfile;${SC_SOURCE_DIR}/src/cllazyfile/judy/src" "" "steplazyfile${_sc_lib_suffix}" )
+add_schema_dependent_test( "inverse_attr4" "inverse_attr" "${SC_SOURCE_DIR}/test/p21/test_inverse_attr.p21"
+                            "" "" "stepeditor${_sc_lib_suffix}" )
 add_schema_dependent_test( "attribute" "inverse_attr" "${SC_SOURCE_DIR}/test/p21/test_inverse_attr.p21" )
 
 # This test exercises the STEPfile read/write progress API using std::thread.
