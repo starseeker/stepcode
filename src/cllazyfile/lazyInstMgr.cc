@@ -23,7 +23,7 @@ lazyInstMgr::~lazyInstMgr() {
     delete _headerRegistry;
     delete _errors;
     delete _ima;
-    //loop over files, sections, instances; delete header instances
+    delete _instanceTypes;
     lazyFileReaderVec_t::iterator fit = _files.begin();
     for( ; fit != _files.end(); ++fit ) {
         delete *fit;
@@ -32,7 +32,7 @@ lazyInstMgr::~lazyInstMgr() {
     for( ; sit != _dataSections.end(); ++sit ) {
         delete *sit;
     }
-    _instancesLoaded.clear();
+    _instancesLoaded.clear( true );
     _instanceStreamPos.clear();
 }
 

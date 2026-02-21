@@ -61,10 +61,7 @@ lazyFileReader::lazyFileReader( std::string fname, lazyInstMgr * i, fileID fid )
             initP21();
             break;
         case Part28:
-            //initP28();
-            //break;
-        default:
-            std::cerr << "Reached default case, " << __FILE__ << ":" << __LINE__ << std::endl;
+            std::cerr << "Part 28 is not supported by the lazy file reader." << std::endl;
             std::exit( EXIT_FAILURE );
     }
 }

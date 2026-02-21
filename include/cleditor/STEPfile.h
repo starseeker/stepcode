@@ -164,6 +164,15 @@ class SC_EDITOR_EXPORT STEPfile {
 
         Severity AppendFile( istream * in, bool useTechCor = 1 ) ;
 
+        /** Populate inverse attribute maps for all loaded instances.
+         * Iterates over all instances to find which instances reference each
+         * other via inverse attributes, and populates the iAMap accordingly.
+         * This is called automatically by AppendFile() after all instances
+         * are loaded. It can also be called manually if instances are
+         * added programmatically.
+         */
+        void PopulateInverseAttributes();
+
         Severity WriteExchangeFile( ostream & out, int validate = 1,
                                     int clearError = 1, int writeComments = 1 );
         Severity WriteExchangeFile( const std::string filename = "", int validate = 1,

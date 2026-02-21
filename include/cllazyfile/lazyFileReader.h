@@ -11,11 +11,6 @@
 #include "cllazyfile/lazyP21DataSectionReader.h"
 #include "cllazyfile/p21HeaderSectionReader.h"
 #include "cllazyfile/headerSectionReader.h"
-
-/* // PART 28
- * #include "lazyP28DataSectionReader.h"
- * #include "p28HeaderSectionReader.h"
- */
 class lazyInstMgr;
 class Registry;
 class headerSectionReader;

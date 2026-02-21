@@ -26,7 +26,6 @@ class lazyDataSectionReader;
 class lazyFileReader;
 
 enum fileTypeEnum { Part21, Part28 };
-// enum loadingEnum { immediate, lazy };
 
 typedef uint64_t instanceID;  ///< the number assigned to an instance in the file
 typedef uint16_t sectionID;   ///< globally unique index of a sectionReader in a sectionReaderVec_t

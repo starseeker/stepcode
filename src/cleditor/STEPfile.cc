@@ -22,12 +22,15 @@
 #include <iostream>
 #include <iterator>
 #include <algorithm>
+#include <set>
 #include <vector>
 
 #include "cleditor/STEPfile.h"
 #include "clstepcore/sdai.h"
 #include "clstepcore/STEPcomplex.h"
 #include "clstepcore/STEPattribute.h"
+#include "clstepcore/STEPaggrEntity.h"
+#include "clstepcore/SubSuperIterators.h"
 #include "cleditor/SdaiHeaderSchema.h"
 
 // STEPundefined contains
@@ -1765,6 +1768,7 @@ Severity STEPfile::AppendFile( istream * in, bool useTechCor ) {
     }
     CloseInputFile( in2 );
     cout << "Finished reading file.\n\n";
+    PopulateInverseAttributes();
     return SEVERITY_NULL;
 }
 
@@ -1880,4 +1884,157 @@ Severity STEPfile::AppendEntityErrorMsg( ErrorDescriptor * e ) {
             return sev;
         }
     }
+}
+
+/** Populate inverse attribute maps for all loaded instances.
+ *
+ * After all instances are loaded, this method iterates over every instance and
+ * finds which other instances reference it via inverse attributes. For each
+ * inverse attribute descriptor on an instance, it:
+ *   1. Finds the inverted entity type (and all subtypes)
+ *   2. Scans all instances of those types
+ *   3. Checks whether the designated attribute of the candidate instance
+ *      references the current instance
+ *   4. Populates the current instance's iAMap entry accordingly
+ *
+ * This is called automatically by AppendFile() once both read passes are done.
+ */
+void STEPfile::PopulateInverseAttributes() {
+#ifdef _WIN32
+#  define sc_strcasecmp _strcmpi
+#else
+#  define sc_strcasecmp strcasecmp
+#endif
+    int n = _instances.InstanceCount();
+
+    for( int i = 0; i < n; i++ ) {
+        MgrNode * mni = _instances.GetMgrNode( i );
+        if( !mni ) {
+            continue;
+        }
+        SDAI_Application_instance * inst = mni->GetApplication_instance();
+        if( !inst || inst == ENTITY_NULL || !inst->eDesc ) {
+            continue;
+        }
+
+        // Collect all inverse attributes (own + inherited from supertypes)
+        std::set< const Inverse_attribute * > iaList;
+        {
+            InverseAItr iai( &( inst->eDesc->InverseAttr() ) );
+            const Inverse_attribute * ia;
+            while( 0 != ( ia = iai.NextInverse_attribute() ) ) {
+                iaList.insert( ia );
+            }
+        }
+        {
+            supertypesIterator sit( inst->eDesc );
+            for( ; !sit.empty(); ++sit ) {
+                InverseAItr iai( &( sit.current()->InverseAttr() ) );
+                const Inverse_attribute * ia;
+                while( 0 != ( ia = iai.NextInverse_attribute() ) ) {
+                    iaList.insert( ia );
+                }
+            }
+        }
+
+        if( iaList.empty() ) {
+            continue;
+        }
+
+        std::set< const Inverse_attribute * >::const_iterator iaIter;
+        for( iaIter = iaList.begin(); iaIter != iaList.end(); ++iaIter ) {
+            const Inverse_attribute * ia = *iaIter;
+
+            // Build the set of valid entity descriptors: inverted entity + all subtypes
+            const EntityDescriptor * invEd = _reg.FindEntity( ia->inverted_entity_id_() );
+            if( !invEd ) {
+                continue;
+            }
+            std::set< const EntityDescriptor * > edSet;
+            edSet.insert( invEd );
+            subtypesIterator sit( invEd );
+            for( ; !sit.empty(); ++sit ) {
+                edSet.insert( *sit );
+            }
+
+            const char * attrName = ia->inverted_attr_id_();
+
+            // Scan all instances for referrers of the matching entity type
+            for( int j = 0; j < n; j++ ) {
+                MgrNode * mnj = _instances.GetMgrNode( j );
+                if( !mnj ) {
+                    continue;
+                }
+                SDAI_Application_instance * referrer = mnj->GetApplication_instance();
+                if( !referrer || referrer == ENTITY_NULL || !referrer->eDesc ) {
+                    continue;
+                }
+                if( edSet.find( referrer->eDesc ) == edSet.end() ) {
+                    continue;
+                }
+
+                // Find the attribute named attrName in the referrer
+                int attrIdx = -1;
+                for( int k = 0; k < referrer->attributes.list_length(); k++ ) {
+                    if( 0 == sc_strcasecmp( attrName, referrer->attributes[k].Name() ) ) {
+                        attrIdx = k;
+                        break;
+                    }
+                }
+                if( attrIdx < 0 ) {
+                    continue;
+                }
+
+                STEPattribute sa = referrer->attributes[attrIdx];
+                if( sa.getADesc()->BaseType() != ENTITY_TYPE ) {
+                    continue;
+                }
+
+                // Check whether this attribute in the referrer actually points to inst
+                bool references = false;
+                if( sa.getADesc()->IsAggrType() ) {
+                    EntityAggregate * aggr = dynamic_cast< EntityAggregate * >( sa.Aggregate() );
+                    if( aggr ) {
+                        EntityNode * en = static_cast< EntityNode * >( aggr->GetHead() );
+                        while( en ) {
+                            if( en->node == inst ) {
+                                references = true;
+                                break;
+                            }
+                            en = static_cast< EntityNode * >( en->NextNode() );
+                        }
+                    }
+                } else {
+                    if( sa.Entity() == inst ) {
+                        references = true;
+                    }
+                }
+
+                if( !references ) {
+                    continue;
+                }
+
+                // Populate the inverse attribute map entry for inst
+                iAstruct ias = inst->getInvAttr( ia );
+                if( ia->inverted_attr_()->IsAggrType() ) {
+                    if( !ias.a ) {
+                        ias.a = new EntityAggregate;
+                        inst->setInvAttr( ia, ias );
+                    }
+                    ias.a->AddNode( new EntityNode( referrer ) );
+                } else {
+                    if( !ias.i ) {
+                        ias.i = referrer;
+                        inst->setInvAttr( ia, ias );
+                    } else if( ias.i->GetFileId() != referrer->GetFileId() ) {
+                        cerr << "WARNING: instance #" << inst->GetFileId()
+                             << " has non-aggregate inverse attr '" << ia->Name()
+                             << "' referenced by multiple instances (#" << ias.i->GetFileId()
+                             << " and #" << referrer->GetFileId() << ")." << endl;
+                    }
+                }
+            }
+        }
+    }
+#undef sc_strcasecmp
 }
