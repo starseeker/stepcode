@@ -24,33 +24,24 @@ SET(EXPPP_SOURCES
  )
 
 include_directories(
-  ${SC_SOURCE_DIR}/include
-  ${SC_SOURCE_DIR}/include/exppp
-  ${SC_SOURCE_DIR}/src/express
+  ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/include/exppp
+  ${PROJECT_SOURCE_DIR}/src/express
  )
 
-if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(libexppp SHARED SOURCES ${LIBEXPPP_SOURCES} LINK_LIBRARIES express)
+SC_ADDLIB(libexppp SOURCES ${LIBEXPPP_SOURCES} LINK_LIBRARIES express DLL_EXPORTS SC_EXPPP_DLL_EXPORTS)
+if(TARGET libexppp)
   set_target_properties(libexppp PROPERTIES PREFIX "")
-  if(WIN32)
-    target_compile_definitions(libexppp PRIVATE SC_EXPPP_DLL_EXPORTS)
-  endif()
 endif()
-
-if(BUILD_STATIC_LIBS)
-  SC_ADDLIB(libexppp-static STATIC SOURCES ${LIBEXPPP_SOURCES} LINK_LIBRARIES express-static)
+if(TARGET libexppp-static)
   set_target_properties(libexppp-static PROPERTIES PREFIX "")
 endif()
 
-if(BUILD_SHARED_LIBS)
-  SC_ADDEXEC(exppp SOURCES ${EXPPP_SOURCES} LINK_LIBRARIES libexppp express)
-else()
-  SC_ADDEXEC(exppp SOURCES ${EXPPP_SOURCES} LINK_LIBRARIES libexppp-static express-static)
-endif()
+SC_ADDEXEC(exppp SOURCES ${EXPPP_SOURCES} LINK_LIBRARIES libexppp${SC_LIB_SUFFIX} express${SC_LIB_SUFFIX})
 
 if(SC_ENABLE_TESTING)
   add_subdirectory(test)
-endif(SC_ENABLE_TESTING)
+endif()
 
 # Local Variables:
 # tab-width: 8

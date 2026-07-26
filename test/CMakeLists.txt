@@ -10,8 +10,8 @@ foreach(UNITARY_SCHEMA ${UNITARY_SCHEMAS})
   #if the file name begins with fail_, then testing it should result in an error.
   if( UNITARY_SCHEMA MATCHES "fail_.*" )
     set_tests_properties( ${TEST_NAME} PROPERTIES WILL_FAIL true )
-  endif( UNITARY_SCHEMA MATCHES "fail_.*" )
-endforeach(UNITARY_SCHEMA ${UNITARY_SCHEMAS})
+  endif()
+endforeach()
 
 if(NOT ${SC_BUILD_EXPRESS_ONLY})
   add_subdirectory(p21)

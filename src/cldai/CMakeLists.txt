@@ -14,21 +14,10 @@ set(DAI_SRCS
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/include/stepcode
+  ${PROJECT_SOURCE_DIR}/include/stepcode
   )
 
-set(_libdeps steputils)
-
-if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(stepdai SHARED SOURCES ${DAI_SRCS} LINK_LIBRARIES ${_libdeps})
-  if(WIN32)
-    target_compile_definitions(stepdai PRIVATE SC_DAI_DLL_EXPORTS)
-  endif()
-endif()
-
-if(BUILD_STATIC_LIBS)
-  SC_ADDLIB(stepdai-static STATIC SOURCES ${DAI_SRCS} LINK_LIBRARIES $<JOIN:${_libdeps},-static >-static)
-endif()
+SC_ADDLIB(stepdai SOURCES ${DAI_SRCS} LINK_LIBRARIES steputils DLL_EXPORTS SC_DAI_DLL_EXPORTS)
 
 # Local Variables:
 # tab-width: 8

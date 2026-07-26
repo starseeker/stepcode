@@ -10,25 +10,18 @@ set(LAZY_SRCS
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/include/stepcode
+  ${PROJECT_SOURCE_DIR}/include/stepcode
   )
 
-set(_libdeps stepcore stepdai steputils stepeditor)
+SC_ADDLIB(steplazyfile SOURCES ${LAZY_SRCS} LINK_LIBRARIES stepcore stepdai steputils stepeditor DLL_EXPORTS SC_LAZYFILE_DLL_EXPORTS)
 
-if(BUILD_SHARED_LIBS)
-  SC_ADDLIB(steplazyfile SHARED SOURCES ${LAZY_SRCS} LINK_LIBRARIES ${_libdeps})
+SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile${SC_LIB_SUFFIX} stepeditor${SC_LIB_SUFFIX} TESTABLE)
+if(TARGET lazy_test)
+  target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
   if(WIN32)
-    target_compile_definitions(steplazyfile PRIVATE SC_LAZYFILE_DLL_EXPORTS)
+    target_link_libraries(lazy_test psapi)
   endif()
 endif()
-
-if(BUILD_STATIC_LIBS)
-  set(_libdeps stepcore-static stepdai-static steputils-static stepeditor-static)
-  SC_ADDLIB(steplazyfile-static STATIC SOURCES ${LAZY_SRCS} LINK_LIBRARIES ${_libdeps})
-endif()
-
-SC_ADDEXEC(lazy_test SOURCES "lazy_test.cc;sc_benchmark.cc" LINK_LIBRARIES steplazyfile stepeditor NO_INSTALL)
-target_compile_definitions(lazy_test PRIVATE NO_REGISTRY)
 
 # Local Variables:
 # tab-width: 8

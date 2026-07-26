@@ -38,13 +38,13 @@ if(NOT "${SC_GENERATE_LEXER_PARSER}" STREQUAL "OFF")
   else()
     if("${SC_GENERATE_LEXER_PARSER}" STREQUAL "ON")
       message(FATAL_ERROR "\nSC_GENERATE_LEXER_PARSER set to ON, but couldn't find lemon/re2c")
-    else("${SC_GENERATE_LEXER_PARSER}" STREQUAL "ON")
+    else()
       set(SC_GENERATE_LP_SOURCES 0)
-    endif("${SC_GENERATE_LEXER_PARSER}" STREQUAL "ON")
+    endif()
   endif()
-else(NOT "${SC_GENERATE_LEXER_PARSER}" STREQUAL "OFF")
+else()
   set(SC_GENERATE_LP_SOURCES 0)
-endif(NOT "${SC_GENERATE_LEXER_PARSER}" STREQUAL "OFF")
+endif()
 
 # Local Variables:
 # tab-width: 8

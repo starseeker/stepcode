@@ -35,10 +35,10 @@
 # been set by some other means (like a higher level CMakeLists.txt file
 # including this one).
 
-# The location in which to install BRL-CAD executables.
+# The location in which to install STEPcode executables.
 if(NOT BIN_DIR)
   set(BIN_DIR bin)
-endif(NOT BIN_DIR)
+endif()
 
 # Define a relative path that will "reset" a path back to
 # the point before BIN_DIR was appended.  This is primarily
@@ -50,38 +50,38 @@ while (NOT "${LBIN_DIR}" STREQUAL "")
   set(LBIN_DIR "${LBDIR}")
   if ("${RBIN_DIR}" STREQUAL "")
     set(RBIN_DIR "..")
-  else ("${RBIN_DIR}" STREQUAL "")
+  else()
     set(RBIN_DIR "../${RBIN_DIR}")
-  endif ("${RBIN_DIR}" STREQUAL "")
-endwhile (NOT "${LBIN_DIR}" STREQUAL "")
+  endif()
+endwhile()
 
-# The location in which to install BRL-CAD libraries.
+# The location in which to install STEPcode libraries.
 if(NOT LIB_DIR)
   set(LIB_DIR lib)
-endif(NOT LIB_DIR)
+endif()
 if(NOT LIBEXEC_DIR)
   set(LIBEXEC_DIR libexec)
-endif(NOT LIBEXEC_DIR)
+endif()
 
-# The location in which to install BRL-CAD header files.
+# The location in which to install STEPcode header files.
 if(NOT INCLUDE_DIR)
   set(INCLUDE_DIR include)
-endif(NOT INCLUDE_DIR)
+endif()
 
-# The location in which to install BRL-CAD data files
+# The location in which to install STEPcode data files
 if(NOT DATA_DIR)
   set(DATA_DIR share)
-endif(NOT DATA_DIR)
+endif()
 
-# The location in which to install BRL-CAD documentation files
+# The location in which to install STEPcode documentation files
 if(NOT DOC_DIR)
   set(DOC_DIR ${DATA_DIR}/doc)
-endif(NOT DOC_DIR)
+endif()
 
-# The location in which to install BRL-CAD Manual pages
+# The location in which to install STEPcode Manual pages
 if(NOT MAN_DIR)
   set(MAN_DIR ${DATA_DIR}/man)
-endif(NOT MAN_DIR)
+endif()
 
 # Make sure no absolute paths have been supplied to these variables
 set(INSTALL_DIRS BIN INCLUDE LIB LIBEXEC DATA MAN DOC)
@@ -90,8 +90,8 @@ foreach(instdir ${INSTALL_DIRS})
   if("${${instdir}_DIR}" STREQUAL "${instdir_full}")
     message(FATAL_ERROR "Error - absolute path supplied for ${instdir}_DIR.  This path must be relative - e.g. \"bin\" instead of \"/usr/bin\"")
     set(HAVE_INSTALL_DIR_FULL_PATH 1)
-  endif("${${instdir}_DIR}" STREQUAL "${instdir_full}")
-endforeach(instdir ${INSTALL_DIRS})
+  endif()
+endforeach()
 
 #---------------------------------------------------------------------
 # Output directories - this is where built library and executable
@@ -105,14 +105,14 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
   # variables to the correct values.
   if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${${PROJECT_NAME}_BINARY_DIR}/${LIB_DIR} CACHE INTERNAL "Single output directory for building all libraries.")
-  endif(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+  endif()
   if(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${${PROJECT_NAME}_BINARY_DIR}/${LIB_DIR} CACHE INTERNAL "Single output directory for building all archives.")
-  endif(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+  endif()
   if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${${PROJECT_NAME}_BINARY_DIR}/${BIN_DIR} CACHE INTERNAL "Single output directory for building all executables.")
-  endif(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-else(NOT CMAKE_CONFIGURATION_TYPES)
+  endif()
+else()
   # Multi-configuration is more difficult.  Not only do we need to
   # properly set the output directories, but we also need to
   # identify the "toplevel" directory for each configuration so
@@ -136,25 +136,25 @@ else(NOT CMAKE_CONFIGURATION_TYPES)
   foreach(CFG_TYPE ${CMAKE_CONFIGURATION_TYPES})
     if(NOT "${CMAKE_CFG_INTDIR}" STREQUAL ".")
       set(CFG_ROOT ${${PROJECT_NAME}_BINARY_DIR}/${CFG_TYPE})
-    endif(NOT "${CMAKE_CFG_INTDIR}" STREQUAL ".")
+    endif()
     string(TOUPPER "${CFG_TYPE}" CFG_TYPE_UPPER)
     if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER})
       set("CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER}" ${CFG_ROOT}/${LIB_DIR} CACHE INTERNAL "Single output directory for building ${CFG_TYPE} libraries.")
-    endif(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER})
+    endif()
     if(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER})
       set("CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER}" ${CFG_ROOT}/${LIB_DIR} CACHE INTERNAL "Single output directory for building ${CFG_TYPE} archives.")
-    endif(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER})
+    endif()
     if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER})
       set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER}" ${CFG_ROOT}/${BIN_DIR} CACHE INTERNAL "Single output directory for building ${CFG_TYPE} executables.")
-    endif(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG_TYPE_UPPER})
+    endif()
     if(NOT DEFINED CMAKE_BINARY_DIR_${CFG_TYPE_UPPER})
       set("CMAKE_BINARY_DIR_${CFG_TYPE_UPPER}" ${CFG_ROOT} CACHE INTERNAL "Toplevel binary dir for ${CFG_TYPE} building.")
-    endif(NOT DEFINED CMAKE_BINARY_DIR_${CFG_TYPE_UPPER})
+    endif()
     if(NOT DEFINED ${PROJECT_NAME}_BINARY_DIR_${CFG_TYPE_UPPER})
       set("${PROJECT_NAME}_BINARY_DIR_${CFG_TYPE_UPPER}" ${CFG_ROOT} CACHE INTERNAL "Toplevel binary dir for ${CFG_TYPE} building.")
-    endif(NOT DEFINED ${PROJECT_NAME}_BINARY_DIR_${CFG_TYPE_UPPER})
+    endif()
   endforeach()
-endif(NOT CMAKE_CONFIGURATION_TYPES)
+endif()
 
 # Local Variables:
 # tab-width: 8

@@ -18,12 +18,13 @@ function(add_stepcore_test name libs)
     COMMAND $<TARGET_FILE:tst_${name}>)
   set_tests_properties(build_cpp_${name} PROPERTIES LABELS cpp_unit_stepcore DEPENDS stepcore)
   set_tests_properties(test_${name} PROPERTIES LABELS cpp_unit_stepcore DEPENDS build_cpp_${name})
-endfunction(add_stepcore_test name libs)
+endfunction()
 
-add_stepcore_test("SupertypesIterator" "stepcore;steputils;stepeditor;stepdai") #all these libs are necessary?
-add_stepcore_test("operators_STEPattribute" "stepcore;steputils;stepeditor;stepdai")
-add_stepcore_test("operators_SDAI_Select" "stepcore;steputils;stepeditor;stepdai")
-add_stepcore_test("null_attr" "stepcore;steputils;stepeditor;stepdai")
+set(_stepcore_test_libs "stepcore${SC_LIB_SUFFIX};steputils${SC_LIB_SUFFIX};stepeditor${SC_LIB_SUFFIX};stepdai${SC_LIB_SUFFIX}")
+add_stepcore_test("SupertypesIterator" "${_stepcore_test_libs}") #all these libs are necessary?
+add_stepcore_test("operators_STEPattribute" "${_stepcore_test_libs}")
+add_stepcore_test("operators_SDAI_Select" "${_stepcore_test_libs}")
+add_stepcore_test("null_attr" "${_stepcore_test_libs}")
 
 # Local Variables:
 # tab-width: 8

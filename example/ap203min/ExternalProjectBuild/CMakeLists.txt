@@ -5,8 +5,8 @@
 # freely copied in part or in full for any purpose.  No acknowledgment is required
 # for the use of this file.
 #
-project(AP203Minimum)
 cmake_minimum_required(VERSION 3.12)
+project(AP203Minimum)
 
 INCLUDE( ExternalProject )
 
@@ -15,28 +15,16 @@ set(CMAKE_MODULE_PATH ${AP203Minimum_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 INCLUDE( External_STEPCode )
 
 #####
-# Variables ideally set by FindSTEPCode.cmake
+# IMPORTED targets for STEPcode libraries
 
-IF(NOT WIN32)
-	set( STEPCODE_LIBRARIES
-	${STEPCODE_INSTALL_DIR}/lib/libstepcore.a
-	${STEPCODE_INSTALL_DIR}/lib/libstepeditor.a
-	${STEPCODE_INSTALL_DIR}/lib/libstepdai.a
-	${STEPCODE_INSTALL_DIR}/lib/libsteputils.a
-	${STEPCODE_INSTALL_DIR}/lib/libsdai_ap203.a
-	)
-ELSE()
-	set( STEPCODE_LIBRARIES
-	${STEPCODE_INSTALL_DIR}/lib/libstepcore.lib
-	${STEPCODE_INSTALL_DIR}/lib/libstepeditor.lib
-	${STEPCODE_INSTALL_DIR}/lib/libstepdai.lib
-	${STEPCODE_INSTALL_DIR}/lib/libsteputils.lib
-	${STEPCODE_INSTALL_DIR}/lib/libsdai_ap203.lib
-	${STEPCODE_INSTALL_DIR}/lib/libexpress.lib
-	${STEPCODE_INSTALL_DIR}/lib/libexppp.lib
-	shlwapi.lib
-	)
-ENDIF()
+foreach(_lib stepcore stepeditor stepdai steputils sdai_ap203)
+  add_library(SC::${_lib} STATIC IMPORTED)
+  set_target_properties(SC::${_lib} PROPERTIES
+    IMPORTED_LOCATION
+      "${STEPCODE_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${_lib}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
+  add_dependencies(SC::${_lib} STEPCODE)
+endforeach()
 
 MESSAGE( STATUS "STEPCODE_INSTALL_DIR: " ${STEPCODE_INSTALL_DIR} )
 
@@ -65,8 +53,8 @@ add_executable( ${PROJECT_NAME} ${SRCS} ${HDRS})
 
 add_dependencies( ${PROJECT_NAME} STEPCODE )
 
-target_link_libraries( ${PROJECT_NAME} 
-    ${STEPCODE_LIBRARIES}
+target_link_libraries( ${PROJECT_NAME}
+    SC::stepeditor SC::stepcore SC::stepdai SC::steputils SC::sdai_ap203
 )
 
 # Local Variables:
